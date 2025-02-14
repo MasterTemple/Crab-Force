@@ -146,7 +146,32 @@ impl InteractionCommand for PreconditionsCommand {
             ));
         };
 
-        let value = format!("{:?}", item_component.req_precondition);
+        // let value = format!("{:?}", item_component.req_precondition);
+        let preconditions = &LOCALE_XML
+            .locales
+            .get(&CONFIG.locale)
+            .unwrap()
+            .preconditions;
+        let precondition_text = item_component
+            .req_precondition
+            .as_ref()
+            .map(|reqs| {
+                let text = reqs
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, id)| {
+                        let cond = preconditions
+                            .get(&id)
+                            .map(|req| req.failure_reason.clone())
+                            .flatten()
+                            .unwrap_or_else(|| format!("Precondition {id}"));
+                        format!("**{}.** {}", idx + 1, cond)
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                text
+            })
+            .unwrap_or_else(|| String::from("None"));
 
         let Some(render_component) = components
             .iter()
@@ -176,7 +201,7 @@ impl InteractionCommand for PreconditionsCommand {
             .default_embed()
             .title(format!("{} {}", name, item.id))
             .url(CONFIG.explorer_uri(format!("/objects/{}", item.id).as_str()))
-            .field("Preconditions", value, false);
+            .field("Preconditions", precondition_text, false);
 
         if let Some(icon_url) = icon_url {
             embed = embed.thumbnail(icon_url);

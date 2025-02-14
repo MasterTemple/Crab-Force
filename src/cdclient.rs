@@ -2330,9 +2330,9 @@ pub struct ItemComponent {
     pub sell_multiplier: Option<f64>,
 }
 
-fn parse_currency_costs(input: String) -> Option<Vec<(i32, i32)>> {
+fn parse_currency_costs(input: Option<String>) -> Option<Vec<(i32, i32)>> {
     let mut elements = vec![];
-    for pair in input.split(',') {
+    for pair in input?.split(',') {
         let (id, count) = pair.trim().split_once(':')?;
         elements.push((id.parse().ok()?, count.parse().ok()?))
     }
@@ -3328,9 +3328,9 @@ pub enum MissionPreReqType {
     Required(i32),
 }
 
-fn parse_mission_prereqs(input: String) -> Option<Vec<MissionPreReqType>> {
+fn parse_mission_prereqs(input: Option<String>) -> Option<Vec<MissionPreReqType>> {
     let mut elements = vec![];
-    for value in input.split(',') {
+    for value in input?.split(',') {
         if value.contains("|") {
             let options = value
                 .split('|')
