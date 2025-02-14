@@ -1,4 +1,4 @@
-use crate::interaction_command::{CustomIdOptions, InteractionCommand, ToCustomId};
+use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
 use crate::{int_option, CD_CLIENT, CONFIG};
 use serenity::all::{
     CommandOptionType, CreateActionRow, CreateCommandOption, CreateEmbed, ResolvedOption,
@@ -55,12 +55,13 @@ impl InteractionCommand for LevelCommand {
 
     type Arguments = LevelArguments;
 
-    fn run(arguments: Self::Arguments) -> (CreateEmbed, Option<Vec<CreateActionRow>>) {
+    fn run(arguments: Self::Arguments) -> CommandResult {
         let LevelArguments { level } = arguments;
 
-        let Some(progression) = CD_CLIENT.level_progression_lookup.at_key(&level) else {
-            return CONFIG.error_msg(format!("Level `{level}` does not exist!"));
-        };
+        let progression = CD_CLIENT
+            .level_progression_lookup
+            .at_key(&level)
+            .ok_or_else(|| format!("Level `{level}` does not exist!"))?;
 
         let total_experience = progression.required_uscore;
         let experience_for_previous_level = CD_CLIENT
@@ -98,6 +99,6 @@ impl InteractionCommand for LevelCommand {
             next_level_button,
         ])]);
 
-        (embed, components)
+        Ok((embed, components))
     }
 }

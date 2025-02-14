@@ -137,6 +137,8 @@ pub trait ToCustomId {
     }
 }
 
+pub type CommandResult = Result<(CreateEmbed, Option<Vec<CreateActionRow>>), String>;
+
 pub trait InteractionCommand {
     const NAME: &'static str;
     const DESCRIPTION: &'static str;
@@ -165,7 +167,8 @@ pub trait InteractionCommand {
         cmd
     }
 
-    fn run(arguments: Self::Arguments) -> (CreateEmbed, Option<Vec<CreateActionRow>>);
+    // fn run(arguments: Self::Arguments) -> (CreateEmbed, Option<Vec<CreateActionRow>>);
+    fn run(arguments: Self::Arguments) -> CommandResult;
 
     fn handle_autocomplete(
         autocomplete_option: AutocompleteOption<'_>,
@@ -174,11 +177,9 @@ pub trait InteractionCommand {
     }
 
     fn handle_slash_command(command: &CommandInteraction) -> CreateInteractionResponseMessage {
-        let (embed, components) = match Self::Arguments::try_from(command.data.options().as_slice())
-        {
-            Ok(args) => Self::run(args),
-            Err(msg) => CONFIG.error_msg(msg),
-        };
+        let result = Self::Arguments::try_from(command.data.options().as_slice())
+            .and_then(|args| Self::run(args));
+        let (embed, components) = result.unwrap_or_else(|msg| CONFIG.error_embed(msg));
 
         let mut response = CreateInteractionResponseMessage::new().embed(embed);
         if let Some(components) = components {
@@ -192,10 +193,8 @@ pub trait InteractionCommand {
     ) -> CreateInteractionResponseMessage {
         let options = CustomIdOptions::from_custom_id(interaction.data.custom_id.as_str());
 
-        let (embed, components) = match Self::Arguments::try_from(options) {
-            Ok(args) => Self::run(args),
-            Err(msg) => CONFIG.error_msg(msg),
-        };
+        let result = Self::Arguments::try_from(options).and_then(|args| Self::run(args));
+        let (embed, components) = result.unwrap_or_else(|msg| CONFIG.error_embed(msg));
 
         let back_button = CreateButton::new_link(interaction.message.link()).label("Back");
         let back_component_row = CreateActionRow::Buttons(vec![back_button]);

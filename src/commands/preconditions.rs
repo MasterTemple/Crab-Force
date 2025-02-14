@@ -1,5 +1,6 @@
 use crate::cdclient::components::{ITEM_COMPONENT, RENDER_COMPONENT};
-use crate::interaction_command::{CustomIdOptions, InteractionCommand, ToCustomId};
+use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
+use crate::queries::{AutocompleteQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
 use serenity::all::{
     AutocompleteChoice, CommandOptionType, CreateActionRow, CreateCommandOption, CreateEmbed,
@@ -73,154 +74,50 @@ impl InteractionCommand for PreconditionsCommand {
         autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
     ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
         let input = autocomplete_option.value;
-        if input.len() == 0 {
-            return Some(vec![]);
-        }
-        Some(
-            CD_CLIENT
-                .objects
-                .iter()
-                // .filter(|item| item.name.len() > 0)
-                .map(|item| {
-                    let id = item.id;
-                    let name = item.display_name.clone().unwrap_or_else(|| {
-                        item.name.clone().unwrap_or_else(|| format!("Item {id}"))
-                    });
-                    // dbg!(&item);
-                    (id, name)
-                    // let name = item.name.clone();
-                    // .clone()
-                    // .unwrap_or_else(|| item.name.clone());
-                    // AutocompleteChoice::new(format!("[{id}] {name}"), id)
-                })
-                .filter(|(_, name)| name.to_lowercase().contains(input))
-                .map(|(id, name)| AutocompleteChoice::new(format!("[{id}] {name}"), id))
-                .take(25)
-                .collect(),
-        )
+        Some(CD_CLIENT.autocomplete_object(input))
     }
 
-    fn run(arguments: Self::Arguments) -> (CreateEmbed, Option<Vec<CreateActionRow>>) {
+    fn run(arguments: Self::Arguments) -> CommandResult {
         let PreconditionsArguments { item: item_id } = arguments;
 
-        let Some(item) = CD_CLIENT.objects.at_key(&item_id) else {
-            return CONFIG.error_msg(format!("Object `{item_id}` does not exist!"));
-        };
+        let explorer_url = CD_CLIENT.object_explorer_url(item_id);
+        // let item = CD_CLIENT.get_object(item_id)?;
+        let name = CD_CLIENT.req_object_name(item_id);
+        let item_component = CD_CLIENT.object_item_component(item_id)?;
 
-        let name = LOCALE_XML
-            .locales
-            .get("en_US")
-            .unwrap()
-            .objects
-            .get(&item.id)
-            .map(|o| o.name.clone())
-            .flatten()
-            .unwrap_or_else(|| {
-                item.display_name.clone().unwrap_or_else(|| {
-                    item.name
-                        .clone()
-                        .unwrap_or_else(|| format!("Item {item_id}"))
-                })
-            });
-
-        let Some(components) = CD_CLIENT.components_registry.at_group_key(&item_id) else {
-            return CONFIG.error_msg(format!("Object `{item_id}` has no Registered Components"));
-        };
-
-        let Some(item_component) = components
-            .iter()
-            .find(|comp| comp.component_type == ITEM_COMPONENT)
-        else {
-            return CONFIG.error_msg(format!(
-                "Object `{item_id}` has no Registered Item Component"
-            ));
-        };
-
-        let Some(item_component) = CD_CLIENT
-            .item_component
-            .at_key(&item_component.component_id)
-        else {
-            return CONFIG.error_msg(format!(
-                "Item Component `{}` does not exist!",
-                item_component.component_id
-            ));
-        };
-
-        // let value = format!("{:?}", item_component.req_precondition);
-        let preconditions = &LOCALE_XML
+        let preconditions_map = &LOCALE_XML
             .locales
             .get(&CONFIG.locale)
             .unwrap()
             .preconditions;
-        let precondition_text = item_component
-            .req_precondition
-            .as_ref()
-            .map(|reqs| {
-                let text = reqs
-                    .iter()
-                    .enumerate()
-                    .map(|(idx, id)| {
-                        let cond = preconditions
-                            .get(&id)
-                            .map(|req| req.failure_reason.clone())
-                            .flatten()
-                            .unwrap_or_else(|| format!("Precondition {id}"));
-                        format!("**{}.** {}", idx + 1, cond)
-                    })
-                    .collect::<Vec<_>>()
-                    .join("\n");
-                text
-            })
-            .unwrap_or_else(|| String::from("None"));
 
-        let Some(render_component) = components
-            .iter()
-            .find(|comp| comp.component_type == RENDER_COMPONENT)
-        else {
-            return CONFIG.error_msg(format!(
-                "Object `{item_id}` has no Registered Render Component"
-            ));
+        let precondition_text = if let Some(reqs) = item_component.req_precondition.as_ref() {
+            reqs.iter()
+                .enumerate()
+                .map(|(idx, id)| {
+                    let cond = preconditions_map
+                        .get(&id)
+                        .map(|req| req.failure_reason.clone())
+                        .flatten()
+                        .unwrap_or_else(|| format!("Precondition {id}"));
+                    format!("**{}.** {}", idx + 1, cond)
+                })
+                .collect::<Vec<_>>()
+                .join("\n")
+        } else {
+            String::from("None")
         };
-
-        let Some(render_component) = CD_CLIENT
-            .render_component
-            .at_key(&render_component.component_id)
-        else {
-            return CONFIG.error_msg(format!(
-                "Render Component `{}` does not exist!",
-                render_component.component_id
-            ));
-        };
-
-        let icon_url = render_component
-            .icon_asset
-            .as_ref()
-            .map(|asset| icon_asset_as_url(asset));
 
         let mut embed = CONFIG
             .default_embed()
-            .title(format!("{} {}", name, item.id))
-            .url(CONFIG.explorer_uri(format!("/objects/{}", item.id).as_str()))
+            .title(format!("{} {}", name, item_id))
+            .url(explorer_url)
             .field("Preconditions", precondition_text, false);
 
-        if let Some(icon_url) = icon_url {
+        if let Some(icon_url) = CD_CLIENT.object_icon_url(item_id) {
             embed = embed.thumbnail(icon_url);
         }
 
-        // .thumbnail(CONFIG.explorer_uri("/lu-res/ui/ingame/passport_i90.png"));
-
-        // let prev_level_button = PreconditionsArguments { item: level - 1 }
-        //     .to_button(format!("Preconditions {}", level - 1))
-        //     .disabled(level - 1 < min_level);
-        // let next_level_button = PreconditionsArguments { level: level + 1 }
-        //     .to_button(format!("Preconditions {}", level + 1))
-        //     .disabled(level + 1 > max_level);
-        //
-        // let components = Some(vec![CreateActionRow::Buttons(vec![
-        //     prev_level_button,
-        //     next_level_button,
-        // ])]);
-
-        (embed, None)
+        Ok((embed, None))
     }
 }
