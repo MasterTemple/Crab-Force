@@ -1,6 +1,7 @@
 use std::{
     ops::{Deref, DerefMut},
     path::Path,
+    str::FromStr,
 };
 
 // ! I STILL SHOULD TRIM NON-NULLABLE STRINGS
@@ -15,6 +16,31 @@ pub mod components {
     pub const ITEM_COMPONENT: i32 = 11;
     pub const VENDOR_COMPONENT: i32 = 16;
     pub const INVENTORY_COMPONENT: i32 = 17;
+}
+
+// static LIST_REGEX: Lazy<Regex> =
+//     Lazy::new(|| Regex::new(r#"<translation locale="([^"]+)">(.*)</translation>"#).unwrap());
+
+fn parse_optional_comma_list<T: FromStr>(input: Option<String>) -> Option<Vec<T>> {
+    parse_optional_list(input, ',')
+}
+
+fn parse_optional_list<T: FromStr>(input: Option<String>, splitter: char) -> Option<Vec<T>> {
+    Some(parse_required_list(input?, splitter))
+}
+
+fn parse_required_comma_list<T: FromStr>(input: String) -> Vec<T> {
+    parse_required_list(input, ',')
+}
+
+fn parse_required_list<T: FromStr>(input: String, splitter: char) -> Vec<T> {
+    let mut elements = vec![];
+    for num in input.split(splitter) {
+        if let Ok(el) = num.trim().parse() {
+            elements.push(el);
+        }
+    }
+    elements
 }
 
 /// Trims text and converts values that are completely white-space to be None
@@ -973,7 +999,7 @@ pub struct Animations {
     pub hide_equip: bool,
     pub ignore_upper_body: bool,
     pub restartable: bool,
-    pub face_animation_name: Option<String>,
+    pub face_animation_name: Option<Vec<i32>>,
     pub priority: Option<f64>,
     pub blend_time: Option<f64>,
 }
@@ -993,7 +1019,7 @@ impl FromCdClient for Animations {
             hide_equip: row.get(7)?,
             ignore_upper_body: row.get(8)?,
             restartable: row.get(9)?,
-            face_animation_name: trim_and_nullify(row.get(10)?),
+            face_animation_name: parse_optional_comma_list(row.get(10)?),
             priority: row.get(11)?,
             blend_time: row.get(12)?,
         })
@@ -1074,7 +1100,7 @@ pub struct BehaviorEffect {
     pub pcreate_duration: Option<f64>,
     pub animation_name: Option<String>,
     pub attach_to_object: Option<bool>,
-    pub bone_name: Option<String>,
+    pub bone_name: Option<Vec<String>>,
     pub use_secondary: Option<bool>,
     pub camera_effect_type: Option<i32>,
     pub camera_duration: Option<f64>,
@@ -1095,12 +1121,21 @@ pub struct BehaviorEffect {
     pub render_value1: Option<f64>,
     pub render_value2: Option<f64>,
     pub render_value3: Option<f64>,
-    pub render_rgba: Option<String>,
+    pub render_rgba: Option<Vec<i32>>,
     pub render_shader_val: Option<i32>,
     pub motion_id: Option<i32>,
     pub mesh_id: Option<i32>,
     pub mesh_duration: Option<f64>,
     pub mesh_locked_node: Option<String>,
+}
+
+fn parse_bone_name(input: Option<String>) -> Option<Vec<String>> {
+    Some(
+        input?
+            .split(&[',', ';'])
+            .map(|it| it.trim().to_string())
+            .collect(),
+    )
 }
 
 impl FromCdClient for BehaviorEffect {
@@ -1115,7 +1150,7 @@ impl FromCdClient for BehaviorEffect {
             pcreate_duration: row.get(4)?,
             animation_name: trim_and_nullify(row.get(5)?),
             attach_to_object: row.get(6)?,
-            bone_name: trim_and_nullify(row.get(7)?),
+            bone_name: parse_bone_name(row.get(7)?),
             use_secondary: row.get(8)?,
             camera_effect_type: row.get(9)?,
             camera_duration: row.get(10)?,
@@ -1136,7 +1171,7 @@ impl FromCdClient for BehaviorEffect {
             render_value1: row.get(25)?,
             render_value2: row.get(26)?,
             render_value3: row.get(27)?,
-            render_rgba: trim_and_nullify(row.get(28)?),
+            render_rgba: parse_optional_comma_list(row.get(28)?),
             render_shader_val: row.get(29)?,
             motion_id: row.get(30)?,
             mesh_id: row.get(31)?,
@@ -1386,7 +1421,7 @@ pub struct BuffParameters {
     pub buff_id: i32,
     pub parameter_name: String,
     pub number_value: Option<f64>,
-    pub string_value: Option<String>,
+    pub string_value: Option<Vec<f64>>,
     pub effect_id: Option<i32>,
 }
 
@@ -1398,7 +1433,7 @@ impl FromCdClient for BuffParameters {
             buff_id: row.get(0)?,
             parameter_name: row.get(1)?,
             number_value: row.get(2)?,
-            string_value: trim_and_nullify(row.get(3)?),
+            string_value: parse_optional_comma_list(row.get(3)?),
             effect_id: row.get(4)?,
         })
     }
@@ -1640,7 +1675,7 @@ impl HasKey for CelebrationParameters {
 #[derive(Clone, Debug)]
 pub struct ChoiceBuildComponent {
     pub id: i32,
-    pub selections: String,
+    pub selections: Vec<i32>,
     pub imagination_override: Option<i32>,
 }
 
@@ -1650,7 +1685,7 @@ impl FromCdClient for ChoiceBuildComponent {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            selections: row.get(1)?,
+            selections: parse_required_comma_list(row.get(1)?),
             imagination_override: row.get(2)?,
         })
     }
@@ -1879,7 +1914,7 @@ impl HasKey for DbExclude {
 pub struct DeletionRestrictions {
     pub id: i32,
     pub restricted: bool,
-    pub ids: Option<String>,
+    pub ids: Option<Vec<i32>>,
     pub check_type: i32,
     pub localize: bool,
     pub loc_status: i32,
@@ -1893,7 +1928,7 @@ impl FromCdClient for DeletionRestrictions {
         Ok(Self {
             id: row.get(0)?,
             restricted: row.get(1)?,
-            ids: trim_and_nullify(row.get(2)?),
+            ids: parse_optional_comma_list(row.get(2)?),
             check_type: row.get(3)?,
             localize: row.get(4)?,
             loc_status: row.get(5)?,
@@ -2098,10 +2133,10 @@ impl HasKey for ExhibitComponent {
 #[derive(Clone, Debug)]
 pub struct Factions {
     pub faction: i32,
-    pub faction_list: String,
+    pub faction_list: Vec<i32>,
     pub faction_list_friendly: bool,
-    pub friend_list: Option<String>,
-    pub enemy_list: Option<String>,
+    pub friend_list: Option<Vec<i32>>,
+    pub enemy_list: Option<Vec<i32>>,
 }
 
 impl FromCdClient for Factions {
@@ -2110,10 +2145,10 @@ impl FromCdClient for Factions {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             faction: row.get(0)?,
-            faction_list: row.get(1)?,
+            faction_list: parse_required_comma_list(row.get(1)?),
             faction_list_friendly: row.get(2)?,
-            friend_list: trim_and_nullify(row.get(3)?),
-            enemy_list: trim_and_nullify(row.get(4)?),
+            friend_list: parse_optional_comma_list(row.get(3)?),
+            enemy_list: parse_optional_comma_list(row.get(4)?),
         })
     }
 }
@@ -2268,7 +2303,7 @@ pub struct ItemComponent {
     pub decal: Option<i32>,
     pub offset_group_id: Option<i32>,
     pub build_types: Option<i32>,
-    pub req_precondition: Option<String>,
+    pub req_precondition: Option<Vec<i32>>,
     pub animation_flag: Option<i32>,
     pub equip_effects: Option<i32>,
     pub ready_for_qa: Option<bool>,
@@ -2278,17 +2313,26 @@ pub struct ItemComponent {
     pub del_res_index: Option<i32>,
     pub currency_lot: Option<i32>,
     pub alt_currency_cost: Option<i32>,
-    pub sub_items: Option<String>,
+    pub sub_items: Option<Vec<i32>>,
     pub audio_event_use: Option<String>,
     pub no_equip_animation: bool,
     pub commendation_lot: Option<i32>,
     pub commendation_cost: Option<i32>,
     pub audio_equip_meta_event_set: Option<String>,
-    pub currency_costs: Option<String>,
+    pub currency_costs: Option<Vec<(i32, i32)>>,
     pub ingredient_info: Option<String>,
     pub loc_status: Option<i32>,
     pub forge_type: Option<i32>,
     pub sell_multiplier: Option<f64>,
+}
+
+fn parse_currency_costs(input: String) -> Option<Vec<(i32, i32)>> {
+    let mut elements = vec![];
+    for pair in input.split(',') {
+        let (id, count) = pair.trim().split_once(':')?;
+        elements.push((id.parse().ok()?, count.parse().ok()?))
+    }
+    Some(elements)
 }
 
 impl FromCdClient for ItemComponent {
@@ -2317,7 +2361,7 @@ impl FromCdClient for ItemComponent {
             decal: row.get(18)?,
             offset_group_id: row.get(19)?,
             build_types: row.get(20)?,
-            req_precondition: trim_and_nullify(row.get(21)?),
+            req_precondition: parse_optional_list(row.get(21)?, ';'),
             animation_flag: row.get(22)?,
             equip_effects: row.get(23)?,
             ready_for_qa: row.get(24)?,
@@ -2327,13 +2371,13 @@ impl FromCdClient for ItemComponent {
             del_res_index: row.get(28)?,
             currency_lot: row.get(29)?,
             alt_currency_cost: row.get(30)?,
-            sub_items: trim_and_nullify(row.get(31)?),
+            sub_items: parse_optional_comma_list(row.get(31)?),
             audio_event_use: trim_and_nullify(row.get(32)?),
             no_equip_animation: row.get(33)?,
             commendation_lot: row.get(34)?,
             commendation_cost: row.get(35)?,
             audio_equip_meta_event_set: trim_and_nullify(row.get(36)?),
-            currency_costs: trim_and_nullify(row.get(37)?),
+            currency_costs: parse_currency_costs(row.get(37)?),
             ingredient_info: trim_and_nullify(row.get(38)?),
             loc_status: row.get(39)?,
             forge_type: row.get(40)?,
@@ -2449,7 +2493,7 @@ impl HasGroupKey for ItemSetSkills {
 pub struct ItemSets {
     pub set_id: i32,
     pub loc_status: i32,
-    pub item_ids: String,
+    pub item_ids: Vec<i32>,
     pub kit_type: i32,
     pub kit_rank: Option<i32>,
     pub kit_image: Option<i32>,
@@ -2471,7 +2515,7 @@ impl FromCdClient for ItemSets {
         Ok(Self {
             set_id: row.get(0)?,
             loc_status: row.get(1)?,
-            item_ids: row.get(2)?,
+            item_ids: parse_required_comma_list(row.get(2)?),
             kit_type: row.get(3)?,
             kit_rank: row.get(4)?,
             kit_image: row.get(5)?,
@@ -3087,9 +3131,9 @@ pub struct MissionTasks {
     pub loc_status: i32,
     pub task_type: i32,
     pub target: Option<i32>,
-    pub target_group: Option<String>,
+    pub target_group: Option<Vec<i32>>,
     pub target_value: Option<i32>,
-    pub task_param1: Option<String>,
+    pub task_param1: Option<Vec<i32>>,
     pub large_task_icon: Option<String>,
     pub icon_id: Option<i32>,
     pub uid: i32,
@@ -3107,9 +3151,9 @@ impl FromCdClient for MissionTasks {
             loc_status: row.get(1)?,
             task_type: row.get(2)?,
             target: row.get(3)?,
-            target_group: trim_and_nullify(row.get(4)?),
+            target_group: parse_optional_comma_list(row.get(4)?),
             target_value: row.get(5)?,
-            task_param1: trim_and_nullify(row.get(6)?),
+            task_param1: parse_optional_comma_list(row.get(6)?),
             large_task_icon: trim_and_nullify(row.get(7)?),
             icon_id: row.get(8)?,
             uid: row.get(9)?,
@@ -3261,17 +3305,46 @@ pub struct Missions {
     pub time_limit: Option<i32>,
     pub is_mission: bool,
     pub mission_icon_id: Option<i32>,
-    pub prereq_mission_id: Option<String>,
+    pub prereq_mission_id: Option<Vec<MissionPreReqType>>,
     pub localize: bool,
     pub in_motd: bool,
     pub cooldown_time: Option<i64>,
     pub is_random: bool,
-    pub random_pool: Option<String>,
+    pub random_pool: Option<Vec<i32>>,
     pub uiprereq_id: Option<i32>,
     pub gate_version: Option<String>,
     pub hudstates: Option<String>,
     pub loc_status: i32,
     pub reward_bankinventory: Option<i32>,
+}
+
+#[derive(Clone, Debug)]
+pub enum MissionPreReqType {
+    OneOf(Vec<i32>),
+    Required(i32),
+}
+
+fn parse_mission_prereqs(input: String) -> Option<Vec<MissionPreReqType>> {
+    let mut elements = vec![];
+    for value in input.split(',') {
+        if value.contains("|") {
+            let options = value
+                .split('|')
+                .filter_map(|val| {
+                    let start = val.find(char::is_numeric)?;
+                    let remaining = &val[start..];
+                    let end = remaining
+                        .find(|c| !char::is_numeric(c))
+                        .unwrap_or_else(|| remaining.len());
+                    val[start..start + end].parse().ok()
+                })
+                .collect();
+            elements.push(MissionPreReqType::OneOf(options));
+        } else {
+            elements.push(MissionPreReqType::Required(value.trim().parse().ok()?));
+        }
+    }
+    Some(elements)
 }
 
 impl FromCdClient for Missions {
@@ -3320,12 +3393,12 @@ impl FromCdClient for Missions {
             time_limit: row.get(38)?,
             is_mission: row.get(39)?,
             mission_icon_id: row.get(40)?,
-            prereq_mission_id: trim_and_nullify(row.get(41)?),
+            prereq_mission_id: parse_mission_prereqs(row.get(41)?),
             localize: row.get(42)?,
             in_motd: row.get(43)?,
             cooldown_time: row.get(44)?,
             is_random: row.get(45)?,
-            random_pool: trim_and_nullify(row.get(46)?),
+            random_pool: parse_optional_comma_list(row.get(46)?),
             uiprereq_id: row.get(47)?,
             gate_version: trim_and_nullify(row.get(48)?),
             hudstates: trim_and_nullify(row.get(49)?),
@@ -4009,7 +4082,7 @@ impl HasKey for PlayerStatistics {
 pub struct Preconditions {
     pub id: i32,
     pub r#type: Option<i32>,
-    pub target_lot: Option<String>,
+    pub target_lot: Option<Vec<i32>>,
     pub target_group: Option<String>,
     pub target_count: Option<i32>,
     pub icon_id: Option<i32>,
@@ -4026,7 +4099,7 @@ impl FromCdClient for Preconditions {
         Ok(Self {
             id: row.get(0)?,
             r#type: row.get(1)?,
-            target_lot: trim_and_nullify(row.get(2)?),
+            target_lot: parse_optional_comma_list(row.get(2)?),
             target_group: trim_and_nullify(row.get(3)?),
             target_count: row.get(4)?,
             icon_id: row.get(5)?,
@@ -4144,7 +4217,7 @@ impl HasKey for PropertyTemplate {
 #[derive(Clone, Debug)]
 pub struct ProximityMonitorComponent {
     pub id: i32,
-    pub proximities: String,
+    pub proximities: Vec<i32>,
     pub load_on_client: bool,
     pub load_on_server: bool,
 }
@@ -4155,7 +4228,7 @@ impl FromCdClient for ProximityMonitorComponent {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            proximities: row.get(1)?,
+            proximities: parse_required_comma_list(row.get(1)?),
             load_on_client: row.get(2)?,
             load_on_server: row.get(3)?,
         })
@@ -4359,7 +4432,7 @@ pub struct RebuildComponent {
     pub take_imagination: i32,
     pub interruptible: bool,
     pub self_activator: bool,
-    pub custom_modules: Option<String>,
+    pub custom_modules: Option<Vec<i32>>,
     pub activity_id: Option<i32>,
     pub post_imagination_cost: Option<i32>,
     pub time_before_smash: f64,
@@ -4376,7 +4449,7 @@ impl FromCdClient for RebuildComponent {
             take_imagination: row.get(3)?,
             interruptible: row.get(4)?,
             self_activator: row.get(5)?,
-            custom_modules: trim_and_nullify(row.get(6)?),
+            custom_modules: parse_optional_comma_list(row.get(6)?),
             activity_id: row.get(7)?,
             post_imagination_cost: row.get(8)?,
             time_before_smash: row.get(9)?,
@@ -4405,7 +4478,7 @@ pub struct RebuildSections {
     pub fall_angle_y: Option<f64>,
     pub fall_angle_z: Option<f64>,
     pub fall_height: Option<f64>,
-    pub requires_list: Option<String>,
+    pub requires_list: Option<Vec<i32>>,
     pub size: i32,
     pub b_placed: bool,
 }
@@ -4425,7 +4498,7 @@ impl FromCdClient for RebuildSections {
             fall_angle_y: row.get(7)?,
             fall_angle_z: row.get(8)?,
             fall_height: row.get(9)?,
-            requires_list: trim_and_nullify(row.get(10)?),
+            requires_list: parse_optional_comma_list(row.get(10)?),
             size: row.get(11)?,
             b_placed: row.get(12)?,
         })
@@ -4480,7 +4553,7 @@ pub struct RenderComponent {
     pub effect4: Option<i32>,
     pub effect5: Option<i32>,
     pub effect6: Option<i32>,
-    pub animation_group_ids: Option<String>,
+    pub animation_group_ids: Option<Vec<i32>>,
     pub fade: Option<bool>,
     pub usedropshadow: Option<bool>,
     pub preload_animations: Option<bool>,
@@ -4515,7 +4588,7 @@ impl FromCdClient for RenderComponent {
             effect4: row.get(8)?,
             effect5: row.get(9)?,
             effect6: row.get(10)?,
-            animation_group_ids: trim_and_nullify(row.get(11)?),
+            animation_group_ids: parse_optional_comma_list(row.get(11)?),
             fade: row.get(12)?,
             usedropshadow: row.get(13)?,
             preload_animations: row.get(14)?,
@@ -4841,7 +4914,7 @@ pub struct SkillBehavior {
     pub cooldown: Option<f64>,
     pub in_npc_editor: bool,
     pub skill_icon: Option<i32>,
-    pub oom_skill_id: Option<String>,
+    pub oom_skill_id: Option<Vec<i32>>,
     pub oom_behavior_effect_id: Option<i32>,
     pub cast_type_desc: Option<i32>,
     pub im_bonus_ui: Option<i32>,
@@ -4867,7 +4940,7 @@ impl FromCdClient for SkillBehavior {
             cooldown: row.get(5)?,
             in_npc_editor: row.get(6)?,
             skill_icon: row.get(7)?,
-            oom_skill_id: trim_and_nullify(row.get(8)?),
+            oom_skill_id: parse_optional_comma_list(row.get(8)?),
             oom_behavior_effect_id: row.get(9)?,
             cast_type_desc: row.get(10)?,
             im_bonus_ui: row.get(11)?,
