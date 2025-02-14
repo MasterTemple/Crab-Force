@@ -57,6 +57,10 @@ fn trim_and_nullify(value: Option<String>) -> Option<String> {
     })
 }
 
+fn trim_to_string(value: String) -> String {
+    value.trim().to_string()
+}
+
 pub struct KeyedVec<T: HasKey>(Vec<T>);
 
 impl<T: HasKey> KeyedVec<T> {
@@ -811,7 +815,7 @@ impl FromCdClient for AccessoryDefaultLoc {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             group_id: row.get(0)?,
-            description: row.get(1)?,
+            description: trim_to_string(row.get(1)?),
             pos_x: row.get(2)?,
             pos_y: row.get(3)?,
             pos_z: row.get(4)?,
@@ -913,7 +917,7 @@ impl FromCdClient for ActivityRewards {
             loot_matrix_index: row.get(3)?,
             currency_index: row.get(4)?,
             challenge_rating: row.get(5)?,
-            description: row.get(6)?,
+            description: trim_to_string(row.get(6)?),
         })
     }
 }
@@ -942,7 +946,7 @@ impl FromCdClient for ActivityText {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             activity_id: row.get(0)?,
-            r#type: row.get(1)?,
+            r#type: trim_to_string(row.get(1)?),
             localize: row.get(2)?,
             loc_status: row.get(3)?,
             gate_version: trim_and_nullify(row.get(4)?),
@@ -972,7 +976,7 @@ impl FromCdClient for AnimationIndex {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             animation_group_id: row.get(0)?,
-            description: row.get(1)?,
+            description: trim_to_string(row.get(1)?),
             group_type: trim_and_nullify(row.get(2)?),
         })
     }
@@ -1010,8 +1014,8 @@ impl FromCdClient for Animations {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             animation_group_id: row.get(0)?,
-            animation_type: row.get(1)?,
-            animation_name: row.get(2)?,
+            animation_type: trim_to_string(row.get(1)?),
+            animation_name: trim_to_string(row.get(2)?),
             chance_to_play: row.get(3)?,
             min_loops: row.get(4)?,
             max_loops: row.get(5)?,
@@ -1203,7 +1207,7 @@ impl FromCdClient for BehaviorParameter {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             behavior_id: row.get(0)?,
-            parameter_id: row.get(1)?,
+            parameter_id: trim_to_string(row.get(1)?),
             value: row.get(2)?,
         })
     }
@@ -1260,7 +1264,7 @@ impl FromCdClient for BehaviorTemplateName {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             template_id: row.get(0)?,
-            name: row.get(1)?,
+            name: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -1296,14 +1300,14 @@ impl FromCdClient for Blueprints {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            name: row.get(1)?,
-            description: row.get(2)?,
+            name: trim_to_string(row.get(1)?),
+            description: trim_to_string(row.get(2)?),
             accountid: row.get(3)?,
             characterid: row.get(4)?,
             price: row.get(5)?,
             rating: row.get(6)?,
             categoryid: row.get(7)?,
-            lxfpath: row.get(8)?,
+            lxfpath: trim_to_string(row.get(8)?),
             deleted: row.get(9)?,
             created: row.get(10)?,
             modified: row.get(11)?,
@@ -1345,7 +1349,7 @@ impl FromCdClient for BrickColors {
             blue: row.get(3)?,
             alpha: row.get(4)?,
             legopaletteid: row.get(5)?,
-            description: row.get(6)?,
+            description: trim_to_string(row.get(6)?),
             valid_types: row.get(7)?,
             valid_characters: row.get(8)?,
             factory_valid: row.get(9)?,
@@ -1431,7 +1435,7 @@ impl FromCdClient for BuffParameters {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             buff_id: row.get(0)?,
-            parameter_name: row.get(1)?,
+            parameter_name: trim_to_string(row.get(1)?),
             number_value: row.get(2)?,
             string_value: parse_optional_comma_list(row.get(3)?),
             effect_id: row.get(4)?,
@@ -1517,7 +1521,7 @@ impl FromCdClient for Camera {
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
-            camera_name: row.get(0)?,
+            camera_name: trim_to_string(row.get(0)?),
             pitch_angle_tolerance: row.get(1)?,
             starting_zoom: row.get(2)?,
             zoom_return_modifier: row.get(3)?,
@@ -1630,7 +1634,7 @@ impl FromCdClient for CelebrationParameters {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            animation: row.get(1)?,
+            animation: trim_to_string(row.get(1)?),
             background_object: row.get(2)?,
             duration: row.get(3)?,
             sub_text: trim_and_nullify(row.get(4)?),
@@ -1639,7 +1643,7 @@ impl FromCdClient for CelebrationParameters {
             cele_lead_in: row.get(7)?,
             cele_lead_out: row.get(8)?,
             camera_path_lot: row.get(9)?,
-            path_node_name: row.get(10)?,
+            path_node_name: trim_to_string(row.get(10)?),
             ambient_r: row.get(11)?,
             ambient_g: row.get(12)?,
             ambient_b: row.get(13)?,
@@ -1789,7 +1793,7 @@ impl FromCdClient for ControlSchemes {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             control_scheme: row.get(0)?,
-            scheme_name: row.get(1)?,
+            scheme_name: trim_to_string(row.get(1)?),
             rotation_speed: row.get(2)?,
             walk_forward_speed: row.get(3)?,
             walk_backward_speed: row.get(4)?,
@@ -1895,8 +1899,8 @@ impl FromCdClient for DbExclude {
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
-            table: row.get(0)?,
-            column: row.get(1)?,
+            table: trim_to_string(row.get(0)?),
+            column: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -2042,7 +2046,7 @@ impl FromCdClient for Emotes {
         Ok(Self {
             id: row.get(0)?,
             animation_name: trim_and_nullify(row.get(1)?),
-            icon_filename: row.get(2)?,
+            icon_filename: trim_to_string(row.get(2)?),
             channel: trim_and_nullify(row.get(3)?),
             command: trim_and_nullify(row.get(4)?),
             locked: row.get(5)?,
@@ -2074,7 +2078,7 @@ impl FromCdClient for EventGating {
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
-            event_name: row.get(0)?,
+            event_name: trim_to_string(row.get(0)?),
             date_start: row.get(1)?,
             date_end: row.get(2)?,
         })
@@ -2176,7 +2180,7 @@ impl FromCdClient for FeatureGating {
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
-            feature_name: row.get(0)?,
+            feature_name: trim_to_string(row.get(0)?),
             major: row.get(1)?,
             current: row.get(2)?,
             minor: row.get(3)?,
@@ -2206,7 +2210,7 @@ impl FromCdClient for FlairTable {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            asset: row.get(1)?,
+            asset: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -2630,8 +2634,8 @@ impl FromCdClient for LuPExhibitModelData {
             min_xz: row.get(1)?,
             max_xz: row.get(2)?,
             max_y: row.get(3)?,
-            description: row.get(4)?,
-            owner: row.get(5)?,
+            description: trim_to_string(row.get(4)?),
+            owner: trim_to_string(row.get(5)?),
         })
     }
 }
@@ -2681,7 +2685,7 @@ impl FromCdClient for LanguageType {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             language_id: row.get(0)?,
-            language_description: row.get(1)?,
+            language_description: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -2910,8 +2914,8 @@ impl FromCdClient for MinifigDecalsEyebrows {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            high_path: row.get(1)?,
-            low_path: row.get(2)?,
+            high_path: trim_to_string(row.get(1)?),
+            low_path: trim_to_string(row.get(2)?),
             character_create_valid: row.get(3)?,
             male: row.get(4)?,
             female: row.get(5)?,
@@ -2944,8 +2948,8 @@ impl FromCdClient for MinifigDecalsEyes {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            high_path: row.get(1)?,
-            low_path: row.get(2)?,
+            high_path: trim_to_string(row.get(1)?),
+            low_path: trim_to_string(row.get(2)?),
             character_create_valid: row.get(3)?,
             male: row.get(4)?,
             female: row.get(5)?,
@@ -2974,7 +2978,7 @@ impl FromCdClient for MinifigDecalsLegs {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            high_path: row.get(1)?,
+            high_path: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -3004,8 +3008,8 @@ impl FromCdClient for MinifigDecalsMouths {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            high_path: row.get(1)?,
-            low_path: row.get(2)?,
+            high_path: trim_to_string(row.get(1)?),
+            low_path: trim_to_string(row.get(2)?),
             character_create_valid: row.get(3)?,
             male: row.get(4)?,
             female: row.get(5)?,
@@ -3037,7 +3041,7 @@ impl FromCdClient for MinifigDecalsTorsos {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            high_path: row.get(1)?,
+            high_path: trim_to_string(row.get(1)?),
             character_create_valid: row.get(2)?,
             male: row.get(3)?,
             female: row.get(4)?,
@@ -3353,7 +3357,7 @@ impl FromCdClient for Missions {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            defined_type: row.get(1)?,
+            defined_type: trim_to_string(row.get(1)?),
             defined_subtype: trim_and_nullify(row.get(2)?),
             uisort_order: row.get(3)?,
             offer_object_id: row.get(4)?,
@@ -3429,7 +3433,7 @@ impl FromCdClient for ModelBehavior {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            definition_xmlfilename: row.get(1)?,
+            definition_xmlfilename: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -3462,10 +3466,10 @@ impl FromCdClient for ModularBuildComponent {
         Ok(Self {
             id: row.get(0)?,
             build_type: row.get(1)?,
-            xml: row.get(2)?,
+            xml: trim_to_string(row.get(2)?),
             created_lot: row.get(3)?,
             created_physics_id: row.get(4)?,
-            audio_event_guid_snap: row.get(5)?,
+            audio_event_guid_snap: trim_to_string(row.get(5)?),
             audio_event_guid_complete: trim_and_nullify(row.get(6)?),
             audio_event_guid_present: trim_and_nullify(row.get(7)?),
         })
@@ -3499,7 +3503,7 @@ impl FromCdClient for ModuleComponent {
             id: row.get(0)?,
             part_code: row.get(1)?,
             build_type: row.get(2)?,
-            xml: row.get(3)?,
+            xml: trim_to_string(row.get(3)?),
             primary_sound_guid: trim_and_nullify(row.get(4)?),
             assembled_effect_id: row.get(5)?,
         })
@@ -3575,7 +3579,7 @@ impl FromCdClient for MovementAIComponent {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            movement_type: row.get(1)?,
+            movement_type: trim_to_string(row.get(1)?),
             wander_chance: row.get(2)?,
             wander_delay_min: row.get(3)?,
             wander_delay_max: row.get(4)?,
@@ -3619,7 +3623,7 @@ impl FromCdClient for MovingPlatforms {
             platform_move_z: row.get(4)?,
             platform_move_time: row.get(5)?,
             platform_start_at_end: row.get(6)?,
-            description: row.get(7)?,
+            description: trim_to_string(row.get(7)?),
         })
     }
 }
@@ -3733,7 +3737,7 @@ impl FromCdClient for ObjectBehaviors {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             behavior_id: row.get(0)?,
-            xmldata: row.get(1)?,
+            xmldata: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -3870,7 +3874,7 @@ impl FromCdClient for PetAbilities {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            ability_name: row.get(1)?,
+            ability_name: trim_to_string(row.get(1)?),
             imagination_cost: row.get(2)?,
             loc_status: row.get(3)?,
         })
@@ -4136,7 +4140,7 @@ impl FromCdClient for PropertyEntranceComponent {
         Ok(Self {
             id: row.get(0)?,
             map_id: row.get(1)?,
-            property_name: row.get(2)?,
+            property_name: trim_to_string(row.get(2)?),
             is_on_property: row.get(3)?,
             group_type: trim_and_nullify(row.get(4)?),
         })
@@ -4184,7 +4188,7 @@ impl FromCdClient for PropertyTemplate {
             id: row.get(0)?,
             map_id: row.get(1)?,
             vendor_map_id: row.get(2)?,
-            spawn_name: row.get(3)?,
+            spawn_name: trim_to_string(row.get(3)?),
             r#type: row.get(4)?,
             sizecode: row.get(5)?,
             minimum_price: row.get(6)?,
@@ -4262,7 +4266,7 @@ impl FromCdClient for ProximityTypes {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            name: row.get(1)?,
+            name: trim_to_string(row.get(1)?),
             radius: row.get(2)?,
             collision_group: row.get(3)?,
             passive_checks: row.get(4)?,
@@ -4342,9 +4346,9 @@ impl FromCdClient for RailActivatorComponent {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            start_anim: row.get(1)?,
+            start_anim: trim_to_string(row.get(1)?),
             loop_anim: trim_and_nullify(row.get(2)?),
-            stop_anim: row.get(3)?,
+            stop_anim: trim_to_string(row.get(3)?),
             start_sound: trim_and_nullify(row.get(4)?),
             loop_sound: trim_and_nullify(row.get(5)?),
             stop_sound: trim_and_nullify(row.get(6)?),
@@ -4525,7 +4529,7 @@ impl FromCdClient for ReleaseVersion {
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
-            release_version: row.get(0)?,
+            release_version: trim_to_string(row.get(0)?),
             release_date: row.get(1)?,
         })
     }
@@ -4637,8 +4641,8 @@ impl FromCdClient for RenderComponentFlash {
             id: row.get(0)?,
             interactive: row.get(1)?,
             animated: row.get(2)?,
-            node_name: row.get(3)?,
-            flash_path: row.get(4)?,
+            node_name: trim_to_string(row.get(3)?),
+            flash_path: trim_to_string(row.get(4)?),
             element_name: trim_and_nullify(row.get(5)?),
             uid: row.get(6)?,
         })
@@ -4666,7 +4670,7 @@ impl FromCdClient for RenderComponentWrapper {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            default_wrapper_asset: row.get(1)?,
+            default_wrapper_asset: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -4751,7 +4755,7 @@ impl FromCdClient for RewardCodes {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            code: row.get(1)?,
+            code: trim_to_string(row.get(1)?),
             attachment_lot: row.get(2)?,
             loc_status: row.get(3)?,
             gate_version: trim_and_nullify(row.get(4)?),
@@ -4829,8 +4833,8 @@ impl FromCdClient for RocketLaunchpadControlComponent {
             default_zone_id: row.get(2)?,
             target_scene: trim_and_nullify(row.get(3)?),
             gm_level: row.get(4)?,
-            player_animation: row.get(5)?,
-            rocket_animation: row.get(6)?,
+            player_animation: trim_to_string(row.get(5)?),
+            rocket_animation: trim_to_string(row.get(6)?),
             launch_music: trim_and_nullify(row.get(7)?),
             use_launch_precondition: row.get(8)?,
             use_alt_landing_precondition: row.get(9)?,
@@ -4862,7 +4866,7 @@ impl FromCdClient for SceneTable {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             scene_id: row.get(0)?,
-            scene_name: row.get(1)?,
+            scene_name: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -5018,8 +5022,8 @@ impl FromCdClient for SmashableChainIndex {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            target_group: row.get(1)?,
-            description: row.get(2)?,
+            target_group: trim_to_string(row.get(1)?),
+            description: trim_to_string(row.get(2)?),
             continuous: row.get(3)?,
         })
     }
@@ -5139,10 +5143,10 @@ impl FromCdClient for SubscriptionPricing {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            country_code: row.get(1)?,
-            monthly_fee_gold: row.get(2)?,
-            monthly_fee_silver: row.get(3)?,
-            monthly_fee_bronze: row.get(4)?,
+            country_code: trim_to_string(row.get(1)?),
+            monthly_fee_gold: trim_to_string(row.get(2)?),
+            monthly_fee_silver: trim_to_string(row.get(3)?),
+            monthly_fee_bronze: trim_to_string(row.get(4)?),
             monetary_symbol: row.get(5)?,
             symbol_is_appended: row.get(6)?,
         })
@@ -5209,14 +5213,14 @@ impl FromCdClient for TamingBuildPuzzles {
             id: row.get(0)?,
             puzzle_model_lot: row.get(1)?,
             npclot: row.get(2)?,
-            valid_pieces_lxf: row.get(3)?,
-            invalid_pieces_lxf: row.get(4)?,
+            valid_pieces_lxf: trim_to_string(row.get(3)?),
+            invalid_pieces_lxf: trim_to_string(row.get(4)?),
             difficulty: row.get(5)?,
             timelimit: row.get(6)?,
             num_valid_pieces: row.get(7)?,
             total_num_pieces: row.get(8)?,
-            model_name: row.get(9)?,
-            full_model_lxf: row.get(10)?,
+            model_name: trim_to_string(row.get(9)?),
+            full_model_lxf: trim_to_string(row.get(10)?),
             duration: row.get(11)?,
             imag_cost_per_build: row.get(12)?,
         })
@@ -5244,7 +5248,7 @@ impl FromCdClient for TextDescription {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             text_id: row.get(0)?,
-            test_description: row.get(1)?,
+            test_description: trim_to_string(row.get(1)?),
         })
     }
 }
@@ -5272,7 +5276,7 @@ impl FromCdClient for TextLanguage {
         Ok(Self {
             text_id: row.get(0)?,
             language_id: row.get(1)?,
-            text: row.get(2)?,
+            text: trim_to_string(row.get(2)?),
         })
     }
 }
@@ -5322,7 +5326,7 @@ impl FromCdClient for TrailEffects {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             trail_id: row.get(0)?,
-            texture_name: row.get(1)?,
+            texture_name: trim_to_string(row.get(1)?),
             blendmode: row.get(2)?,
             cardlifetime: row.get(3)?,
             colorlifetime: row.get(4)?,
@@ -5331,8 +5335,8 @@ impl FromCdClient for TrailEffects {
             max_particles: row.get(7)?,
             birth_delay: row.get(8)?,
             death_delay: row.get(9)?,
-            bone1: row.get(10)?,
-            bone2: row.get(11)?,
+            bone1: trim_to_string(row.get(10)?),
+            bone2: trim_to_string(row.get(11)?),
             tex_length: row.get(12)?,
             tex_width: row.get(13)?,
             start_color_r: row.get(14)?,
@@ -5375,7 +5379,7 @@ impl FromCdClient for UgBehaviorSounds {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            guid: row.get(1)?,
+            guid: trim_to_string(row.get(1)?),
             localize: row.get(2)?,
             loc_status: row.get(3)?,
             gate_version: trim_and_nullify(row.get(4)?),
@@ -5634,8 +5638,8 @@ impl FromCdClient for VehicleStatMap {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            module_stat: row.get(1)?,
-            havok_stat: row.get(2)?,
+            module_stat: trim_to_string(row.get(1)?),
+            havok_stat: trim_to_string(row.get(2)?),
             havok_change_per_module_stat: row.get(3)?,
         })
     }
@@ -5868,7 +5872,7 @@ impl FromCdClient for WorldConfig {
             mail_percent_attachment_fee: row.get(51)?,
             property_reputation_delay: row.get(52)?,
             level_cap: row.get(53)?,
-            level_up_behavior_effect: row.get(54)?,
+            level_up_behavior_effect: trim_to_string(row.get(54)?),
             character_version: row.get(55)?,
             level_cap_currency_conversion: row.get(56)?,
         })
@@ -5903,9 +5907,9 @@ impl FromCdClient for ZoneLoadingTips {
         Ok(Self {
             id: row.get(0)?,
             zoneid: row.get(1)?,
-            imagelocation: row.get(2)?,
+            imagelocation: trim_to_string(row.get(2)?),
             localize: row.get(3)?,
-            gate_version: row.get(4)?,
+            gate_version: trim_to_string(row.get(4)?),
             loc_status: row.get(5)?,
             weight: row.get(6)?,
             target_version: trim_and_nullify(row.get(7)?),
@@ -5990,7 +5994,7 @@ impl FromCdClient for ZoneTable {
         Ok(Self {
             zone_id: row.get(0)?,
             loc_status: row.get(1)?,
-            zone_name: row.get(2)?,
+            zone_name: trim_to_string(row.get(2)?),
             script_id: row.get(3)?,
             ghostdistance_min: row.get(4)?,
             ghostdistance: row.get(5)?,
@@ -6042,7 +6046,7 @@ impl FromCdClient for BrickAttributes {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            icon_asset: row.get(1)?,
+            icon_asset: trim_to_string(row.get(1)?),
             display_order: row.get(2)?,
             loc_status: row.get(3)?,
         })
@@ -6076,10 +6080,10 @@ impl FromCdClient for Dtproperties {
         Ok(Self {
             id: row.get(0)?,
             objectid: row.get(1)?,
-            property: row.get(2)?,
-            value: row.get(3)?,
-            uvalue: row.get(4)?,
-            lvalue: row.get(5)?,
+            property: trim_to_string(row.get(2)?),
+            value: trim_to_string(row.get(3)?),
+            uvalue: trim_to_string(row.get(4)?),
+            lvalue: trim_to_string(row.get(5)?),
             version: row.get(6)?,
         })
     }
@@ -6107,7 +6111,7 @@ impl FromCdClient for MapAnimationPriorities {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            name: row.get(1)?,
+            name: trim_to_string(row.get(1)?),
             priority: row.get(2)?,
         })
     }
@@ -6136,9 +6140,9 @@ impl FromCdClient for MapAssetType {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            label: row.get(1)?,
-            pathdir: row.get(2)?,
-            typelabel: row.get(3)?,
+            label: trim_to_string(row.get(1)?),
+            pathdir: trim_to_string(row.get(2)?),
+            typelabel: trim_to_string(row.get(3)?),
         })
     }
 }
@@ -6193,7 +6197,7 @@ impl FromCdClient for MapItemTypes {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            description: row.get(1)?,
+            description: trim_to_string(row.get(1)?),
             equip_location: trim_and_nullify(row.get(2)?),
         })
     }
@@ -6222,7 +6226,7 @@ impl FromCdClient for MapRenderEffects {
         Ok(Self {
             id: row.get(0)?,
             game_id: row.get(1)?,
-            description: row.get(2)?,
+            description: trim_to_string(row.get(2)?),
         })
     }
 }
@@ -6250,7 +6254,7 @@ impl FromCdClient for MapShaders {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            label: row.get(1)?,
+            label: trim_to_string(row.get(1)?),
             game_value: row.get(2)?,
             priority: row.get(3)?,
         })
@@ -6279,7 +6283,7 @@ impl FromCdClient for MapTextureResource {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            texturepath: row.get(1)?,
+            texturepath: trim_to_string(row.get(1)?),
             surface_type: row.get(2)?,
         })
     }
@@ -6307,7 +6311,7 @@ impl FromCdClient for MapBlueprintCategory {
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
             id: row.get(0)?,
-            description: row.get(1)?,
+            description: trim_to_string(row.get(1)?),
             enabled: row.get(2)?,
         })
     }
@@ -6336,11 +6340,11 @@ impl FromCdClient for Sysdiagrams {
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
-            name: row.get(0)?,
+            name: trim_to_string(row.get(0)?),
             principal_id: row.get(1)?,
             diagram_id: row.get(2)?,
             version: row.get(3)?,
-            definition: row.get(4)?,
+            definition: trim_to_string(row.get(4)?),
         })
     }
 }
