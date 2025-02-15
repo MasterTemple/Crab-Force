@@ -1,22 +1,7 @@
-use crate::cdclient::components::{ITEM_COMPONENT, RENDER_COMPONENT};
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
 use crate::queries::{AutocompleteQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{
-    AutocompleteChoice, CommandOptionType, CreateActionRow, CreateCommandOption, CreateEmbed,
-    ResolvedOption,
-};
-
-pub fn fix_icon_asset(asset: &str) -> String {
-    asset
-        .replace("\\", "/")
-        .replace("../", "")
-        .replace("./", "")
-}
-
-pub fn icon_asset_as_url(asset: &str) -> String {
-    CONFIG.explorer_res_uri(&fix_icon_asset(asset))
-}
+use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
 
 pub struct BuyCommand;
 
