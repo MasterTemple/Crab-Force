@@ -5,8 +5,9 @@ use serenity::all::AutocompleteChoice;
 use crate::{
     cdclient::{
         components::{ITEM_COMPONENT, PACKAGE_COMPONENT, RENDER_COMPONENT, VENDOR_COMPONENT},
-        CdClient, ItemComponent, Missions, Objects, PackageComponent, RenderComponent,
-        SkillBehavior, VendorComponent,
+        CdClient, CdClientItemComponent, CdClientMissions, CdClientObjects,
+        CdClientPackageComponent, CdClientRenderComponent, CdClientSkillBehavior,
+        CdClientVendorComponent,
     },
     locale::LocaleTranslation,
     CD_CLIENT, CONFIG, LOCALE_XML,
@@ -200,13 +201,13 @@ pub trait ObjectQueries {
 
     fn object_hyperlinked_name(&self, item_id: i32) -> String;
 
-    fn get_object(&self, item_id: i32) -> MsgResult<&Objects>;
+    fn get_object(&self, item_id: i32) -> MsgResult<&CdClientObjects>;
 
-    fn object_item_component(&self, item_id: i32) -> MsgResult<&ItemComponent>;
+    fn object_item_component(&self, item_id: i32) -> MsgResult<&CdClientItemComponent>;
 
     fn object_explorer_url(&self, item_id: i32) -> String;
 
-    fn object_render_component(&self, item_id: i32) -> MsgResult<&RenderComponent>;
+    fn object_render_component(&self, item_id: i32) -> MsgResult<&CdClientRenderComponent>;
 
     fn object_icon_url(&self, item_id: i32) -> Option<String>;
     /// returns vendor ids
@@ -214,11 +215,11 @@ pub trait ObjectQueries {
 
     fn object_package_ids(&self, id: i32) -> MsgResult<Vec<i32>>;
 
-    fn object_package_component(&self, item_id: i32) -> MsgResult<&PackageComponent>;
+    fn object_package_component(&self, item_id: i32) -> MsgResult<&CdClientPackageComponent>;
 }
 
 impl ObjectQueries for CdClient {
-    fn object_package_component(&self, item_id: i32) -> MsgResult<&PackageComponent> {
+    fn object_package_component(&self, item_id: i32) -> MsgResult<&CdClientPackageComponent> {
         let components = self
             .components_registry
             .at_group_key(&item_id)
@@ -299,7 +300,7 @@ impl ObjectQueries for CdClient {
         explorer_link_name(name, item_id, explorer_url)
     }
 
-    fn get_object(&self, item_id: i32) -> MsgResult<&Objects> {
+    fn get_object(&self, item_id: i32) -> MsgResult<&CdClientObjects> {
         CD_CLIENT.objects.at_key(&item_id).ok_or_else(|| {
             format!(
                 "{} does not exist!",
@@ -308,7 +309,7 @@ impl ObjectQueries for CdClient {
         })
     }
 
-    fn object_item_component(&self, item_id: i32) -> MsgResult<&ItemComponent> {
+    fn object_item_component(&self, item_id: i32) -> MsgResult<&CdClientItemComponent> {
         let components = self
             .components_registry
             .at_group_key(&item_id)
@@ -342,7 +343,7 @@ impl ObjectQueries for CdClient {
         CONFIG.explorer_uri(format!("/objects/{}", item_id))
     }
 
-    fn object_render_component(&self, item_id: i32) -> MsgResult<&RenderComponent> {
+    fn object_render_component(&self, item_id: i32) -> MsgResult<&CdClientRenderComponent> {
         let components = self
             .components_registry
             .at_group_key(&item_id)
@@ -457,12 +458,12 @@ pub trait SkillQueries {
     fn skill_icon_url(&self, id: i32) -> Option<String>;
     fn skill_explorer_url(&self, id: i32) -> String;
     fn skill_hyperlinked_name(&self, id: i32) -> String;
-    fn get_skill(&self, id: i32) -> MsgResult<&SkillBehavior>;
+    fn get_skill(&self, id: i32) -> MsgResult<&CdClientSkillBehavior>;
     fn cooldown_group_hyperlinked_name(&self, cdg: i32) -> String;
 }
 
 impl SkillQueries for CdClient {
-    fn get_skill(&self, id: i32) -> MsgResult<&SkillBehavior> {
+    fn get_skill(&self, id: i32) -> MsgResult<&CdClientSkillBehavior> {
         self.skill_behavior
             .at_key(&id)
             .ok_or_else(|| format!("{} does not exist!", CD_CLIENT.skill_hyperlinked_name(id)))
@@ -522,7 +523,7 @@ pub trait AchievementQueries {
         let url = CONFIG.explorer_uri(format!("/missions/{}", id));
         explorer_link_name(name, id, url)
     }
-    fn get_achievement(&self, id: i32) -> MsgResult<&Missions>;
+    fn get_achievement(&self, id: i32) -> MsgResult<&CdClientMissions>;
     fn full_achievement_path(&self, id: i32) -> String;
     fn get_achievement_rewards(&self, id: i32) -> Option<Vec<MissionReward>>;
 }
@@ -613,7 +614,7 @@ impl AchievementQueries for CdClient {
         url
     }
 
-    fn get_achievement(&self, id: i32) -> MsgResult<&Missions> {
+    fn get_achievement(&self, id: i32) -> MsgResult<&CdClientMissions> {
         self.missions.at_key(&id).ok_or_else(|| {
             format!(
                 "{} does not exist!",

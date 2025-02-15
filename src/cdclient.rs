@@ -183,435 +183,437 @@ pub trait FromCdClient: Sized {
 
 #[allow(dead_code)]
 pub struct CdClientRows {
-    pub ai_combat_roles: Vec<AiCombatRoles>,
-    pub accessory_default_loc: Vec<AccessoryDefaultLoc>,
-    pub activities: Vec<Activities>,
-    pub activity_rewards: Vec<ActivityRewards>,
-    pub activity_text: Vec<ActivityText>,
-    pub animation_index: Vec<AnimationIndex>,
-    pub animations: Vec<Animations>,
-    pub base_combat_aicomponent: Vec<BaseCombatAIComponent>,
-    pub behavior_effect: Vec<BehaviorEffect>,
-    pub behavior_parameter: Vec<BehaviorParameter>,
-    pub behavior_template: Vec<BehaviorTemplate>,
-    pub behavior_template_name: Vec<BehaviorTemplateName>,
-    pub blueprints: Vec<Blueprints>,
-    pub brick_colors: Vec<BrickColors>,
-    pub brick_idtable: Vec<BrickIDTable>,
-    pub buff_definitions: Vec<BuffDefinitions>,
-    pub buff_parameters: Vec<BuffParameters>,
-    pub camera: Vec<Camera>,
-    pub celebration_parameters: Vec<CelebrationParameters>,
-    pub choice_build_component: Vec<ChoiceBuildComponent>,
-    pub collectible_component: Vec<CollectibleComponent>,
-    pub components_registry: Vec<ComponentsRegistry>,
-    pub control_schemes: Vec<ControlSchemes>,
-    pub currency_denominations: Vec<CurrencyDenominations>,
-    pub currency_table: Vec<CurrencyTable>,
-    pub db_exclude: Vec<DbExclude>,
-    pub deletion_restrictions: Vec<DeletionRestrictions>,
-    pub destructible_component: Vec<DestructibleComponent>,
-    pub dev_model_behaviors: Vec<DevModelBehaviors>,
-    pub emotes: Vec<Emotes>,
-    pub event_gating: Vec<EventGating>,
-    pub exhibit_component: Vec<ExhibitComponent>,
-    pub factions: Vec<Factions>,
-    pub feature_gating: Vec<FeatureGating>,
-    pub flair_table: Vec<FlairTable>,
-    pub icons: Vec<Icons>,
-    pub inventory_component: Vec<InventoryComponent>,
-    pub item_component: Vec<ItemComponent>,
-    pub item_egg_data: Vec<ItemEggData>,
-    pub item_food_data: Vec<ItemFoodData>,
-    pub item_set_skills: Vec<ItemSetSkills>,
-    pub item_sets: Vec<ItemSets>,
-    pub jet_pack_pad_component: Vec<JetPackPadComponent>,
-    pub lu_pexhibit_component: Vec<LuPExhibitComponent>,
-    pub lu_pexhibit_model_data: Vec<LuPExhibitModelData>,
-    pub lu_pzone_ids: Vec<LuPZoneIDs>,
-    pub language_type: Vec<LanguageType>,
-    pub level_progression_lookup: Vec<LevelProgressionLookup>,
-    pub loot_matrix: Vec<LootMatrix>,
-    pub loot_matrix_index: Vec<LootMatrixIndex>,
-    pub loot_table: Vec<LootTable>,
-    pub loot_table_index: Vec<LootTableIndex>,
-    pub minifig_component: Vec<MinifigComponent>,
-    pub minifig_decals_eyebrows: Vec<MinifigDecalsEyebrows>,
-    pub minifig_decals_eyes: Vec<MinifigDecalsEyes>,
-    pub minifig_decals_legs: Vec<MinifigDecalsLegs>,
-    pub minifig_decals_mouths: Vec<MinifigDecalsMouths>,
-    pub minifig_decals_torsos: Vec<MinifigDecalsTorsos>,
-    pub mission_email: Vec<MissionEmail>,
-    pub mission_npccomponent: Vec<MissionNPCComponent>,
-    pub mission_tasks: Vec<MissionTasks>,
-    pub mission_text: Vec<MissionText>,
-    pub missions: Vec<Missions>,
-    pub model_behavior: Vec<ModelBehavior>,
-    pub modular_build_component: Vec<ModularBuildComponent>,
-    pub module_component: Vec<ModuleComponent>,
-    pub motion_fx: Vec<MotionFX>,
-    pub movement_aicomponent: Vec<MovementAIComponent>,
-    pub moving_platforms: Vec<MovingPlatforms>,
-    pub npc_icons: Vec<NpcIcons>,
-    pub object_behavior_xref: Vec<ObjectBehaviorXREF>,
-    pub object_behaviors: Vec<ObjectBehaviors>,
-    pub object_skills: Vec<ObjectSkills>,
-    pub objects: Vec<Objects>,
-    pub package_component: Vec<PackageComponent>,
-    pub pet_abilities: Vec<PetAbilities>,
-    pub pet_component: Vec<PetComponent>,
-    pub pet_nest_component: Vec<PetNestComponent>,
-    pub physics_component: Vec<PhysicsComponent>,
-    pub player_flags: Vec<PlayerFlags>,
-    pub player_statistics: Vec<PlayerStatistics>,
-    pub preconditions: Vec<Preconditions>,
-    pub property_entrance_component: Vec<PropertyEntranceComponent>,
-    pub property_template: Vec<PropertyTemplate>,
-    pub proximity_monitor_component: Vec<ProximityMonitorComponent>,
-    pub proximity_types: Vec<ProximityTypes>,
-    pub racing_module_component: Vec<RacingModuleComponent>,
-    pub rail_activator_component: Vec<RailActivatorComponent>,
-    pub rarity_table: Vec<RarityTable>,
-    pub rarity_table_index: Vec<RarityTableIndex>,
-    pub rebuild_component: Vec<RebuildComponent>,
-    pub rebuild_sections: Vec<RebuildSections>,
-    pub release_version: Vec<ReleaseVersion>,
-    pub render_component: Vec<RenderComponent>,
-    pub render_component_flash: Vec<RenderComponentFlash>,
-    pub render_component_wrapper: Vec<RenderComponentWrapper>,
-    pub render_icon_assets: Vec<RenderIconAssets>,
-    pub reputation_rewards: Vec<ReputationRewards>,
-    pub reward_codes: Vec<RewardCodes>,
-    pub rewards: Vec<Rewards>,
-    pub rocket_launchpad_control_component: Vec<RocketLaunchpadControlComponent>,
-    pub scene_table: Vec<SceneTable>,
-    pub script_component: Vec<ScriptComponent>,
-    pub skill_behavior: Vec<SkillBehavior>,
-    pub smashable_chain: Vec<SmashableChain>,
-    pub smashable_chain_index: Vec<SmashableChainIndex>,
-    pub smashable_component: Vec<SmashableComponent>,
-    pub smashable_elements: Vec<SmashableElements>,
-    pub speedchat_menu: Vec<SpeedchatMenu>,
-    pub subscription_pricing: Vec<SubscriptionPricing>,
-    pub surface_type: Vec<SurfaceType>,
-    pub taming_build_puzzles: Vec<TamingBuildPuzzles>,
-    pub text_description: Vec<TextDescription>,
-    pub text_language: Vec<TextLanguage>,
-    pub trail_effects: Vec<TrailEffects>,
-    pub ug_behavior_sounds: Vec<UgBehaviorSounds>,
-    pub vehicle_physics: Vec<VehiclePhysics>,
-    pub vehicle_stat_map: Vec<VehicleStatMap>,
-    pub vendor_component: Vec<VendorComponent>,
-    pub whats_cool_item_spotlight: Vec<WhatsCoolItemSpotlight>,
-    pub whats_cool_news_and_tips: Vec<WhatsCoolNewsAndTips>,
-    pub world_config: Vec<WorldConfig>,
-    pub zone_loading_tips: Vec<ZoneLoadingTips>,
-    pub zone_summary: Vec<ZoneSummary>,
-    pub zone_table: Vec<ZoneTable>,
-    pub brick_attributes: Vec<BrickAttributes>,
-    pub dtproperties: Vec<Dtproperties>,
-    pub map_animation_priorities: Vec<MapAnimationPriorities>,
-    pub map_asset_type: Vec<MapAssetType>,
-    pub map_icon: Vec<MapIcon>,
-    pub map_item_types: Vec<MapItemTypes>,
-    pub map_render_effects: Vec<MapRenderEffects>,
-    pub map_shaders: Vec<MapShaders>,
-    pub map_texture_resource: Vec<MapTextureResource>,
-    pub map_blueprint_category: Vec<MapBlueprintCategory>,
-    pub sysdiagrams: Vec<Sysdiagrams>,
-    pub possessable_component: Vec<PossessableComponent>,
-    pub skill_sets: Vec<SkillSets>,
-    pub map_faces_and_hair: Vec<MapFacesAndHair>,
+    pub ai_combat_roles: Vec<CdClientAiCombatRoles>,
+    pub accessory_default_loc: Vec<CdClientAccessoryDefaultLoc>,
+    pub activities: Vec<CdClientActivities>,
+    pub activity_rewards: Vec<CdClientActivityCdClientRewards>,
+    pub activity_text: Vec<CdClientActivityText>,
+    pub animation_index: Vec<CdClientAnimationIndex>,
+    pub animations: Vec<CdClientAnimations>,
+    pub base_combat_aicomponent: Vec<CdClientBaseCombatAIComponent>,
+    pub behavior_effect: Vec<CdClientBehaviorEffect>,
+    pub behavior_parameter: Vec<CdClientBehaviorParameter>,
+    pub behavior_template: Vec<CdClientBehaviorTemplate>,
+    pub behavior_template_name: Vec<CdClientBehaviorTemplateName>,
+    pub blueprints: Vec<CdClientBlueprints>,
+    pub brick_colors: Vec<CdClientBrickColors>,
+    pub brick_idtable: Vec<CdClientBrickIDTable>,
+    pub buff_definitions: Vec<CdClientBuffDefinitions>,
+    pub buff_parameters: Vec<CdClientBuffParameters>,
+    pub camera: Vec<CdClientCamera>,
+    pub celebration_parameters: Vec<CdClientCelebrationParameters>,
+    pub choice_build_component: Vec<CdClientChoiceBuildComponent>,
+    pub collectible_component: Vec<CdClientCollectibleComponent>,
+    pub components_registry: Vec<CdClientComponentsRegistry>,
+    pub control_schemes: Vec<CdClientControlSchemes>,
+    pub currency_denominations: Vec<CdClientCurrencyDenominations>,
+    pub currency_table: Vec<CdClientCurrencyTable>,
+    pub db_exclude: Vec<CdClientDbExclude>,
+    pub deletion_restrictions: Vec<CdClientDeletionRestrictions>,
+    pub destructible_component: Vec<CdClientDestructibleComponent>,
+    pub dev_model_behaviors: Vec<CdClientDevModelBehaviors>,
+    pub emotes: Vec<CdClientEmotes>,
+    pub event_gating: Vec<CdClientEventGating>,
+    pub exhibit_component: Vec<CdClientExhibitComponent>,
+    pub factions: Vec<CdClientFactions>,
+    pub feature_gating: Vec<CdClientFeatureGating>,
+    pub flair_table: Vec<CdClientFlairTable>,
+    pub icons: Vec<CdClientIcons>,
+    pub inventory_component: Vec<CdClientInventoryComponent>,
+    pub item_component: Vec<CdClientItemComponent>,
+    pub item_egg_data: Vec<CdClientItemEggData>,
+    pub item_food_data: Vec<CdClientItemFoodData>,
+    pub item_set_skills: Vec<CdClientItemSetSkills>,
+    pub item_sets: Vec<CdClientItemSets>,
+    pub jet_pack_pad_component: Vec<CdClientJetPackPadComponent>,
+    pub lu_pexhibit_component: Vec<CdClientLuPExhibitComponent>,
+    pub lu_pexhibit_model_data: Vec<CdClientLuPExhibitModelData>,
+    pub lu_pzone_ids: Vec<CdClientLuPZoneIDs>,
+    pub language_type: Vec<CdClientLanguageType>,
+    pub level_progression_lookup: Vec<CdClientLevelProgressionLookup>,
+    pub loot_matrix: Vec<CdClientLootMatrix>,
+    pub loot_matrix_index: Vec<CdClientLootMatrixIndex>,
+    pub loot_table: Vec<CdClientLootTable>,
+    pub loot_table_index: Vec<CdClientLootTableIndex>,
+    pub minifig_component: Vec<CdClientMinifigComponent>,
+    pub minifig_decals_eyebrows: Vec<CdClientMinifigDecalsEyebrows>,
+    pub minifig_decals_eyes: Vec<CdClientMinifigDecalsEyes>,
+    pub minifig_decals_legs: Vec<CdClientMinifigDecalsLegs>,
+    pub minifig_decals_mouths: Vec<CdClientMinifigDecalsMouths>,
+    pub minifig_decals_torsos: Vec<CdClientMinifigDecalsTorsos>,
+    pub mission_email: Vec<CdClientMissionEmail>,
+    pub mission_npccomponent: Vec<CdClientMissionNPCComponent>,
+    pub mission_tasks: Vec<CdClientMissionTasks>,
+    pub mission_text: Vec<CdClientMissionText>,
+    pub missions: Vec<CdClientMissions>,
+    pub model_behavior: Vec<CdClientModelBehavior>,
+    pub modular_build_component: Vec<CdClientModularBuildComponent>,
+    pub module_component: Vec<CdClientModuleComponent>,
+    pub motion_fx: Vec<CdClientMotionFX>,
+    pub movement_aicomponent: Vec<CdClientMovementAIComponent>,
+    pub moving_platforms: Vec<CdClientMovingPlatforms>,
+    pub npc_icons: Vec<CdClientNpcIcons>,
+    pub object_behavior_xref: Vec<CdClientObjectBehaviorXREF>,
+    pub object_behaviors: Vec<CdClientObjectBehaviors>,
+    pub object_skills: Vec<CdClientObjectSkills>,
+    pub objects: Vec<CdClientObjects>,
+    pub package_component: Vec<CdClientPackageComponent>,
+    pub pet_abilities: Vec<CdClientPetAbilities>,
+    pub pet_component: Vec<CdClientPetComponent>,
+    pub pet_nest_component: Vec<CdClientPetNestComponent>,
+    pub physics_component: Vec<CdClientPhysicsComponent>,
+    pub player_flags: Vec<CdClientPlayerFlags>,
+    pub player_statistics: Vec<CdClientPlayerStatistics>,
+    pub preconditions: Vec<CdClientPreconditions>,
+    pub property_entrance_component: Vec<CdClientPropertyEntranceComponent>,
+    pub property_template: Vec<CdClientPropertyTemplate>,
+    pub proximity_monitor_component: Vec<CdClientProximityMonitorComponent>,
+    pub proximity_types: Vec<CdClientProximityTypes>,
+    pub racing_module_component: Vec<CdClientRacingModuleComponent>,
+    pub rail_activator_component: Vec<CdClientRailActivatorComponent>,
+    pub rarity_table: Vec<CdClientRarityTable>,
+    pub rarity_table_index: Vec<CdClientRarityTableIndex>,
+    pub rebuild_component: Vec<CdClientRebuildComponent>,
+    pub rebuild_sections: Vec<CdClientRebuildSections>,
+    pub release_version: Vec<CdClientReleaseVersion>,
+    pub render_component: Vec<CdClientRenderComponent>,
+    pub render_component_flash: Vec<CdClientRenderComponentFlash>,
+    pub render_component_wrapper: Vec<CdClientRenderComponentWrapper>,
+    pub render_icon_assets: Vec<CdClientRenderIconAssets>,
+    pub reputation_rewards: Vec<CdClientReputationRewards>,
+    pub reward_codes: Vec<CdClientRewardCodes>,
+    pub rewards: Vec<CdClientRewards>,
+    pub rocket_launchpad_control_component: Vec<CdClientRocketLaunchpadControlComponent>,
+    pub scene_table: Vec<CdClientSceneTable>,
+    pub script_component: Vec<CdClientScriptComponent>,
+    pub skill_behavior: Vec<CdClientSkillBehavior>,
+    pub smashable_chain: Vec<CdClientSmashableChain>,
+    pub smashable_chain_index: Vec<CdClientSmashableChainIndex>,
+    pub smashable_component: Vec<CdClientSmashableComponent>,
+    pub smashable_elements: Vec<CdClientSmashableElements>,
+    pub speedchat_menu: Vec<CdClientSpeedchatMenu>,
+    pub subscription_pricing: Vec<CdClientSubscriptionPricing>,
+    pub surface_type: Vec<CdClientSurfaceType>,
+    pub taming_build_puzzles: Vec<CdClientTamingBuildPuzzles>,
+    pub text_description: Vec<CdClientTextDescription>,
+    pub text_language: Vec<CdClientTextLanguage>,
+    pub trail_effects: Vec<CdClientTrailEffects>,
+    pub ug_behavior_sounds: Vec<CdClientUgBehaviorSounds>,
+    pub vehicle_physics: Vec<CdClientVehiclePhysics>,
+    pub vehicle_stat_map: Vec<CdClientVehicleStatMap>,
+    pub vendor_component: Vec<CdClientVendorComponent>,
+    pub whats_cool_item_spotlight: Vec<CdClientWhatsCoolItemSpotlight>,
+    pub whats_cool_news_and_tips: Vec<CdClientWhatsCoolNewsAndTips>,
+    pub world_config: Vec<CdClientWorldConfig>,
+    pub zone_loading_tips: Vec<CdClientZoneLoadingTips>,
+    pub zone_summary: Vec<CdClientZoneSummary>,
+    pub zone_table: Vec<CdClientZoneTable>,
+    pub brick_attributes: Vec<CdClientBrickAttributes>,
+    pub dtproperties: Vec<CdClientDtproperties>,
+    pub map_animation_priorities: Vec<CdClientMapAnimationPriorities>,
+    pub map_asset_type: Vec<CdClientMapAssetType>,
+    pub map_icon: Vec<CdClientMapIcon>,
+    pub map_item_types: Vec<CdClientMapItemTypes>,
+    pub map_render_effects: Vec<CdClientMapRenderEffects>,
+    pub map_shaders: Vec<CdClientMapShaders>,
+    pub map_texture_resource: Vec<CdClientMapTextureResource>,
+    pub map_blueprint_category: Vec<CdClientMapBlueprintCategory>,
+    pub sysdiagrams: Vec<CdClientSysdiagrams>,
+    pub possessable_component: Vec<CdClientPossessableComponent>,
+    pub skill_sets: Vec<CdClientSkillSets>,
+    pub map_faces_and_hair: Vec<CdClientMapFacesAndHair>,
 }
 
 impl CdClientRows {
     pub fn load_sqlite(path: &Path) -> rusqlite::Result<Self> {
         let conn = rusqlite::Connection::open(path)?;
         Ok(Self {
-            ai_combat_roles: AiCombatRoles::load(&conn)?,
-            accessory_default_loc: AccessoryDefaultLoc::load(&conn)?,
-            activities: Activities::load(&conn)?,
-            activity_rewards: ActivityRewards::load(&conn)?,
-            activity_text: ActivityText::load(&conn)?,
-            animation_index: AnimationIndex::load(&conn)?,
-            animations: Animations::load(&conn)?,
-            base_combat_aicomponent: BaseCombatAIComponent::load(&conn)?,
-            behavior_effect: BehaviorEffect::load(&conn)?,
-            behavior_parameter: BehaviorParameter::load(&conn)?,
-            behavior_template: BehaviorTemplate::load(&conn)?,
-            behavior_template_name: BehaviorTemplateName::load(&conn)?,
-            blueprints: Blueprints::load(&conn)?,
-            brick_colors: BrickColors::load(&conn)?,
-            brick_idtable: BrickIDTable::load(&conn)?,
-            buff_definitions: BuffDefinitions::load(&conn)?,
-            buff_parameters: BuffParameters::load(&conn)?,
-            camera: Camera::load(&conn)?,
-            celebration_parameters: CelebrationParameters::load(&conn)?,
-            choice_build_component: ChoiceBuildComponent::load(&conn)?,
-            collectible_component: CollectibleComponent::load(&conn)?,
-            components_registry: ComponentsRegistry::load(&conn)?,
-            control_schemes: ControlSchemes::load(&conn)?,
-            currency_denominations: CurrencyDenominations::load(&conn)?,
-            currency_table: CurrencyTable::load(&conn)?,
-            db_exclude: DbExclude::load(&conn)?,
-            deletion_restrictions: DeletionRestrictions::load(&conn)?,
-            destructible_component: DestructibleComponent::load(&conn)?,
-            dev_model_behaviors: DevModelBehaviors::load(&conn)?,
-            emotes: Emotes::load(&conn)?,
-            event_gating: EventGating::load(&conn)?,
-            exhibit_component: ExhibitComponent::load(&conn)?,
-            factions: Factions::load(&conn)?,
-            feature_gating: FeatureGating::load(&conn)?,
-            flair_table: FlairTable::load(&conn)?,
-            icons: Icons::load(&conn)?,
-            inventory_component: InventoryComponent::load(&conn)?,
-            item_component: ItemComponent::load(&conn)?,
-            item_egg_data: ItemEggData::load(&conn)?,
-            item_food_data: ItemFoodData::load(&conn)?,
-            item_set_skills: ItemSetSkills::load(&conn)?,
-            item_sets: ItemSets::load(&conn)?,
-            jet_pack_pad_component: JetPackPadComponent::load(&conn)?,
-            lu_pexhibit_component: LuPExhibitComponent::load(&conn)?,
-            lu_pexhibit_model_data: LuPExhibitModelData::load(&conn)?,
-            lu_pzone_ids: LuPZoneIDs::load(&conn)?,
-            language_type: LanguageType::load(&conn)?,
-            level_progression_lookup: LevelProgressionLookup::load(&conn)?,
-            loot_matrix: LootMatrix::load(&conn)?,
-            loot_matrix_index: LootMatrixIndex::load(&conn)?,
-            loot_table: LootTable::load(&conn)?,
-            loot_table_index: LootTableIndex::load(&conn)?,
-            minifig_component: MinifigComponent::load(&conn)?,
-            minifig_decals_eyebrows: MinifigDecalsEyebrows::load(&conn)?,
-            minifig_decals_eyes: MinifigDecalsEyes::load(&conn)?,
-            minifig_decals_legs: MinifigDecalsLegs::load(&conn)?,
-            minifig_decals_mouths: MinifigDecalsMouths::load(&conn)?,
-            minifig_decals_torsos: MinifigDecalsTorsos::load(&conn)?,
-            mission_email: MissionEmail::load(&conn)?,
-            mission_npccomponent: MissionNPCComponent::load(&conn)?,
-            mission_tasks: MissionTasks::load(&conn)?,
-            mission_text: MissionText::load(&conn)?,
-            missions: Missions::load(&conn)?,
-            model_behavior: ModelBehavior::load(&conn)?,
-            modular_build_component: ModularBuildComponent::load(&conn)?,
-            module_component: ModuleComponent::load(&conn)?,
-            motion_fx: MotionFX::load(&conn)?,
-            movement_aicomponent: MovementAIComponent::load(&conn)?,
-            moving_platforms: MovingPlatforms::load(&conn)?,
-            npc_icons: NpcIcons::load(&conn)?,
-            object_behavior_xref: ObjectBehaviorXREF::load(&conn)?,
-            object_behaviors: ObjectBehaviors::load(&conn)?,
-            object_skills: ObjectSkills::load(&conn)?,
-            objects: Objects::load(&conn)?,
-            package_component: PackageComponent::load(&conn)?,
-            pet_abilities: PetAbilities::load(&conn)?,
-            pet_component: PetComponent::load(&conn)?,
-            pet_nest_component: PetNestComponent::load(&conn)?,
-            physics_component: PhysicsComponent::load(&conn)?,
-            player_flags: PlayerFlags::load(&conn)?,
-            player_statistics: PlayerStatistics::load(&conn)?,
-            preconditions: Preconditions::load(&conn)?,
-            property_entrance_component: PropertyEntranceComponent::load(&conn)?,
-            property_template: PropertyTemplate::load(&conn)?,
-            proximity_monitor_component: ProximityMonitorComponent::load(&conn)?,
-            proximity_types: ProximityTypes::load(&conn)?,
-            racing_module_component: RacingModuleComponent::load(&conn)?,
-            rail_activator_component: RailActivatorComponent::load(&conn)?,
-            rarity_table: RarityTable::load(&conn)?,
-            rarity_table_index: RarityTableIndex::load(&conn)?,
-            rebuild_component: RebuildComponent::load(&conn)?,
-            rebuild_sections: RebuildSections::load(&conn)?,
-            release_version: ReleaseVersion::load(&conn)?,
-            render_component: RenderComponent::load(&conn)?,
-            render_component_flash: RenderComponentFlash::load(&conn)?,
-            render_component_wrapper: RenderComponentWrapper::load(&conn)?,
-            render_icon_assets: RenderIconAssets::load(&conn)?,
-            reputation_rewards: ReputationRewards::load(&conn)?,
-            reward_codes: RewardCodes::load(&conn)?,
-            rewards: Rewards::load(&conn)?,
-            rocket_launchpad_control_component: RocketLaunchpadControlComponent::load(&conn)?,
-            scene_table: SceneTable::load(&conn)?,
-            script_component: ScriptComponent::load(&conn)?,
-            skill_behavior: SkillBehavior::load(&conn)?,
-            smashable_chain: SmashableChain::load(&conn)?,
-            smashable_chain_index: SmashableChainIndex::load(&conn)?,
-            smashable_component: SmashableComponent::load(&conn)?,
-            smashable_elements: SmashableElements::load(&conn)?,
-            speedchat_menu: SpeedchatMenu::load(&conn)?,
-            subscription_pricing: SubscriptionPricing::load(&conn)?,
-            surface_type: SurfaceType::load(&conn)?,
-            taming_build_puzzles: TamingBuildPuzzles::load(&conn)?,
-            text_description: TextDescription::load(&conn)?,
-            text_language: TextLanguage::load(&conn)?,
-            trail_effects: TrailEffects::load(&conn)?,
-            ug_behavior_sounds: UgBehaviorSounds::load(&conn)?,
-            vehicle_physics: VehiclePhysics::load(&conn)?,
-            vehicle_stat_map: VehicleStatMap::load(&conn)?,
-            vendor_component: VendorComponent::load(&conn)?,
-            whats_cool_item_spotlight: WhatsCoolItemSpotlight::load(&conn)?,
-            whats_cool_news_and_tips: WhatsCoolNewsAndTips::load(&conn)?,
-            world_config: WorldConfig::load(&conn)?,
-            zone_loading_tips: ZoneLoadingTips::load(&conn)?,
-            zone_summary: ZoneSummary::load(&conn)?,
-            zone_table: ZoneTable::load(&conn)?,
-            brick_attributes: BrickAttributes::load(&conn)?,
-            dtproperties: Dtproperties::load(&conn)?,
-            map_animation_priorities: MapAnimationPriorities::load(&conn)?,
-            map_asset_type: MapAssetType::load(&conn)?,
-            map_icon: MapIcon::load(&conn)?,
-            map_item_types: MapItemTypes::load(&conn)?,
-            map_render_effects: MapRenderEffects::load(&conn)?,
-            map_shaders: MapShaders::load(&conn)?,
-            map_texture_resource: MapTextureResource::load(&conn)?,
-            map_blueprint_category: MapBlueprintCategory::load(&conn)?,
-            sysdiagrams: Sysdiagrams::load(&conn)?,
-            possessable_component: PossessableComponent::load(&conn)?,
-            skill_sets: SkillSets::load(&conn)?,
-            map_faces_and_hair: MapFacesAndHair::load(&conn)?,
+            ai_combat_roles: CdClientAiCombatRoles::load(&conn)?,
+            accessory_default_loc: CdClientAccessoryDefaultLoc::load(&conn)?,
+            activities: CdClientActivities::load(&conn)?,
+            activity_rewards: CdClientActivityCdClientRewards::load(&conn)?,
+            activity_text: CdClientActivityText::load(&conn)?,
+            animation_index: CdClientAnimationIndex::load(&conn)?,
+            animations: CdClientAnimations::load(&conn)?,
+            base_combat_aicomponent: CdClientBaseCombatAIComponent::load(&conn)?,
+            behavior_effect: CdClientBehaviorEffect::load(&conn)?,
+            behavior_parameter: CdClientBehaviorParameter::load(&conn)?,
+            behavior_template: CdClientBehaviorTemplate::load(&conn)?,
+            behavior_template_name: CdClientBehaviorTemplateName::load(&conn)?,
+            blueprints: CdClientBlueprints::load(&conn)?,
+            brick_colors: CdClientBrickColors::load(&conn)?,
+            brick_idtable: CdClientBrickIDTable::load(&conn)?,
+            buff_definitions: CdClientBuffDefinitions::load(&conn)?,
+            buff_parameters: CdClientBuffParameters::load(&conn)?,
+            camera: CdClientCamera::load(&conn)?,
+            celebration_parameters: CdClientCelebrationParameters::load(&conn)?,
+            choice_build_component: CdClientChoiceBuildComponent::load(&conn)?,
+            collectible_component: CdClientCollectibleComponent::load(&conn)?,
+            components_registry: CdClientComponentsRegistry::load(&conn)?,
+            control_schemes: CdClientControlSchemes::load(&conn)?,
+            currency_denominations: CdClientCurrencyDenominations::load(&conn)?,
+            currency_table: CdClientCurrencyTable::load(&conn)?,
+            db_exclude: CdClientDbExclude::load(&conn)?,
+            deletion_restrictions: CdClientDeletionRestrictions::load(&conn)?,
+            destructible_component: CdClientDestructibleComponent::load(&conn)?,
+            dev_model_behaviors: CdClientDevModelBehaviors::load(&conn)?,
+            emotes: CdClientEmotes::load(&conn)?,
+            event_gating: CdClientEventGating::load(&conn)?,
+            exhibit_component: CdClientExhibitComponent::load(&conn)?,
+            factions: CdClientFactions::load(&conn)?,
+            feature_gating: CdClientFeatureGating::load(&conn)?,
+            flair_table: CdClientFlairTable::load(&conn)?,
+            icons: CdClientIcons::load(&conn)?,
+            inventory_component: CdClientInventoryComponent::load(&conn)?,
+            item_component: CdClientItemComponent::load(&conn)?,
+            item_egg_data: CdClientItemEggData::load(&conn)?,
+            item_food_data: CdClientItemFoodData::load(&conn)?,
+            item_set_skills: CdClientItemSetSkills::load(&conn)?,
+            item_sets: CdClientItemSets::load(&conn)?,
+            jet_pack_pad_component: CdClientJetPackPadComponent::load(&conn)?,
+            lu_pexhibit_component: CdClientLuPExhibitComponent::load(&conn)?,
+            lu_pexhibit_model_data: CdClientLuPExhibitModelData::load(&conn)?,
+            lu_pzone_ids: CdClientLuPZoneIDs::load(&conn)?,
+            language_type: CdClientLanguageType::load(&conn)?,
+            level_progression_lookup: CdClientLevelProgressionLookup::load(&conn)?,
+            loot_matrix: CdClientLootMatrix::load(&conn)?,
+            loot_matrix_index: CdClientLootMatrixIndex::load(&conn)?,
+            loot_table: CdClientLootTable::load(&conn)?,
+            loot_table_index: CdClientLootTableIndex::load(&conn)?,
+            minifig_component: CdClientMinifigComponent::load(&conn)?,
+            minifig_decals_eyebrows: CdClientMinifigDecalsEyebrows::load(&conn)?,
+            minifig_decals_eyes: CdClientMinifigDecalsEyes::load(&conn)?,
+            minifig_decals_legs: CdClientMinifigDecalsLegs::load(&conn)?,
+            minifig_decals_mouths: CdClientMinifigDecalsMouths::load(&conn)?,
+            minifig_decals_torsos: CdClientMinifigDecalsTorsos::load(&conn)?,
+            mission_email: CdClientMissionEmail::load(&conn)?,
+            mission_npccomponent: CdClientMissionNPCComponent::load(&conn)?,
+            mission_tasks: CdClientMissionTasks::load(&conn)?,
+            mission_text: CdClientMissionText::load(&conn)?,
+            missions: CdClientMissions::load(&conn)?,
+            model_behavior: CdClientModelBehavior::load(&conn)?,
+            modular_build_component: CdClientModularBuildComponent::load(&conn)?,
+            module_component: CdClientModuleComponent::load(&conn)?,
+            motion_fx: CdClientMotionFX::load(&conn)?,
+            movement_aicomponent: CdClientMovementAIComponent::load(&conn)?,
+            moving_platforms: CdClientMovingPlatforms::load(&conn)?,
+            npc_icons: CdClientNpcIcons::load(&conn)?,
+            object_behavior_xref: CdClientObjectBehaviorXREF::load(&conn)?,
+            object_behaviors: CdClientObjectBehaviors::load(&conn)?,
+            object_skills: CdClientObjectSkills::load(&conn)?,
+            objects: CdClientObjects::load(&conn)?,
+            package_component: CdClientPackageComponent::load(&conn)?,
+            pet_abilities: CdClientPetAbilities::load(&conn)?,
+            pet_component: CdClientPetComponent::load(&conn)?,
+            pet_nest_component: CdClientPetNestComponent::load(&conn)?,
+            physics_component: CdClientPhysicsComponent::load(&conn)?,
+            player_flags: CdClientPlayerFlags::load(&conn)?,
+            player_statistics: CdClientPlayerStatistics::load(&conn)?,
+            preconditions: CdClientPreconditions::load(&conn)?,
+            property_entrance_component: CdClientPropertyEntranceComponent::load(&conn)?,
+            property_template: CdClientPropertyTemplate::load(&conn)?,
+            proximity_monitor_component: CdClientProximityMonitorComponent::load(&conn)?,
+            proximity_types: CdClientProximityTypes::load(&conn)?,
+            racing_module_component: CdClientRacingModuleComponent::load(&conn)?,
+            rail_activator_component: CdClientRailActivatorComponent::load(&conn)?,
+            rarity_table: CdClientRarityTable::load(&conn)?,
+            rarity_table_index: CdClientRarityTableIndex::load(&conn)?,
+            rebuild_component: CdClientRebuildComponent::load(&conn)?,
+            rebuild_sections: CdClientRebuildSections::load(&conn)?,
+            release_version: CdClientReleaseVersion::load(&conn)?,
+            render_component: CdClientRenderComponent::load(&conn)?,
+            render_component_flash: CdClientRenderComponentFlash::load(&conn)?,
+            render_component_wrapper: CdClientRenderComponentWrapper::load(&conn)?,
+            render_icon_assets: CdClientRenderIconAssets::load(&conn)?,
+            reputation_rewards: CdClientReputationRewards::load(&conn)?,
+            reward_codes: CdClientRewardCodes::load(&conn)?,
+            rewards: CdClientRewards::load(&conn)?,
+            rocket_launchpad_control_component: CdClientRocketLaunchpadControlComponent::load(
+                &conn,
+            )?,
+            scene_table: CdClientSceneTable::load(&conn)?,
+            script_component: CdClientScriptComponent::load(&conn)?,
+            skill_behavior: CdClientSkillBehavior::load(&conn)?,
+            smashable_chain: CdClientSmashableChain::load(&conn)?,
+            smashable_chain_index: CdClientSmashableChainIndex::load(&conn)?,
+            smashable_component: CdClientSmashableComponent::load(&conn)?,
+            smashable_elements: CdClientSmashableElements::load(&conn)?,
+            speedchat_menu: CdClientSpeedchatMenu::load(&conn)?,
+            subscription_pricing: CdClientSubscriptionPricing::load(&conn)?,
+            surface_type: CdClientSurfaceType::load(&conn)?,
+            taming_build_puzzles: CdClientTamingBuildPuzzles::load(&conn)?,
+            text_description: CdClientTextDescription::load(&conn)?,
+            text_language: CdClientTextLanguage::load(&conn)?,
+            trail_effects: CdClientTrailEffects::load(&conn)?,
+            ug_behavior_sounds: CdClientUgBehaviorSounds::load(&conn)?,
+            vehicle_physics: CdClientVehiclePhysics::load(&conn)?,
+            vehicle_stat_map: CdClientVehicleStatMap::load(&conn)?,
+            vendor_component: CdClientVendorComponent::load(&conn)?,
+            whats_cool_item_spotlight: CdClientWhatsCoolItemSpotlight::load(&conn)?,
+            whats_cool_news_and_tips: CdClientWhatsCoolNewsAndTips::load(&conn)?,
+            world_config: CdClientWorldConfig::load(&conn)?,
+            zone_loading_tips: CdClientZoneLoadingTips::load(&conn)?,
+            zone_summary: CdClientZoneSummary::load(&conn)?,
+            zone_table: CdClientZoneTable::load(&conn)?,
+            brick_attributes: CdClientBrickAttributes::load(&conn)?,
+            dtproperties: CdClientDtproperties::load(&conn)?,
+            map_animation_priorities: CdClientMapAnimationPriorities::load(&conn)?,
+            map_asset_type: CdClientMapAssetType::load(&conn)?,
+            map_icon: CdClientMapIcon::load(&conn)?,
+            map_item_types: CdClientMapItemTypes::load(&conn)?,
+            map_render_effects: CdClientMapRenderEffects::load(&conn)?,
+            map_shaders: CdClientMapShaders::load(&conn)?,
+            map_texture_resource: CdClientMapTextureResource::load(&conn)?,
+            map_blueprint_category: CdClientMapBlueprintCategory::load(&conn)?,
+            sysdiagrams: CdClientSysdiagrams::load(&conn)?,
+            possessable_component: CdClientPossessableComponent::load(&conn)?,
+            skill_sets: CdClientSkillSets::load(&conn)?,
+            map_faces_and_hair: CdClientMapFacesAndHair::load(&conn)?,
         })
     }
 }
 
 #[allow(dead_code)]
 pub struct CdClient {
-    pub ai_combat_roles: KeyedVec<AiCombatRoles>,
-    pub accessory_default_loc: KeyedVec<AccessoryDefaultLoc>,
-    pub activities: KeyedVec<Activities>,
-    pub activity_rewards: GroupKeyedVec<ActivityRewards>,
-    pub activity_text: GroupKeyedVec<ActivityText>,
-    pub animation_index: KeyedVec<AnimationIndex>,
-    pub animations: GroupKeyedVec<Animations>,
-    pub base_combat_aicomponent: KeyedVec<BaseCombatAIComponent>,
-    pub behavior_effect: GroupKeyedVec<BehaviorEffect>,
-    pub behavior_parameter: GroupKeyedVec<BehaviorParameter>,
-    pub behavior_template: GroupKeyedVec<BehaviorTemplate>,
-    pub behavior_template_name: KeyedVec<BehaviorTemplateName>,
-    pub blueprints: KeyedVec<Blueprints>,
-    pub brick_colors: KeyedVec<BrickColors>,
-    pub brick_idtable: KeyedVec<BrickIDTable>,
-    pub buff_definitions: KeyedVec<BuffDefinitions>,
-    pub buff_parameters: KeyedVec<BuffParameters>,
-    pub camera: KeyedVec<Camera>,
-    pub celebration_parameters: KeyedVec<CelebrationParameters>,
-    pub choice_build_component: KeyedVec<ChoiceBuildComponent>,
-    pub collectible_component: KeyedVec<CollectibleComponent>,
-    pub components_registry: GroupKeyedVec<ComponentsRegistry>,
-    pub control_schemes: KeyedVec<ControlSchemes>,
-    pub currency_denominations: KeyedVec<CurrencyDenominations>,
-    pub currency_table: KeyedVec<CurrencyTable>,
-    pub db_exclude: KeyedVec<DbExclude>,
-    pub deletion_restrictions: KeyedVec<DeletionRestrictions>,
-    pub destructible_component: KeyedVec<DestructibleComponent>,
-    pub dev_model_behaviors: KeyedVec<DevModelBehaviors>,
-    pub emotes: KeyedVec<Emotes>,
-    pub event_gating: KeyedVec<EventGating>,
-    pub exhibit_component: KeyedVec<ExhibitComponent>,
-    pub factions: KeyedVec<Factions>,
-    pub feature_gating: KeyedVec<FeatureGating>,
-    pub flair_table: KeyedVec<FlairTable>,
-    pub icons: KeyedVec<Icons>,
-    pub inventory_component: Vec<InventoryComponent>,
-    pub item_component: KeyedVec<ItemComponent>,
-    pub item_egg_data: KeyedVec<ItemEggData>,
-    pub item_food_data: KeyedVec<ItemFoodData>,
-    pub item_set_skills: GroupKeyedVec<ItemSetSkills>,
-    pub item_sets: KeyedVec<ItemSets>,
-    pub jet_pack_pad_component: KeyedVec<JetPackPadComponent>,
-    pub lu_pexhibit_component: KeyedVec<LuPExhibitComponent>,
-    pub lu_pexhibit_model_data: KeyedVec<LuPExhibitModelData>,
-    pub lu_pzone_ids: KeyedVec<LuPZoneIDs>,
-    pub language_type: KeyedVec<LanguageType>,
-    pub level_progression_lookup: KeyedVec<LevelProgressionLookup>,
-    pub loot_matrix: GroupKeyedVec<LootMatrix>,
-    pub loot_matrix_index: KeyedVec<LootMatrixIndex>,
-    pub loot_table: GroupKeyedVec<LootTable>,
-    pub loot_table_index: KeyedVec<LootTableIndex>,
-    pub minifig_component: KeyedVec<MinifigComponent>,
-    pub minifig_decals_eyebrows: KeyedVec<MinifigDecalsEyebrows>,
-    pub minifig_decals_eyes: KeyedVec<MinifigDecalsEyes>,
-    pub minifig_decals_legs: KeyedVec<MinifigDecalsLegs>,
-    pub minifig_decals_mouths: KeyedVec<MinifigDecalsMouths>,
-    pub minifig_decals_torsos: KeyedVec<MinifigDecalsTorsos>,
-    pub mission_email: KeyedVec<MissionEmail>,
-    pub mission_npccomponent: Vec<MissionNPCComponent>,
-    pub mission_tasks: GroupKeyedVec<MissionTasks>,
-    pub mission_text: KeyedVec<MissionText>,
-    pub missions: KeyedVec<Missions>,
-    pub model_behavior: KeyedVec<ModelBehavior>,
-    pub modular_build_component: KeyedVec<ModularBuildComponent>,
-    pub module_component: KeyedVec<ModuleComponent>,
-    pub motion_fx: KeyedVec<MotionFX>,
-    pub movement_aicomponent: KeyedVec<MovementAIComponent>,
-    pub moving_platforms: KeyedVec<MovingPlatforms>,
-    pub npc_icons: KeyedVec<NpcIcons>,
-    pub object_behavior_xref: KeyedVec<ObjectBehaviorXREF>,
-    pub object_behaviors: KeyedVec<ObjectBehaviors>,
-    pub object_skills: GroupKeyedVec<ObjectSkills>,
-    pub objects: KeyedVec<Objects>,
-    pub package_component: KeyedVec<PackageComponent>,
-    pub pet_abilities: KeyedVec<PetAbilities>,
-    pub pet_component: KeyedVec<PetComponent>,
-    pub pet_nest_component: KeyedVec<PetNestComponent>,
-    pub physics_component: KeyedVec<PhysicsComponent>,
-    pub player_flags: KeyedVec<PlayerFlags>,
-    pub player_statistics: KeyedVec<PlayerStatistics>,
-    pub preconditions: KeyedVec<Preconditions>,
-    pub property_entrance_component: KeyedVec<PropertyEntranceComponent>,
-    pub property_template: KeyedVec<PropertyTemplate>,
-    pub proximity_monitor_component: KeyedVec<ProximityMonitorComponent>,
-    pub proximity_types: KeyedVec<ProximityTypes>,
-    pub racing_module_component: KeyedVec<RacingModuleComponent>,
-    pub rail_activator_component: KeyedVec<RailActivatorComponent>,
-    pub rarity_table: GroupKeyedVec<RarityTable>,
-    pub rarity_table_index: KeyedVec<RarityTableIndex>,
-    pub rebuild_component: KeyedVec<RebuildComponent>,
-    pub rebuild_sections: KeyedVec<RebuildSections>,
-    pub release_version: KeyedVec<ReleaseVersion>,
-    pub render_component: KeyedVec<RenderComponent>,
-    pub render_component_flash: GroupKeyedVec<RenderComponentFlash>,
-    pub render_component_wrapper: KeyedVec<RenderComponentWrapper>,
-    pub render_icon_assets: KeyedVec<RenderIconAssets>,
-    pub reputation_rewards: KeyedVec<ReputationRewards>,
-    pub reward_codes: KeyedVec<RewardCodes>,
-    pub rewards: KeyedVec<Rewards>,
-    pub rocket_launchpad_control_component: KeyedVec<RocketLaunchpadControlComponent>,
-    pub scene_table: KeyedVec<SceneTable>,
-    pub script_component: KeyedVec<ScriptComponent>,
-    pub skill_behavior: KeyedVec<SkillBehavior>,
-    pub smashable_chain: GroupKeyedVec<SmashableChain>,
-    pub smashable_chain_index: KeyedVec<SmashableChainIndex>,
-    pub smashable_component: KeyedVec<SmashableComponent>,
-    pub smashable_elements: KeyedVec<SmashableElements>,
-    pub speedchat_menu: KeyedVec<SpeedchatMenu>,
-    pub subscription_pricing: KeyedVec<SubscriptionPricing>,
-    pub surface_type: KeyedVec<SurfaceType>,
-    pub taming_build_puzzles: KeyedVec<TamingBuildPuzzles>,
-    pub text_description: KeyedVec<TextDescription>,
-    pub text_language: KeyedVec<TextLanguage>,
-    pub trail_effects: KeyedVec<TrailEffects>,
-    pub ug_behavior_sounds: KeyedVec<UgBehaviorSounds>,
-    pub vehicle_physics: KeyedVec<VehiclePhysics>,
-    pub vehicle_stat_map: GroupKeyedVec<VehicleStatMap>,
-    pub vendor_component: KeyedVec<VendorComponent>,
-    pub whats_cool_item_spotlight: KeyedVec<WhatsCoolItemSpotlight>,
-    pub whats_cool_news_and_tips: KeyedVec<WhatsCoolNewsAndTips>,
-    pub world_config: KeyedVec<WorldConfig>,
-    pub zone_loading_tips: KeyedVec<ZoneLoadingTips>,
-    pub zone_summary: GroupKeyedVec<ZoneSummary>,
-    pub zone_table: KeyedVec<ZoneTable>,
-    pub brick_attributes: KeyedVec<BrickAttributes>,
-    pub dtproperties: KeyedVec<Dtproperties>,
-    pub map_animation_priorities: KeyedVec<MapAnimationPriorities>,
-    pub map_asset_type: KeyedVec<MapAssetType>,
-    pub map_icon: GroupKeyedVec<MapIcon>,
-    pub map_item_types: KeyedVec<MapItemTypes>,
-    pub map_render_effects: KeyedVec<MapRenderEffects>,
-    pub map_shaders: KeyedVec<MapShaders>,
-    pub map_texture_resource: KeyedVec<MapTextureResource>,
-    pub map_blueprint_category: KeyedVec<MapBlueprintCategory>,
-    pub sysdiagrams: KeyedVec<Sysdiagrams>,
-    pub possessable_component: KeyedVec<PossessableComponent>,
-    pub skill_sets: KeyedVec<SkillSets>,
-    pub map_faces_and_hair: KeyedVec<MapFacesAndHair>,
+    pub ai_combat_roles: KeyedVec<CdClientAiCombatRoles>,
+    pub accessory_default_loc: KeyedVec<CdClientAccessoryDefaultLoc>,
+    pub activities: KeyedVec<CdClientActivities>,
+    pub activity_rewards: GroupKeyedVec<CdClientActivityCdClientRewards>,
+    pub activity_text: GroupKeyedVec<CdClientActivityText>,
+    pub animation_index: KeyedVec<CdClientAnimationIndex>,
+    pub animations: GroupKeyedVec<CdClientAnimations>,
+    pub base_combat_aicomponent: KeyedVec<CdClientBaseCombatAIComponent>,
+    pub behavior_effect: GroupKeyedVec<CdClientBehaviorEffect>,
+    pub behavior_parameter: GroupKeyedVec<CdClientBehaviorParameter>,
+    pub behavior_template: GroupKeyedVec<CdClientBehaviorTemplate>,
+    pub behavior_template_name: KeyedVec<CdClientBehaviorTemplateName>,
+    pub blueprints: KeyedVec<CdClientBlueprints>,
+    pub brick_colors: KeyedVec<CdClientBrickColors>,
+    pub brick_idtable: KeyedVec<CdClientBrickIDTable>,
+    pub buff_definitions: KeyedVec<CdClientBuffDefinitions>,
+    pub buff_parameters: KeyedVec<CdClientBuffParameters>,
+    pub camera: KeyedVec<CdClientCamera>,
+    pub celebration_parameters: KeyedVec<CdClientCelebrationParameters>,
+    pub choice_build_component: KeyedVec<CdClientChoiceBuildComponent>,
+    pub collectible_component: KeyedVec<CdClientCollectibleComponent>,
+    pub components_registry: GroupKeyedVec<CdClientComponentsRegistry>,
+    pub control_schemes: KeyedVec<CdClientControlSchemes>,
+    pub currency_denominations: KeyedVec<CdClientCurrencyDenominations>,
+    pub currency_table: KeyedVec<CdClientCurrencyTable>,
+    pub db_exclude: KeyedVec<CdClientDbExclude>,
+    pub deletion_restrictions: KeyedVec<CdClientDeletionRestrictions>,
+    pub destructible_component: KeyedVec<CdClientDestructibleComponent>,
+    pub dev_model_behaviors: KeyedVec<CdClientDevModelBehaviors>,
+    pub emotes: KeyedVec<CdClientEmotes>,
+    pub event_gating: KeyedVec<CdClientEventGating>,
+    pub exhibit_component: KeyedVec<CdClientExhibitComponent>,
+    pub factions: KeyedVec<CdClientFactions>,
+    pub feature_gating: KeyedVec<CdClientFeatureGating>,
+    pub flair_table: KeyedVec<CdClientFlairTable>,
+    pub icons: KeyedVec<CdClientIcons>,
+    pub inventory_component: Vec<CdClientInventoryComponent>,
+    pub item_component: KeyedVec<CdClientItemComponent>,
+    pub item_egg_data: KeyedVec<CdClientItemEggData>,
+    pub item_food_data: KeyedVec<CdClientItemFoodData>,
+    pub item_set_skills: GroupKeyedVec<CdClientItemSetSkills>,
+    pub item_sets: KeyedVec<CdClientItemSets>,
+    pub jet_pack_pad_component: KeyedVec<CdClientJetPackPadComponent>,
+    pub lu_pexhibit_component: KeyedVec<CdClientLuPExhibitComponent>,
+    pub lu_pexhibit_model_data: KeyedVec<CdClientLuPExhibitModelData>,
+    pub lu_pzone_ids: KeyedVec<CdClientLuPZoneIDs>,
+    pub language_type: KeyedVec<CdClientLanguageType>,
+    pub level_progression_lookup: KeyedVec<CdClientLevelProgressionLookup>,
+    pub loot_matrix: GroupKeyedVec<CdClientLootMatrix>,
+    pub loot_matrix_index: KeyedVec<CdClientLootMatrixIndex>,
+    pub loot_table: GroupKeyedVec<CdClientLootTable>,
+    pub loot_table_index: KeyedVec<CdClientLootTableIndex>,
+    pub minifig_component: KeyedVec<CdClientMinifigComponent>,
+    pub minifig_decals_eyebrows: KeyedVec<CdClientMinifigDecalsEyebrows>,
+    pub minifig_decals_eyes: KeyedVec<CdClientMinifigDecalsEyes>,
+    pub minifig_decals_legs: KeyedVec<CdClientMinifigDecalsLegs>,
+    pub minifig_decals_mouths: KeyedVec<CdClientMinifigDecalsMouths>,
+    pub minifig_decals_torsos: KeyedVec<CdClientMinifigDecalsTorsos>,
+    pub mission_email: KeyedVec<CdClientMissionEmail>,
+    pub mission_npccomponent: Vec<CdClientMissionNPCComponent>,
+    pub mission_tasks: GroupKeyedVec<CdClientMissionTasks>,
+    pub mission_text: KeyedVec<CdClientMissionText>,
+    pub missions: KeyedVec<CdClientMissions>,
+    pub model_behavior: KeyedVec<CdClientModelBehavior>,
+    pub modular_build_component: KeyedVec<CdClientModularBuildComponent>,
+    pub module_component: KeyedVec<CdClientModuleComponent>,
+    pub motion_fx: KeyedVec<CdClientMotionFX>,
+    pub movement_aicomponent: KeyedVec<CdClientMovementAIComponent>,
+    pub moving_platforms: KeyedVec<CdClientMovingPlatforms>,
+    pub npc_icons: KeyedVec<CdClientNpcIcons>,
+    pub object_behavior_xref: KeyedVec<CdClientObjectBehaviorXREF>,
+    pub object_behaviors: KeyedVec<CdClientObjectBehaviors>,
+    pub object_skills: GroupKeyedVec<CdClientObjectSkills>,
+    pub objects: KeyedVec<CdClientObjects>,
+    pub package_component: KeyedVec<CdClientPackageComponent>,
+    pub pet_abilities: KeyedVec<CdClientPetAbilities>,
+    pub pet_component: KeyedVec<CdClientPetComponent>,
+    pub pet_nest_component: KeyedVec<CdClientPetNestComponent>,
+    pub physics_component: KeyedVec<CdClientPhysicsComponent>,
+    pub player_flags: KeyedVec<CdClientPlayerFlags>,
+    pub player_statistics: KeyedVec<CdClientPlayerStatistics>,
+    pub preconditions: KeyedVec<CdClientPreconditions>,
+    pub property_entrance_component: KeyedVec<CdClientPropertyEntranceComponent>,
+    pub property_template: KeyedVec<CdClientPropertyTemplate>,
+    pub proximity_monitor_component: KeyedVec<CdClientProximityMonitorComponent>,
+    pub proximity_types: KeyedVec<CdClientProximityTypes>,
+    pub racing_module_component: KeyedVec<CdClientRacingModuleComponent>,
+    pub rail_activator_component: KeyedVec<CdClientRailActivatorComponent>,
+    pub rarity_table: GroupKeyedVec<CdClientRarityTable>,
+    pub rarity_table_index: KeyedVec<CdClientRarityTableIndex>,
+    pub rebuild_component: KeyedVec<CdClientRebuildComponent>,
+    pub rebuild_sections: KeyedVec<CdClientRebuildSections>,
+    pub release_version: KeyedVec<CdClientReleaseVersion>,
+    pub render_component: KeyedVec<CdClientRenderComponent>,
+    pub render_component_flash: GroupKeyedVec<CdClientRenderComponentFlash>,
+    pub render_component_wrapper: KeyedVec<CdClientRenderComponentWrapper>,
+    pub render_icon_assets: KeyedVec<CdClientRenderIconAssets>,
+    pub reputation_rewards: KeyedVec<CdClientReputationRewards>,
+    pub reward_codes: KeyedVec<CdClientRewardCodes>,
+    pub rewards: KeyedVec<CdClientRewards>,
+    pub rocket_launchpad_control_component: KeyedVec<CdClientRocketLaunchpadControlComponent>,
+    pub scene_table: KeyedVec<CdClientSceneTable>,
+    pub script_component: KeyedVec<CdClientScriptComponent>,
+    pub skill_behavior: KeyedVec<CdClientSkillBehavior>,
+    pub smashable_chain: GroupKeyedVec<CdClientSmashableChain>,
+    pub smashable_chain_index: KeyedVec<CdClientSmashableChainIndex>,
+    pub smashable_component: KeyedVec<CdClientSmashableComponent>,
+    pub smashable_elements: KeyedVec<CdClientSmashableElements>,
+    pub speedchat_menu: KeyedVec<CdClientSpeedchatMenu>,
+    pub subscription_pricing: KeyedVec<CdClientSubscriptionPricing>,
+    pub surface_type: KeyedVec<CdClientSurfaceType>,
+    pub taming_build_puzzles: KeyedVec<CdClientTamingBuildPuzzles>,
+    pub text_description: KeyedVec<CdClientTextDescription>,
+    pub text_language: KeyedVec<CdClientTextLanguage>,
+    pub trail_effects: KeyedVec<CdClientTrailEffects>,
+    pub ug_behavior_sounds: KeyedVec<CdClientUgBehaviorSounds>,
+    pub vehicle_physics: KeyedVec<CdClientVehiclePhysics>,
+    pub vehicle_stat_map: GroupKeyedVec<CdClientVehicleStatMap>,
+    pub vendor_component: KeyedVec<CdClientVendorComponent>,
+    pub whats_cool_item_spotlight: KeyedVec<CdClientWhatsCoolItemSpotlight>,
+    pub whats_cool_news_and_tips: KeyedVec<CdClientWhatsCoolNewsAndTips>,
+    pub world_config: KeyedVec<CdClientWorldConfig>,
+    pub zone_loading_tips: KeyedVec<CdClientZoneLoadingTips>,
+    pub zone_summary: GroupKeyedVec<CdClientZoneSummary>,
+    pub zone_table: KeyedVec<CdClientZoneTable>,
+    pub brick_attributes: KeyedVec<CdClientBrickAttributes>,
+    pub dtproperties: KeyedVec<CdClientDtproperties>,
+    pub map_animation_priorities: KeyedVec<CdClientMapAnimationPriorities>,
+    pub map_asset_type: KeyedVec<CdClientMapAssetType>,
+    pub map_icon: GroupKeyedVec<CdClientMapIcon>,
+    pub map_item_types: KeyedVec<CdClientMapItemTypes>,
+    pub map_render_effects: KeyedVec<CdClientMapRenderEffects>,
+    pub map_shaders: KeyedVec<CdClientMapShaders>,
+    pub map_texture_resource: KeyedVec<CdClientMapTextureResource>,
+    pub map_blueprint_category: KeyedVec<CdClientMapBlueprintCategory>,
+    pub sysdiagrams: KeyedVec<CdClientSysdiagrams>,
+    pub possessable_component: KeyedVec<CdClientPossessableComponent>,
+    pub skill_sets: KeyedVec<CdClientSkillSets>,
+    pub map_faces_and_hair: KeyedVec<CdClientMapFacesAndHair>,
 }
 
 impl CdClient {
@@ -765,7 +767,7 @@ impl CdClient {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct AiCombatRoles {
+pub struct CdClientAiCombatRoles {
     pub id: i32,
     pub preferred_role: i32,
     pub specified_min_range_nouse: Option<f64>,
@@ -774,7 +776,7 @@ pub struct AiCombatRoles {
     pub specific_max_range: Option<f64>,
 }
 
-impl FromCdClient for AiCombatRoles {
+impl FromCdClient for CdClientAiCombatRoles {
     const TABLE: &'static str = "AICombatRoles";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -789,7 +791,7 @@ impl FromCdClient for AiCombatRoles {
     }
 }
 
-impl HasKey for AiCombatRoles {
+impl HasKey for CdClientAiCombatRoles {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -799,7 +801,7 @@ impl HasKey for AiCombatRoles {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct AccessoryDefaultLoc {
+pub struct CdClientAccessoryDefaultLoc {
     pub group_id: i32,
     pub description: String,
     pub pos_x: f64,
@@ -810,7 +812,7 @@ pub struct AccessoryDefaultLoc {
     pub rot_z: f64,
 }
 
-impl FromCdClient for AccessoryDefaultLoc {
+impl FromCdClient for CdClientAccessoryDefaultLoc {
     const TABLE: &'static str = "AccessoryDefaultLoc";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -827,7 +829,7 @@ impl FromCdClient for AccessoryDefaultLoc {
     }
 }
 
-impl HasKey for AccessoryDefaultLoc {
+impl HasKey for CdClientAccessoryDefaultLoc {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -837,7 +839,7 @@ impl HasKey for AccessoryDefaultLoc {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Activities {
+pub struct CdClientActivities {
     pub activity_id: i32,
     pub loc_status: i32,
     pub instance_map_id: Option<i32>,
@@ -859,7 +861,7 @@ pub struct Activities {
     pub optional_percentage: Option<f64>,
 }
 
-impl FromCdClient for Activities {
+impl FromCdClient for CdClientActivities {
     const TABLE: &'static str = "Activities";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -887,7 +889,7 @@ impl FromCdClient for Activities {
     }
 }
 
-impl HasKey for Activities {
+impl HasKey for CdClientActivities {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -897,7 +899,7 @@ impl HasKey for Activities {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ActivityRewards {
+pub struct CdClientActivityCdClientRewards {
     pub object_template: i32,
     pub activity_reward_index: i32,
     pub activity_rating: i32,
@@ -907,8 +909,8 @@ pub struct ActivityRewards {
     pub description: String,
 }
 
-impl FromCdClient for ActivityRewards {
-    const TABLE: &'static str = "ActivityRewards";
+impl FromCdClient for CdClientActivityCdClientRewards {
+    const TABLE: &'static str = "ActivityCdClientRewards";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -923,7 +925,7 @@ impl FromCdClient for ActivityRewards {
     }
 }
 
-impl HasGroupKey for ActivityRewards {
+impl HasGroupKey for CdClientActivityCdClientRewards {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -933,7 +935,7 @@ impl HasGroupKey for ActivityRewards {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ActivityText {
+pub struct CdClientActivityText {
     pub activity_id: i32,
     pub r#type: String,
     pub localize: bool,
@@ -941,7 +943,7 @@ pub struct ActivityText {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for ActivityText {
+impl FromCdClient for CdClientActivityText {
     const TABLE: &'static str = "ActivityText";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -955,7 +957,7 @@ impl FromCdClient for ActivityText {
     }
 }
 
-impl HasGroupKey for ActivityText {
+impl HasGroupKey for CdClientActivityText {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -965,13 +967,13 @@ impl HasGroupKey for ActivityText {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct AnimationIndex {
+pub struct CdClientAnimationIndex {
     pub animation_group_id: i32,
     pub description: String,
     pub group_type: Option<String>,
 }
 
-impl FromCdClient for AnimationIndex {
+impl FromCdClient for CdClientAnimationIndex {
     const TABLE: &'static str = "AnimationIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -983,7 +985,7 @@ impl FromCdClient for AnimationIndex {
     }
 }
 
-impl HasKey for AnimationIndex {
+impl HasKey for CdClientAnimationIndex {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -993,7 +995,7 @@ impl HasKey for AnimationIndex {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Animations {
+pub struct CdClientAnimations {
     pub animation_group_id: i32,
     pub animation_type: String,
     pub animation_name: String,
@@ -1009,7 +1011,7 @@ pub struct Animations {
     pub blend_time: Option<f64>,
 }
 
-impl FromCdClient for Animations {
+impl FromCdClient for CdClientAnimations {
     const TABLE: &'static str = "Animations";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1031,7 +1033,7 @@ impl FromCdClient for Animations {
     }
 }
 
-impl HasGroupKey for Animations {
+impl HasGroupKey for CdClientAnimations {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -1041,7 +1043,7 @@ impl HasGroupKey for Animations {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BaseCombatAIComponent {
+pub struct CdClientBaseCombatAIComponent {
     pub id: i32,
     pub behavior_type: i32,
     pub combat_round_length: f64,
@@ -1061,7 +1063,7 @@ pub struct BaseCombatAIComponent {
     pub ignore_parent: bool,
 }
 
-impl FromCdClient for BaseCombatAIComponent {
+impl FromCdClient for CdClientBaseCombatAIComponent {
     const TABLE: &'static str = "BaseCombatAIComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1087,7 +1089,7 @@ impl FromCdClient for BaseCombatAIComponent {
     }
 }
 
-impl HasKey for BaseCombatAIComponent {
+impl HasKey for CdClientBaseCombatAIComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1097,7 +1099,7 @@ impl HasKey for BaseCombatAIComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BehaviorEffect {
+pub struct CdClientBehaviorEffect {
     pub effect_id: i32,
     pub effect_type: Option<String>,
     pub effect_name: Option<String>,
@@ -1143,7 +1145,7 @@ fn parse_bone_name(input: Option<String>) -> Option<Vec<String>> {
     )
 }
 
-impl FromCdClient for BehaviorEffect {
+impl FromCdClient for CdClientBehaviorEffect {
     const TABLE: &'static str = "BehaviorEffect";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1186,7 +1188,7 @@ impl FromCdClient for BehaviorEffect {
     }
 }
 
-impl HasGroupKey for BehaviorEffect {
+impl HasGroupKey for CdClientBehaviorEffect {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -1196,13 +1198,13 @@ impl HasGroupKey for BehaviorEffect {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BehaviorParameter {
+pub struct CdClientBehaviorParameter {
     pub behavior_id: i32,
     pub parameter_id: String,
     pub value: f64,
 }
 
-impl FromCdClient for BehaviorParameter {
+impl FromCdClient for CdClientBehaviorParameter {
     const TABLE: &'static str = "BehaviorParameter";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1214,7 +1216,7 @@ impl FromCdClient for BehaviorParameter {
     }
 }
 
-impl HasGroupKey for BehaviorParameter {
+impl HasGroupKey for CdClientBehaviorParameter {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -1224,14 +1226,14 @@ impl HasGroupKey for BehaviorParameter {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BehaviorTemplate {
+pub struct CdClientBehaviorTemplate {
     pub behavior_id: i32,
     pub template_id: i32,
     pub effect_id: i32,
     pub effect_handle: Option<String>,
 }
 
-impl FromCdClient for BehaviorTemplate {
+impl FromCdClient for CdClientBehaviorTemplate {
     const TABLE: &'static str = "BehaviorTemplate";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1244,7 +1246,7 @@ impl FromCdClient for BehaviorTemplate {
     }
 }
 
-impl HasGroupKey for BehaviorTemplate {
+impl HasGroupKey for CdClientBehaviorTemplate {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -1254,12 +1256,12 @@ impl HasGroupKey for BehaviorTemplate {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BehaviorTemplateName {
+pub struct CdClientBehaviorTemplateName {
     pub template_id: i32,
     pub name: String,
 }
 
-impl FromCdClient for BehaviorTemplateName {
+impl FromCdClient for CdClientBehaviorTemplateName {
     const TABLE: &'static str = "BehaviorTemplateName";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1270,7 +1272,7 @@ impl FromCdClient for BehaviorTemplateName {
     }
 }
 
-impl HasKey for BehaviorTemplateName {
+impl HasKey for CdClientBehaviorTemplateName {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1280,7 +1282,7 @@ impl HasKey for BehaviorTemplateName {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Blueprints {
+pub struct CdClientBlueprints {
     pub id: i64,
     pub name: String,
     pub description: String,
@@ -1295,7 +1297,7 @@ pub struct Blueprints {
     pub modified: i64,
 }
 
-impl FromCdClient for Blueprints {
+impl FromCdClient for CdClientBlueprints {
     const TABLE: &'static str = "Blueprints";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1316,7 +1318,7 @@ impl FromCdClient for Blueprints {
     }
 }
 
-impl HasKey for Blueprints {
+impl HasKey for CdClientBlueprints {
     type Key = i64;
 
     fn get_key(&self) -> &Self::Key {
@@ -1326,7 +1328,7 @@ impl HasKey for Blueprints {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BrickColors {
+pub struct CdClientBrickColors {
     pub id: i32,
     pub red: f64,
     pub green: f64,
@@ -1339,7 +1341,7 @@ pub struct BrickColors {
     pub factory_valid: bool,
 }
 
-impl FromCdClient for BrickColors {
+impl FromCdClient for CdClientBrickColors {
     const TABLE: &'static str = "BrickColors";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1358,7 +1360,7 @@ impl FromCdClient for BrickColors {
     }
 }
 
-impl HasKey for BrickColors {
+impl HasKey for CdClientBrickColors {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1368,12 +1370,12 @@ impl HasKey for BrickColors {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BrickIDTable {
+pub struct CdClientBrickIDTable {
     pub ndobject_id: i32,
     pub legobrick_id: i32,
 }
 
-impl FromCdClient for BrickIDTable {
+impl FromCdClient for CdClientBrickIDTable {
     const TABLE: &'static str = "BrickIDTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1384,7 +1386,7 @@ impl FromCdClient for BrickIDTable {
     }
 }
 
-impl HasKey for BrickIDTable {
+impl HasKey for CdClientBrickIDTable {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1394,13 +1396,13 @@ impl HasKey for BrickIDTable {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BuffDefinitions {
+pub struct CdClientBuffDefinitions {
     pub id: i32,
     pub priority: f64,
     pub uiicon: Option<String>,
 }
 
-impl FromCdClient for BuffDefinitions {
+impl FromCdClient for CdClientBuffDefinitions {
     const TABLE: &'static str = "BuffDefinitions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1412,7 +1414,7 @@ impl FromCdClient for BuffDefinitions {
     }
 }
 
-impl HasKey for BuffDefinitions {
+impl HasKey for CdClientBuffDefinitions {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1422,7 +1424,7 @@ impl HasKey for BuffDefinitions {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BuffParameters {
+pub struct CdClientBuffParameters {
     pub buff_id: i32,
     pub parameter_name: String,
     pub number_value: Option<f64>,
@@ -1430,8 +1432,8 @@ pub struct BuffParameters {
     pub effect_id: Option<i32>,
 }
 
-impl FromCdClient for BuffParameters {
-    const TABLE: &'static str = "BuffParameters";
+impl FromCdClient for CdClientBuffParameters {
+    const TABLE: &'static str = "CdClientBuffParameters";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1444,7 +1446,7 @@ impl FromCdClient for BuffParameters {
     }
 }
 
-impl HasKey for BuffParameters {
+impl HasKey for CdClientBuffParameters {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1454,7 +1456,7 @@ impl HasKey for BuffParameters {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Camera {
+pub struct CdClientCamera {
     pub camera_name: String,
     pub pitch_angle_tolerance: f64,
     pub starting_zoom: f64,
@@ -1517,8 +1519,8 @@ pub struct Camera {
     pub horizontal_rotate_modifier: f64,
 }
 
-impl FromCdClient for Camera {
-    const TABLE: &'static str = "Camera";
+impl FromCdClient for CdClientCamera {
+    const TABLE: &'static str = "CdClientCamera";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1586,7 +1588,7 @@ impl FromCdClient for Camera {
     }
 }
 
-impl HasKey for Camera {
+impl HasKey for CdClientCamera {
     type Key = String;
 
     fn get_key(&self) -> &Self::Key {
@@ -1596,7 +1598,7 @@ impl HasKey for Camera {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct CelebrationParameters {
+pub struct CdClientCelebrationParameters {
     pub id: i32,
     pub animation: String,
     pub background_object: i32,
@@ -1629,8 +1631,8 @@ pub struct CelebrationParameters {
     pub mixer_program: Option<String>,
 }
 
-impl FromCdClient for CelebrationParameters {
-    const TABLE: &'static str = "CelebrationParameters";
+impl FromCdClient for CdClientCelebrationParameters {
+    const TABLE: &'static str = "CdClientCelebrationParameters";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1668,7 +1670,7 @@ impl FromCdClient for CelebrationParameters {
     }
 }
 
-impl HasKey for CelebrationParameters {
+impl HasKey for CdClientCelebrationParameters {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1678,14 +1680,14 @@ impl HasKey for CelebrationParameters {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ChoiceBuildComponent {
+pub struct CdClientChoiceBuildComponent {
     pub id: i32,
     pub selections: Vec<i32>,
     pub imagination_override: Option<i32>,
 }
 
-impl FromCdClient for ChoiceBuildComponent {
-    const TABLE: &'static str = "ChoiceBuildComponent";
+impl FromCdClient for CdClientChoiceBuildComponent {
+    const TABLE: &'static str = "CdClientChoiceBuildComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1696,7 +1698,7 @@ impl FromCdClient for ChoiceBuildComponent {
     }
 }
 
-impl HasKey for ChoiceBuildComponent {
+impl HasKey for CdClientChoiceBuildComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1706,13 +1708,13 @@ impl HasKey for ChoiceBuildComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct CollectibleComponent {
+pub struct CdClientCollectibleComponent {
     pub id: i32,
     pub requirement_mission: Option<i32>,
 }
 
-impl FromCdClient for CollectibleComponent {
-    const TABLE: &'static str = "CollectibleComponent";
+impl FromCdClient for CdClientCollectibleComponent {
+    const TABLE: &'static str = "CdClientCollectibleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1722,7 +1724,7 @@ impl FromCdClient for CollectibleComponent {
     }
 }
 
-impl HasKey for CollectibleComponent {
+impl HasKey for CdClientCollectibleComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1732,13 +1734,13 @@ impl HasKey for CollectibleComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ComponentsRegistry {
+pub struct CdClientComponentsRegistry {
     pub id: i32,
     pub component_type: i32,
     pub component_id: i32,
 }
 
-impl FromCdClient for ComponentsRegistry {
+impl FromCdClient for CdClientComponentsRegistry {
     const TABLE: &'static str = "ComponentsRegistry";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1750,7 +1752,7 @@ impl FromCdClient for ComponentsRegistry {
     }
 }
 
-impl HasGroupKey for ComponentsRegistry {
+impl HasGroupKey for CdClientComponentsRegistry {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -1760,7 +1762,7 @@ impl HasGroupKey for ComponentsRegistry {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ControlSchemes {
+pub struct CdClientControlSchemes {
     pub control_scheme: i32,
     pub scheme_name: String,
     pub rotation_speed: Option<f64>,
@@ -1788,8 +1790,8 @@ pub struct ControlSchemes {
     pub gamepad_trigger_sensitivity: Option<f64>,
 }
 
-impl FromCdClient for ControlSchemes {
-    const TABLE: &'static str = "ControlSchemes";
+impl FromCdClient for CdClientControlSchemes {
+    const TABLE: &'static str = "CdClientControlSchemes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1822,7 +1824,7 @@ impl FromCdClient for ControlSchemes {
     }
 }
 
-impl HasKey for ControlSchemes {
+impl HasKey for CdClientControlSchemes {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1832,13 +1834,13 @@ impl HasKey for ControlSchemes {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct CurrencyDenominations {
+pub struct CdClientCurrencyDenominations {
     pub value: i32,
     pub objectid: i32,
 }
 
-impl FromCdClient for CurrencyDenominations {
-    const TABLE: &'static str = "CurrencyDenominations";
+impl FromCdClient for CdClientCurrencyDenominations {
+    const TABLE: &'static str = "CdClientCurrencyDenominations";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1848,7 +1850,7 @@ impl FromCdClient for CurrencyDenominations {
     }
 }
 
-impl HasKey for CurrencyDenominations {
+impl HasKey for CdClientCurrencyDenominations {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1858,7 +1860,7 @@ impl HasKey for CurrencyDenominations {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct CurrencyTable {
+pub struct CdClientCurrencyTable {
     pub currency_index: i32,
     pub npcminlevel: i32,
     pub minvalue: i32,
@@ -1866,8 +1868,8 @@ pub struct CurrencyTable {
     pub id: i32,
 }
 
-impl FromCdClient for CurrencyTable {
-    const TABLE: &'static str = "CurrencyTable";
+impl FromCdClient for CdClientCurrencyTable {
+    const TABLE: &'static str = "CdClientCurrencyTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1880,7 +1882,7 @@ impl FromCdClient for CurrencyTable {
     }
 }
 
-impl HasKey for CurrencyTable {
+impl HasKey for CdClientCurrencyTable {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1890,12 +1892,12 @@ impl HasKey for CurrencyTable {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct DbExclude {
+pub struct CdClientDbExclude {
     pub table: String,
     pub column: String,
 }
 
-impl FromCdClient for DbExclude {
+impl FromCdClient for CdClientDbExclude {
     const TABLE: &'static str = "DBExclude";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -1906,7 +1908,7 @@ impl FromCdClient for DbExclude {
     }
 }
 
-impl HasKey for DbExclude {
+impl HasKey for CdClientDbExclude {
     type Key = String;
 
     fn get_key(&self) -> &Self::Key {
@@ -1916,7 +1918,7 @@ impl HasKey for DbExclude {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct DeletionRestrictions {
+pub struct CdClientDeletionRestrictions {
     pub id: i32,
     pub restricted: bool,
     pub ids: Option<Vec<i32>>,
@@ -1926,8 +1928,8 @@ pub struct DeletionRestrictions {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for DeletionRestrictions {
-    const TABLE: &'static str = "DeletionRestrictions";
+impl FromCdClient for CdClientDeletionRestrictions {
+    const TABLE: &'static str = "CdClientDeletionRestrictions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1942,7 +1944,7 @@ impl FromCdClient for DeletionRestrictions {
     }
 }
 
-impl HasKey for DeletionRestrictions {
+impl HasKey for CdClientDeletionRestrictions {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -1952,7 +1954,7 @@ impl HasKey for DeletionRestrictions {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct DestructibleComponent {
+pub struct CdClientDestructibleComponent {
     pub id: i32,
     pub faction: Option<i32>,
     pub faction_list: Option<String>,
@@ -1969,8 +1971,8 @@ pub struct DestructibleComponent {
     pub difficulty_level: Option<i32>,
 }
 
-impl FromCdClient for DestructibleComponent {
-    const TABLE: &'static str = "DestructibleComponent";
+impl FromCdClient for CdClientDestructibleComponent {
+    const TABLE: &'static str = "CdClientDestructibleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1992,7 +1994,7 @@ impl FromCdClient for DestructibleComponent {
     }
 }
 
-impl HasKey for DestructibleComponent {
+impl HasKey for CdClientDestructibleComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2002,13 +2004,13 @@ impl HasKey for DestructibleComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct DevModelBehaviors {
+pub struct CdClientDevModelBehaviors {
     pub model_id: i32,
     pub behavior_id: i32,
 }
 
-impl FromCdClient for DevModelBehaviors {
-    const TABLE: &'static str = "DevModelBehaviors";
+impl FromCdClient for CdClientDevModelBehaviors {
+    const TABLE: &'static str = "CdClientDevModelBehaviors";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2018,7 +2020,7 @@ impl FromCdClient for DevModelBehaviors {
     }
 }
 
-impl HasKey for DevModelBehaviors {
+impl HasKey for CdClientDevModelBehaviors {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2028,7 +2030,7 @@ impl HasKey for DevModelBehaviors {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Emotes {
+pub struct CdClientEmotes {
     pub id: i32,
     pub animation_name: Option<String>,
     pub icon_filename: String,
@@ -2040,8 +2042,8 @@ pub struct Emotes {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for Emotes {
-    const TABLE: &'static str = "Emotes";
+impl FromCdClient for CdClientEmotes {
+    const TABLE: &'static str = "CdClientEmotes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2058,7 +2060,7 @@ impl FromCdClient for Emotes {
     }
 }
 
-impl HasKey for Emotes {
+impl HasKey for CdClientEmotes {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2068,14 +2070,14 @@ impl HasKey for Emotes {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct EventGating {
+pub struct CdClientEventGating {
     pub event_name: String,
     pub date_start: i64,
     pub date_end: i64,
 }
 
-impl FromCdClient for EventGating {
-    const TABLE: &'static str = "EventGating";
+impl FromCdClient for CdClientEventGating {
+    const TABLE: &'static str = "CdClientEventGating";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2086,7 +2088,7 @@ impl FromCdClient for EventGating {
     }
 }
 
-impl HasKey for EventGating {
+impl HasKey for CdClientEventGating {
     type Key = String;
 
     fn get_key(&self) -> &Self::Key {
@@ -2096,7 +2098,7 @@ impl HasKey for EventGating {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ExhibitComponent {
+pub struct CdClientExhibitComponent {
     pub id: i32,
     pub length: f64,
     pub width: f64,
@@ -2108,8 +2110,8 @@ pub struct ExhibitComponent {
     pub f_imagination_cost: f64,
 }
 
-impl FromCdClient for ExhibitComponent {
-    const TABLE: &'static str = "ExhibitComponent";
+impl FromCdClient for CdClientExhibitComponent {
+    const TABLE: &'static str = "CdClientExhibitComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2126,7 +2128,7 @@ impl FromCdClient for ExhibitComponent {
     }
 }
 
-impl HasKey for ExhibitComponent {
+impl HasKey for CdClientExhibitComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2136,7 +2138,7 @@ impl HasKey for ExhibitComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Factions {
+pub struct CdClientFactions {
     pub faction: i32,
     pub faction_list: Vec<i32>,
     pub faction_list_friendly: bool,
@@ -2144,8 +2146,8 @@ pub struct Factions {
     pub enemy_list: Option<Vec<i32>>,
 }
 
-impl FromCdClient for Factions {
-    const TABLE: &'static str = "Factions";
+impl FromCdClient for CdClientFactions {
+    const TABLE: &'static str = "CdClientFactions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2158,7 +2160,7 @@ impl FromCdClient for Factions {
     }
 }
 
-impl HasKey for Factions {
+impl HasKey for CdClientFactions {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2168,7 +2170,7 @@ impl HasKey for Factions {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct FeatureGating {
+pub struct CdClientFeatureGating {
     pub feature_name: String,
     pub major: i32,
     pub current: i32,
@@ -2176,8 +2178,8 @@ pub struct FeatureGating {
     pub description: Option<String>,
 }
 
-impl FromCdClient for FeatureGating {
-    const TABLE: &'static str = "FeatureGating";
+impl FromCdClient for CdClientFeatureGating {
+    const TABLE: &'static str = "CdClientFeatureGating";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2190,7 +2192,7 @@ impl FromCdClient for FeatureGating {
     }
 }
 
-impl HasKey for FeatureGating {
+impl HasKey for CdClientFeatureGating {
     type Key = String;
 
     fn get_key(&self) -> &Self::Key {
@@ -2200,13 +2202,13 @@ impl HasKey for FeatureGating {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct FlairTable {
+pub struct CdClientFlairTable {
     pub id: i32,
     pub asset: String,
 }
 
-impl FromCdClient for FlairTable {
-    const TABLE: &'static str = "FlairTable";
+impl FromCdClient for CdClientFlairTable {
+    const TABLE: &'static str = "CdClientFlairTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2216,7 +2218,7 @@ impl FromCdClient for FlairTable {
     }
 }
 
-impl HasKey for FlairTable {
+impl HasKey for CdClientFlairTable {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2226,14 +2228,14 @@ impl HasKey for FlairTable {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Icons {
+pub struct CdClientIcons {
     pub icon_id: i32,
     pub icon_path: Option<String>,
     pub icon_name: Option<String>,
 }
 
-impl FromCdClient for Icons {
-    const TABLE: &'static str = "Icons";
+impl FromCdClient for CdClientIcons {
+    const TABLE: &'static str = "CdClientIcons";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2244,7 +2246,7 @@ impl FromCdClient for Icons {
     }
 }
 
-impl HasKey for Icons {
+impl HasKey for CdClientIcons {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2254,15 +2256,15 @@ impl HasKey for Icons {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct InventoryComponent {
+pub struct CdClientInventoryComponent {
     pub id: i32,
     pub itemid: i32,
     pub count: i32,
     pub equip: bool,
 }
 
-impl FromCdClient for InventoryComponent {
-    const TABLE: &'static str = "InventoryComponent";
+impl FromCdClient for CdClientInventoryComponent {
+    const TABLE: &'static str = "CdClientInventoryComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2274,7 +2276,7 @@ impl FromCdClient for InventoryComponent {
     }
 }
 
-// impl HasKey for InventoryComponent {
+// impl HasKey for CdClientInventoryComponent {
 //     type Key = i32;
 //
 //     // multiple groupings
@@ -2286,7 +2288,7 @@ impl FromCdClient for InventoryComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ItemComponent {
+pub struct CdClientItemComponent {
     pub id: i32,
     pub equip_location: Option<String>,
     pub base_value: Option<i32>,
@@ -2340,7 +2342,7 @@ fn parse_currency_costs(input: Option<String>) -> Option<Vec<(i32, i32)>> {
     Some(elements)
 }
 
-impl FromCdClient for ItemComponent {
+impl FromCdClient for CdClientItemComponent {
     const TABLE: &'static str = "ItemComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -2391,7 +2393,7 @@ impl FromCdClient for ItemComponent {
     }
 }
 
-impl HasKey for ItemComponent {
+impl HasKey for CdClientItemComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2401,13 +2403,13 @@ impl HasKey for ItemComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ItemEggData {
+pub struct CdClientItemEggData {
     pub id: i32,
     pub chassie_type_id: i32,
 }
 
-impl FromCdClient for ItemEggData {
-    const TABLE: &'static str = "ItemEggData";
+impl FromCdClient for CdClientItemEggData {
+    const TABLE: &'static str = "CdClientItemEggData";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2417,7 +2419,7 @@ impl FromCdClient for ItemEggData {
     }
 }
 
-impl HasKey for ItemEggData {
+impl HasKey for CdClientItemEggData {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2427,7 +2429,7 @@ impl HasKey for ItemEggData {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ItemFoodData {
+pub struct CdClientItemFoodData {
     pub id: i32,
     pub element_1: i32,
     pub element_1_amount: i32,
@@ -2439,8 +2441,8 @@ pub struct ItemFoodData {
     pub element_4_amount: i32,
 }
 
-impl FromCdClient for ItemFoodData {
-    const TABLE: &'static str = "ItemFoodData";
+impl FromCdClient for CdClientItemFoodData {
+    const TABLE: &'static str = "CdClientItemFoodData";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2457,7 +2459,7 @@ impl FromCdClient for ItemFoodData {
     }
 }
 
-impl HasKey for ItemFoodData {
+impl HasKey for CdClientItemFoodData {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2467,14 +2469,14 @@ impl HasKey for ItemFoodData {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ItemSetSkills {
+pub struct CdClientItemSetSkills {
     pub skill_set_id: i32,
     pub skill_id: i32,
     pub skill_cast_type: i32,
 }
 
-impl FromCdClient for ItemSetSkills {
-    const TABLE: &'static str = "ItemSetSkills";
+impl FromCdClient for CdClientItemSetSkills {
+    const TABLE: &'static str = "CdClientItemSetSkills";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2485,7 +2487,7 @@ impl FromCdClient for ItemSetSkills {
     }
 }
 
-impl HasGroupKey for ItemSetSkills {
+impl HasGroupKey for CdClientItemSetSkills {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -2495,7 +2497,7 @@ impl HasGroupKey for ItemSetSkills {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ItemSets {
+pub struct CdClientItemSets {
     pub set_id: i32,
     pub loc_status: i32,
     pub item_ids: Vec<i32>,
@@ -2513,8 +2515,8 @@ pub struct ItemSets {
     pub priority: Option<f64>,
 }
 
-impl FromCdClient for ItemSets {
-    const TABLE: &'static str = "ItemSets";
+impl FromCdClient for CdClientItemSets {
+    const TABLE: &'static str = "CdClientItemSets";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2537,7 +2539,7 @@ impl FromCdClient for ItemSets {
     }
 }
 
-impl HasKey for ItemSets {
+impl HasKey for CdClientItemSets {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2547,7 +2549,7 @@ impl HasKey for ItemSets {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct JetPackPadComponent {
+pub struct CdClientJetPackPadComponent {
     pub id: i32,
     pub x_distance: f64,
     pub y_distance: f64,
@@ -2556,8 +2558,8 @@ pub struct JetPackPadComponent {
     pub lot_warning_volume: Option<i32>,
 }
 
-impl FromCdClient for JetPackPadComponent {
-    const TABLE: &'static str = "JetPackPadComponent";
+impl FromCdClient for CdClientJetPackPadComponent {
+    const TABLE: &'static str = "CdClientJetPackPadComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2571,7 +2573,7 @@ impl FromCdClient for JetPackPadComponent {
     }
 }
 
-impl HasKey for JetPackPadComponent {
+impl HasKey for CdClientJetPackPadComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2581,7 +2583,7 @@ impl HasKey for JetPackPadComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LuPExhibitComponent {
+pub struct CdClientLuPExhibitComponent {
     pub id: i32,
     pub min_xz: f64,
     pub max_xz: f64,
@@ -2591,8 +2593,8 @@ pub struct LuPExhibitComponent {
     pub offset_z: f64,
 }
 
-impl FromCdClient for LuPExhibitComponent {
-    const TABLE: &'static str = "LUPExhibitComponent";
+impl FromCdClient for CdClientLuPExhibitComponent {
+    const TABLE: &'static str = "LUPCdClientExhibitComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2607,7 +2609,7 @@ impl FromCdClient for LuPExhibitComponent {
     }
 }
 
-impl HasKey for LuPExhibitComponent {
+impl HasKey for CdClientLuPExhibitComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2617,7 +2619,7 @@ impl HasKey for LuPExhibitComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LuPExhibitModelData {
+pub struct CdClientLuPExhibitModelData {
     pub lot: i32,
     pub min_xz: f64,
     pub max_xz: f64,
@@ -2626,7 +2628,7 @@ pub struct LuPExhibitModelData {
     pub owner: String,
 }
 
-impl FromCdClient for LuPExhibitModelData {
+impl FromCdClient for CdClientLuPExhibitModelData {
     const TABLE: &'static str = "LUPExhibitModelData";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -2641,7 +2643,7 @@ impl FromCdClient for LuPExhibitModelData {
     }
 }
 
-impl HasKey for LuPExhibitModelData {
+impl HasKey for CdClientLuPExhibitModelData {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2651,11 +2653,11 @@ impl HasKey for LuPExhibitModelData {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LuPZoneIDs {
+pub struct CdClientLuPZoneIDs {
     pub zone_id: i32,
 }
 
-impl FromCdClient for LuPZoneIDs {
+impl FromCdClient for CdClientLuPZoneIDs {
     const TABLE: &'static str = "LUPZoneIDs";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -2665,7 +2667,7 @@ impl FromCdClient for LuPZoneIDs {
     }
 }
 
-impl HasKey for LuPZoneIDs {
+impl HasKey for CdClientLuPZoneIDs {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2675,13 +2677,13 @@ impl HasKey for LuPZoneIDs {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LanguageType {
+pub struct CdClientLanguageType {
     pub language_id: i32,
     pub language_description: String,
 }
 
-impl FromCdClient for LanguageType {
-    const TABLE: &'static str = "LanguageType";
+impl FromCdClient for CdClientLanguageType {
+    const TABLE: &'static str = "CdClientLanguageType";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2691,7 +2693,7 @@ impl FromCdClient for LanguageType {
     }
 }
 
-impl HasKey for LanguageType {
+impl HasKey for CdClientLanguageType {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2701,14 +2703,14 @@ impl HasKey for LanguageType {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LevelProgressionLookup {
+pub struct CdClientLevelProgressionLookup {
     pub id: i32,
     pub required_uscore: i32,
     pub behavior_effect: Option<String>,
 }
 
-impl FromCdClient for LevelProgressionLookup {
-    const TABLE: &'static str = "LevelProgressionLookup";
+impl FromCdClient for CdClientLevelProgressionLookup {
+    const TABLE: &'static str = "CdClientLevelProgressionLookup";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2719,7 +2721,7 @@ impl FromCdClient for LevelProgressionLookup {
     }
 }
 
-impl HasKey for LevelProgressionLookup {
+impl HasKey for CdClientLevelProgressionLookup {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2729,7 +2731,7 @@ impl HasKey for LevelProgressionLookup {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LootMatrix {
+pub struct CdClientLootMatrix {
     pub loot_matrix_index: i32,
     pub loot_table_index: i32,
     pub rarity_table_index: i32,
@@ -2741,8 +2743,8 @@ pub struct LootMatrix {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for LootMatrix {
-    const TABLE: &'static str = "LootMatrix";
+impl FromCdClient for CdClientLootMatrix {
+    const TABLE: &'static str = "CdClientLootMatrix";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2759,7 +2761,7 @@ impl FromCdClient for LootMatrix {
     }
 }
 
-impl HasGroupKey for LootMatrix {
+impl HasGroupKey for CdClientLootMatrix {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -2769,13 +2771,13 @@ impl HasGroupKey for LootMatrix {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LootMatrixIndex {
+pub struct CdClientLootMatrixIndex {
     pub loot_matrix_index: i32,
     pub in_npc_editor: bool,
 }
 
-impl FromCdClient for LootMatrixIndex {
-    const TABLE: &'static str = "LootMatrixIndex";
+impl FromCdClient for CdClientLootMatrixIndex {
+    const TABLE: &'static str = "CdClientLootMatrixIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2785,7 +2787,7 @@ impl FromCdClient for LootMatrixIndex {
     }
 }
 
-impl HasKey for LootMatrixIndex {
+impl HasKey for CdClientLootMatrixIndex {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2795,7 +2797,7 @@ impl HasKey for LootMatrixIndex {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LootTable {
+pub struct CdClientLootTable {
     pub itemid: i32,
     pub loot_table_index: i32,
     pub id: i32,
@@ -2803,8 +2805,8 @@ pub struct LootTable {
     pub sort_priority: i32,
 }
 
-impl FromCdClient for LootTable {
-    const TABLE: &'static str = "LootTable";
+impl FromCdClient for CdClientLootTable {
+    const TABLE: &'static str = "CdClientLootTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2818,7 +2820,7 @@ impl FromCdClient for LootTable {
 }
 
 // multiple groupings, but i will do it by loot_table_index
-impl HasGroupKey for LootTable {
+impl HasGroupKey for CdClientLootTable {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -2828,12 +2830,12 @@ impl HasGroupKey for LootTable {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct LootTableIndex {
+pub struct CdClientLootTableIndex {
     pub loot_table_index: i32,
 }
 
-impl FromCdClient for LootTableIndex {
-    const TABLE: &'static str = "LootTableIndex";
+impl FromCdClient for CdClientLootTableIndex {
+    const TABLE: &'static str = "CdClientLootTableIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2842,7 +2844,7 @@ impl FromCdClient for LootTableIndex {
     }
 }
 
-impl HasKey for LootTableIndex {
+impl HasKey for CdClientLootTableIndex {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2852,7 +2854,7 @@ impl HasKey for LootTableIndex {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MinifigComponent {
+pub struct CdClientMinifigComponent {
     pub id: i32,
     pub head: i32,
     pub chest: i32,
@@ -2868,8 +2870,8 @@ pub struct MinifigComponent {
     pub mouthstyle: i32,
 }
 
-impl FromCdClient for MinifigComponent {
-    const TABLE: &'static str = "MinifigComponent";
+impl FromCdClient for CdClientMinifigComponent {
+    const TABLE: &'static str = "CdClientMinifigComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2890,7 +2892,7 @@ impl FromCdClient for MinifigComponent {
     }
 }
 
-impl HasKey for MinifigComponent {
+impl HasKey for CdClientMinifigComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2900,7 +2902,7 @@ impl HasKey for MinifigComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MinifigDecalsEyebrows {
+pub struct CdClientMinifigDecalsEyebrows {
     pub id: i32,
     pub high_path: String,
     pub low_path: String,
@@ -2909,7 +2911,7 @@ pub struct MinifigDecalsEyebrows {
     pub female: bool,
 }
 
-impl FromCdClient for MinifigDecalsEyebrows {
+impl FromCdClient for CdClientMinifigDecalsEyebrows {
     const TABLE: &'static str = "MinifigDecals_Eyebrows";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -2924,7 +2926,7 @@ impl FromCdClient for MinifigDecalsEyebrows {
     }
 }
 
-impl HasKey for MinifigDecalsEyebrows {
+impl HasKey for CdClientMinifigDecalsEyebrows {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2934,7 +2936,7 @@ impl HasKey for MinifigDecalsEyebrows {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MinifigDecalsEyes {
+pub struct CdClientMinifigDecalsEyes {
     pub id: i32,
     pub high_path: String,
     pub low_path: String,
@@ -2943,7 +2945,7 @@ pub struct MinifigDecalsEyes {
     pub female: bool,
 }
 
-impl FromCdClient for MinifigDecalsEyes {
+impl FromCdClient for CdClientMinifigDecalsEyes {
     const TABLE: &'static str = "MinifigDecals_Eyes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -2958,7 +2960,7 @@ impl FromCdClient for MinifigDecalsEyes {
     }
 }
 
-impl HasKey for MinifigDecalsEyes {
+impl HasKey for CdClientMinifigDecalsEyes {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2968,12 +2970,12 @@ impl HasKey for MinifigDecalsEyes {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MinifigDecalsLegs {
+pub struct CdClientMinifigDecalsLegs {
     pub id: i32,
     pub high_path: String,
 }
 
-impl FromCdClient for MinifigDecalsLegs {
+impl FromCdClient for CdClientMinifigDecalsLegs {
     const TABLE: &'static str = "MinifigDecals_Legs";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -2984,7 +2986,7 @@ impl FromCdClient for MinifigDecalsLegs {
     }
 }
 
-impl HasKey for MinifigDecalsLegs {
+impl HasKey for CdClientMinifigDecalsLegs {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -2994,7 +2996,7 @@ impl HasKey for MinifigDecalsLegs {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MinifigDecalsMouths {
+pub struct CdClientMinifigDecalsMouths {
     pub id: i32,
     pub high_path: String,
     pub low_path: String,
@@ -3003,7 +3005,7 @@ pub struct MinifigDecalsMouths {
     pub female: bool,
 }
 
-impl FromCdClient for MinifigDecalsMouths {
+impl FromCdClient for CdClientMinifigDecalsMouths {
     const TABLE: &'static str = "MinifigDecals_Mouths";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -3018,7 +3020,7 @@ impl FromCdClient for MinifigDecalsMouths {
     }
 }
 
-impl HasKey for MinifigDecalsMouths {
+impl HasKey for CdClientMinifigDecalsMouths {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3028,7 +3030,7 @@ impl HasKey for MinifigDecalsMouths {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MinifigDecalsTorsos {
+pub struct CdClientMinifigDecalsTorsos {
     pub id: i32,
     pub high_path: String,
     pub character_create_valid: bool,
@@ -3036,7 +3038,7 @@ pub struct MinifigDecalsTorsos {
     pub female: bool,
 }
 
-impl FromCdClient for MinifigDecalsTorsos {
+impl FromCdClient for CdClientMinifigDecalsTorsos {
     const TABLE: &'static str = "MinifigDecals_Torsos";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -3050,7 +3052,7 @@ impl FromCdClient for MinifigDecalsTorsos {
     }
 }
 
-impl HasKey for MinifigDecalsTorsos {
+impl HasKey for CdClientMinifigDecalsTorsos {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3060,7 +3062,7 @@ impl HasKey for MinifigDecalsTorsos {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MissionEmail {
+pub struct CdClientMissionEmail {
     pub id: i32,
     pub message_type: i32,
     pub notification_group: i32,
@@ -3071,8 +3073,8 @@ pub struct MissionEmail {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for MissionEmail {
-    const TABLE: &'static str = "MissionEmail";
+impl FromCdClient for CdClientMissionEmail {
+    const TABLE: &'static str = "CdClientMissionEmail";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3088,7 +3090,7 @@ impl FromCdClient for MissionEmail {
     }
 }
 
-impl HasKey for MissionEmail {
+impl HasKey for CdClientMissionEmail {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3098,7 +3100,7 @@ impl HasKey for MissionEmail {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MissionNPCComponent {
+pub struct CdClientMissionNPCComponent {
     pub id: i32,
     pub mission_id: i32,
     pub offers_mission: bool,
@@ -3106,8 +3108,8 @@ pub struct MissionNPCComponent {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for MissionNPCComponent {
-    const TABLE: &'static str = "MissionNPCComponent";
+impl FromCdClient for CdClientMissionNPCComponent {
+    const TABLE: &'static str = "CdClientMissionNPCComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3120,7 +3122,7 @@ impl FromCdClient for MissionNPCComponent {
     }
 }
 
-// impl HasKey for MissionNPCComponent {
+// impl HasKey for CdClientMissionNPCComponent {
 //     type Key = i32;
 //
 //     // multiple groupings
@@ -3131,7 +3133,7 @@ impl FromCdClient for MissionNPCComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MissionTasks {
+pub struct CdClientMissionTasks {
     pub id: i32,
     pub loc_status: i32,
     pub task_type: i32,
@@ -3147,8 +3149,8 @@ pub struct MissionTasks {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for MissionTasks {
-    const TABLE: &'static str = "MissionTasks";
+impl FromCdClient for CdClientMissionTasks {
+    const TABLE: &'static str = "CdClientMissionTasks";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3169,7 +3171,7 @@ impl FromCdClient for MissionTasks {
     }
 }
 
-impl HasGroupKey for MissionTasks {
+impl HasGroupKey for CdClientMissionTasks {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -3179,7 +3181,7 @@ impl HasGroupKey for MissionTasks {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MissionText {
+pub struct CdClientMissionText {
     pub id: i32,
     pub story_icon: Option<String>,
     pub mission_icon: Option<String>,
@@ -3215,8 +3217,8 @@ pub struct MissionText {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for MissionText {
-    const TABLE: &'static str = "MissionText";
+impl FromCdClient for CdClientMissionText {
+    const TABLE: &'static str = "CdClientMissionText";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3257,7 +3259,7 @@ impl FromCdClient for MissionText {
     }
 }
 
-impl HasKey for MissionText {
+impl HasKey for CdClientMissionText {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3267,7 +3269,7 @@ impl HasKey for MissionText {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Missions {
+pub struct CdClientMissions {
     pub id: i32,
     pub defined_type: String,
     pub defined_subtype: Option<String>,
@@ -3351,7 +3353,7 @@ fn parse_mission_prereqs(input: Option<String>) -> Option<Vec<MissionPreReqType>
     Some(elements)
 }
 
-impl FromCdClient for Missions {
+impl FromCdClient for CdClientMissions {
     const TABLE: &'static str = "Missions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -3412,7 +3414,7 @@ impl FromCdClient for Missions {
     }
 }
 
-impl HasKey for Missions {
+impl HasKey for CdClientMissions {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3422,13 +3424,13 @@ impl HasKey for Missions {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ModelBehavior {
+pub struct CdClientModelBehavior {
     pub id: i32,
     pub definition_xmlfilename: String,
 }
 
-impl FromCdClient for ModelBehavior {
-    const TABLE: &'static str = "ModelBehavior";
+impl FromCdClient for CdClientModelBehavior {
+    const TABLE: &'static str = "CdClientModelBehavior";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3438,7 +3440,7 @@ impl FromCdClient for ModelBehavior {
     }
 }
 
-impl HasKey for ModelBehavior {
+impl HasKey for CdClientModelBehavior {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3448,7 +3450,7 @@ impl HasKey for ModelBehavior {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ModularBuildComponent {
+pub struct CdClientModularBuildComponent {
     pub id: i32,
     pub build_type: i32,
     pub xml: String,
@@ -3459,8 +3461,8 @@ pub struct ModularBuildComponent {
     pub audio_event_guid_present: Option<String>,
 }
 
-impl FromCdClient for ModularBuildComponent {
-    const TABLE: &'static str = "ModularBuildComponent";
+impl FromCdClient for CdClientModularBuildComponent {
+    const TABLE: &'static str = "CdClientModularBuildComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3476,7 +3478,7 @@ impl FromCdClient for ModularBuildComponent {
     }
 }
 
-impl HasKey for ModularBuildComponent {
+impl HasKey for CdClientModularBuildComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3486,7 +3488,7 @@ impl HasKey for ModularBuildComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ModuleComponent {
+pub struct CdClientModuleComponent {
     pub id: i32,
     pub part_code: i32,
     pub build_type: i32,
@@ -3495,8 +3497,8 @@ pub struct ModuleComponent {
     pub assembled_effect_id: Option<i32>,
 }
 
-impl FromCdClient for ModuleComponent {
-    const TABLE: &'static str = "ModuleComponent";
+impl FromCdClient for CdClientModuleComponent {
+    const TABLE: &'static str = "CdClientModuleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3510,7 +3512,7 @@ impl FromCdClient for ModuleComponent {
     }
 }
 
-impl HasKey for ModuleComponent {
+impl HasKey for CdClientModuleComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3520,7 +3522,7 @@ impl HasKey for ModuleComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MotionFX {
+pub struct CdClientMotionFX {
     pub id: i32,
     pub type_id: i32,
     pub slam_velocity: Option<f64>,
@@ -3533,8 +3535,8 @@ pub struct MotionFX {
     pub distance: Option<f64>,
 }
 
-impl FromCdClient for MotionFX {
-    const TABLE: &'static str = "MotionFX";
+impl FromCdClient for CdClientMotionFX {
+    const TABLE: &'static str = "CdClientMotionFX";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3552,7 +3554,7 @@ impl FromCdClient for MotionFX {
     }
 }
 
-impl HasKey for MotionFX {
+impl HasKey for CdClientMotionFX {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3562,7 +3564,7 @@ impl HasKey for MotionFX {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MovementAIComponent {
+pub struct CdClientMovementAIComponent {
     pub id: i32,
     pub movement_type: String,
     pub wander_chance: f64,
@@ -3573,8 +3575,8 @@ pub struct MovementAIComponent {
     pub attached_path: Option<String>,
 }
 
-impl FromCdClient for MovementAIComponent {
-    const TABLE: &'static str = "MovementAIComponent";
+impl FromCdClient for CdClientMovementAIComponent {
+    const TABLE: &'static str = "CdClientMovementAIComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3590,7 +3592,7 @@ impl FromCdClient for MovementAIComponent {
     }
 }
 
-impl HasKey for MovementAIComponent {
+impl HasKey for CdClientMovementAIComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3600,7 +3602,7 @@ impl HasKey for MovementAIComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MovingPlatforms {
+pub struct CdClientMovingPlatforms {
     pub id: i32,
     pub platform_is_simple_mover: bool,
     pub platform_move_x: f64,
@@ -3611,8 +3613,8 @@ pub struct MovingPlatforms {
     pub description: String,
 }
 
-impl FromCdClient for MovingPlatforms {
-    const TABLE: &'static str = "MovingPlatforms";
+impl FromCdClient for CdClientMovingPlatforms {
+    const TABLE: &'static str = "CdClientMovingPlatforms";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3628,7 +3630,7 @@ impl FromCdClient for MovingPlatforms {
     }
 }
 
-impl HasKey for MovingPlatforms {
+impl HasKey for CdClientMovingPlatforms {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3638,7 +3640,7 @@ impl HasKey for MovingPlatforms {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct NpcIcons {
+pub struct CdClientNpcIcons {
     pub id: i32,
     pub color: i32,
     pub offset: f64,
@@ -3656,8 +3658,8 @@ pub struct NpcIcons {
     pub composite_icon_texture: Option<String>,
 }
 
-impl FromCdClient for NpcIcons {
-    const TABLE: &'static str = "NpcIcons";
+impl FromCdClient for CdClientNpcIcons {
+    const TABLE: &'static str = "CdClientNpcIcons";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3680,7 +3682,7 @@ impl FromCdClient for NpcIcons {
     }
 }
 
-impl HasKey for NpcIcons {
+impl HasKey for CdClientNpcIcons {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3690,7 +3692,7 @@ impl HasKey for NpcIcons {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ObjectBehaviorXREF {
+pub struct CdClientObjectBehaviorXREF {
     pub lot: i32,
     pub behavior_id1: i64,
     pub behavior_id2: i64,
@@ -3700,8 +3702,8 @@ pub struct ObjectBehaviorXREF {
     pub r#type: i32,
 }
 
-impl FromCdClient for ObjectBehaviorXREF {
-    const TABLE: &'static str = "ObjectBehaviorXREF";
+impl FromCdClient for CdClientObjectBehaviorXREF {
+    const TABLE: &'static str = "CdClientObjectBehaviorXREF";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3716,7 +3718,7 @@ impl FromCdClient for ObjectBehaviorXREF {
     }
 }
 
-impl HasKey for ObjectBehaviorXREF {
+impl HasKey for CdClientObjectBehaviorXREF {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3726,13 +3728,13 @@ impl HasKey for ObjectBehaviorXREF {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ObjectBehaviors {
+pub struct CdClientObjectBehaviors {
     pub behavior_id: i64,
     pub xmldata: String,
 }
 
-impl FromCdClient for ObjectBehaviors {
-    const TABLE: &'static str = "ObjectBehaviors";
+impl FromCdClient for CdClientObjectBehaviors {
+    const TABLE: &'static str = "CdClientObjectBehaviors";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3742,7 +3744,7 @@ impl FromCdClient for ObjectBehaviors {
     }
 }
 
-impl HasKey for ObjectBehaviors {
+impl HasKey for CdClientObjectBehaviors {
     type Key = i64;
 
     fn get_key(&self) -> &Self::Key {
@@ -3752,15 +3754,15 @@ impl HasKey for ObjectBehaviors {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ObjectSkills {
+pub struct CdClientObjectSkills {
     pub object_template: i32,
     pub skill_id: i32,
     pub cast_on_type: Option<i32>,
     pub aicombat_weight: Option<i32>,
 }
 
-impl FromCdClient for ObjectSkills {
-    const TABLE: &'static str = "ObjectSkills";
+impl FromCdClient for CdClientObjectSkills {
+    const TABLE: &'static str = "CdClientObjectSkills";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3772,7 +3774,7 @@ impl FromCdClient for ObjectSkills {
     }
 }
 
-impl HasGroupKey for ObjectSkills {
+impl HasGroupKey for CdClientObjectSkills {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -3782,7 +3784,7 @@ impl HasGroupKey for ObjectSkills {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Objects {
+pub struct CdClientObjects {
     pub id: i32,
     pub name: Option<String>,
     pub placeable: bool,
@@ -3799,7 +3801,7 @@ pub struct Objects {
     pub hq_valid: Option<bool>,
 }
 
-impl FromCdClient for Objects {
+impl FromCdClient for CdClientObjects {
     const TABLE: &'static str = "Objects";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -3823,7 +3825,7 @@ impl FromCdClient for Objects {
 }
 
 // There are a few duplicates (35006-35008)
-impl HasKey for Objects {
+impl HasKey for CdClientObjects {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3833,13 +3835,13 @@ impl HasKey for Objects {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PackageComponent {
+pub struct CdClientPackageComponent {
     pub id: i32,
     pub loot_matrix_index: i32,
     pub package_type: i32,
 }
 
-impl FromCdClient for PackageComponent {
+impl FromCdClient for CdClientPackageComponent {
     const TABLE: &'static str = "PackageComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -3851,7 +3853,7 @@ impl FromCdClient for PackageComponent {
     }
 }
 
-impl HasKey for PackageComponent {
+impl HasKey for CdClientPackageComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3861,15 +3863,15 @@ impl HasKey for PackageComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PetAbilities {
+pub struct CdClientPetAbilities {
     pub id: i32,
     pub ability_name: String,
     pub imagination_cost: i32,
     pub loc_status: i32,
 }
 
-impl FromCdClient for PetAbilities {
-    const TABLE: &'static str = "PetAbilities";
+impl FromCdClient for CdClientPetAbilities {
+    const TABLE: &'static str = "CdClientPetAbilities";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3881,7 +3883,7 @@ impl FromCdClient for PetAbilities {
     }
 }
 
-impl HasKey for PetAbilities {
+impl HasKey for CdClientPetAbilities {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3891,7 +3893,7 @@ impl HasKey for PetAbilities {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PetComponent {
+pub struct CdClientPetComponent {
     pub id: i32,
     pub min_tame_update_time: f64,
     pub max_tame_update_time: f64,
@@ -3909,8 +3911,8 @@ pub struct PetComponent {
     pub buff_ids: Option<String>,
 }
 
-impl FromCdClient for PetComponent {
-    const TABLE: &'static str = "PetComponent";
+impl FromCdClient for CdClientPetComponent {
+    const TABLE: &'static str = "CdClientPetComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3933,7 +3935,7 @@ impl FromCdClient for PetComponent {
     }
 }
 
-impl HasKey for PetComponent {
+impl HasKey for CdClientPetComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3943,13 +3945,13 @@ impl HasKey for PetComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PetNestComponent {
+pub struct CdClientPetNestComponent {
     pub id: i32,
     pub elemental_type: i32,
 }
 
-impl FromCdClient for PetNestComponent {
-    const TABLE: &'static str = "PetNestComponent";
+impl FromCdClient for CdClientPetNestComponent {
+    const TABLE: &'static str = "CdClientPetNestComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3959,7 +3961,7 @@ impl FromCdClient for PetNestComponent {
     }
 }
 
-impl HasKey for PetNestComponent {
+impl HasKey for CdClientPetNestComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -3969,7 +3971,7 @@ impl HasKey for PetNestComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PhysicsComponent {
+pub struct CdClientPhysicsComponent {
     pub id: i32,
     pub r#static: f64,
     pub physics_asset: Option<String>,
@@ -3988,8 +3990,8 @@ pub struct PhysicsComponent {
     pub gravity_volume_asset: Option<String>,
 }
 
-impl FromCdClient for PhysicsComponent {
-    const TABLE: &'static str = "PhysicsComponent";
+impl FromCdClient for CdClientPhysicsComponent {
+    const TABLE: &'static str = "CdClientPhysicsComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4013,7 +4015,7 @@ impl FromCdClient for PhysicsComponent {
     }
 }
 
-impl HasKey for PhysicsComponent {
+impl HasKey for CdClientPhysicsComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4023,15 +4025,15 @@ impl HasKey for PhysicsComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PlayerFlags {
+pub struct CdClientPlayerFlags {
     pub id: i32,
     pub session_only: bool,
     pub only_set_by_server: bool,
     pub session_zone_only: bool,
 }
 
-impl FromCdClient for PlayerFlags {
-    const TABLE: &'static str = "PlayerFlags";
+impl FromCdClient for CdClientPlayerFlags {
+    const TABLE: &'static str = "CdClientPlayerFlags";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4043,7 +4045,7 @@ impl FromCdClient for PlayerFlags {
     }
 }
 
-impl HasKey for PlayerFlags {
+impl HasKey for CdClientPlayerFlags {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4053,15 +4055,15 @@ impl HasKey for PlayerFlags {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PlayerStatistics {
+pub struct CdClientPlayerStatistics {
     pub stat_id: i32,
     pub sort_order: Option<i32>,
     pub loc_status: i32,
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for PlayerStatistics {
-    const TABLE: &'static str = "PlayerStatistics";
+impl FromCdClient for CdClientPlayerStatistics {
+    const TABLE: &'static str = "CdClientPlayerStatistics";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4073,7 +4075,7 @@ impl FromCdClient for PlayerStatistics {
     }
 }
 
-impl HasKey for PlayerStatistics {
+impl HasKey for CdClientPlayerStatistics {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4083,7 +4085,7 @@ impl HasKey for PlayerStatistics {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Preconditions {
+pub struct CdClientPreconditions {
     pub id: i32,
     pub r#type: Option<i32>,
     pub target_lot: Option<Vec<i32>>,
@@ -4096,8 +4098,8 @@ pub struct Preconditions {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for Preconditions {
-    const TABLE: &'static str = "Preconditions";
+impl FromCdClient for CdClientPreconditions {
+    const TABLE: &'static str = "CdClientPreconditions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4115,7 +4117,7 @@ impl FromCdClient for Preconditions {
     }
 }
 
-impl HasKey for Preconditions {
+impl HasKey for CdClientPreconditions {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4125,7 +4127,7 @@ impl HasKey for Preconditions {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PropertyEntranceComponent {
+pub struct CdClientPropertyEntranceComponent {
     pub id: i32,
     pub map_id: i32,
     pub property_name: String,
@@ -4133,8 +4135,8 @@ pub struct PropertyEntranceComponent {
     pub group_type: Option<String>,
 }
 
-impl FromCdClient for PropertyEntranceComponent {
-    const TABLE: &'static str = "PropertyEntranceComponent";
+impl FromCdClient for CdClientPropertyEntranceComponent {
+    const TABLE: &'static str = "CdClientPropertyEntranceComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4147,7 +4149,7 @@ impl FromCdClient for PropertyEntranceComponent {
     }
 }
 
-impl HasKey for PropertyEntranceComponent {
+impl HasKey for CdClientPropertyEntranceComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4157,7 +4159,7 @@ impl HasKey for PropertyEntranceComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PropertyTemplate {
+pub struct CdClientPropertyTemplate {
     pub id: i32,
     pub map_id: i32,
     pub vendor_map_id: i32,
@@ -4180,8 +4182,8 @@ pub struct PropertyTemplate {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for PropertyTemplate {
-    const TABLE: &'static str = "PropertyTemplate";
+impl FromCdClient for CdClientPropertyTemplate {
+    const TABLE: &'static str = "CdClientPropertyTemplate";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4209,7 +4211,7 @@ impl FromCdClient for PropertyTemplate {
     }
 }
 
-impl HasKey for PropertyTemplate {
+impl HasKey for CdClientPropertyTemplate {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4219,15 +4221,15 @@ impl HasKey for PropertyTemplate {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ProximityMonitorComponent {
+pub struct CdClientProximityMonitorComponent {
     pub id: i32,
     pub proximities: Vec<i32>,
     pub load_on_client: bool,
     pub load_on_server: bool,
 }
 
-impl FromCdClient for ProximityMonitorComponent {
-    const TABLE: &'static str = "ProximityMonitorComponent";
+impl FromCdClient for CdClientProximityMonitorComponent {
+    const TABLE: &'static str = "CdClientProximityMonitorComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4239,7 +4241,7 @@ impl FromCdClient for ProximityMonitorComponent {
     }
 }
 
-impl HasKey for ProximityMonitorComponent {
+impl HasKey for CdClientProximityMonitorComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4249,7 +4251,7 @@ impl HasKey for ProximityMonitorComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ProximityTypes {
+pub struct CdClientProximityTypes {
     pub id: i32,
     pub name: String,
     pub radius: i32,
@@ -4260,8 +4262,8 @@ pub struct ProximityTypes {
     pub load_on_server: bool,
 }
 
-impl FromCdClient for ProximityTypes {
-    const TABLE: &'static str = "ProximityTypes";
+impl FromCdClient for CdClientProximityTypes {
+    const TABLE: &'static str = "CdClientProximityTypes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4277,7 +4279,7 @@ impl FromCdClient for ProximityTypes {
     }
 }
 
-impl HasKey for ProximityTypes {
+impl HasKey for CdClientProximityTypes {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4287,7 +4289,7 @@ impl HasKey for ProximityTypes {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RacingModuleComponent {
+pub struct CdClientRacingModuleComponent {
     pub id: i32,
     pub top_speed: Option<f64>,
     pub acceleration: Option<f64>,
@@ -4296,8 +4298,8 @@ pub struct RacingModuleComponent {
     pub imagination: Option<f64>,
 }
 
-impl FromCdClient for RacingModuleComponent {
-    const TABLE: &'static str = "RacingModuleComponent";
+impl FromCdClient for CdClientRacingModuleComponent {
+    const TABLE: &'static str = "CdClientRacingModuleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4311,7 +4313,7 @@ impl FromCdClient for RacingModuleComponent {
     }
 }
 
-impl HasKey for RacingModuleComponent {
+impl HasKey for CdClientRacingModuleComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4321,7 +4323,7 @@ impl HasKey for RacingModuleComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RailActivatorComponent {
+pub struct CdClientRailActivatorComponent {
     pub id: i32,
     pub start_anim: String,
     pub loop_anim: Option<String>,
@@ -4340,8 +4342,8 @@ pub struct RailActivatorComponent {
     pub show_name_billboard: bool,
 }
 
-impl FromCdClient for RailActivatorComponent {
-    const TABLE: &'static str = "RailActivatorComponent";
+impl FromCdClient for CdClientRailActivatorComponent {
+    const TABLE: &'static str = "CdClientRailActivatorComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4365,7 +4367,7 @@ impl FromCdClient for RailActivatorComponent {
     }
 }
 
-impl HasKey for RailActivatorComponent {
+impl HasKey for CdClientRailActivatorComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4375,15 +4377,15 @@ impl HasKey for RailActivatorComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RarityTable {
+pub struct CdClientRarityTable {
     pub id: i32,
     pub randmax: f64,
     pub rarity: i32,
     pub rarity_table_index: i32,
 }
 
-impl FromCdClient for RarityTable {
-    const TABLE: &'static str = "RarityTable";
+impl FromCdClient for CdClientRarityTable {
+    const TABLE: &'static str = "CdClientRarityTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4395,7 +4397,7 @@ impl FromCdClient for RarityTable {
     }
 }
 
-impl HasGroupKey for RarityTable {
+impl HasGroupKey for CdClientRarityTable {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -4405,12 +4407,12 @@ impl HasGroupKey for RarityTable {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RarityTableIndex {
+pub struct CdClientRarityTableIndex {
     pub rarity_table_index: i32,
 }
 
-impl FromCdClient for RarityTableIndex {
-    const TABLE: &'static str = "RarityTableIndex";
+impl FromCdClient for CdClientRarityTableIndex {
+    const TABLE: &'static str = "CdClientRarityTableIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4419,7 +4421,7 @@ impl FromCdClient for RarityTableIndex {
     }
 }
 
-impl HasKey for RarityTableIndex {
+impl HasKey for CdClientRarityTableIndex {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4429,7 +4431,7 @@ impl HasKey for RarityTableIndex {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RebuildComponent {
+pub struct CdClientRebuildComponent {
     pub id: i32,
     pub reset_time: f64,
     pub complete_time: Option<f64>,
@@ -4442,8 +4444,8 @@ pub struct RebuildComponent {
     pub time_before_smash: f64,
 }
 
-impl FromCdClient for RebuildComponent {
-    const TABLE: &'static str = "RebuildComponent";
+impl FromCdClient for CdClientRebuildComponent {
+    const TABLE: &'static str = "CdClientRebuildComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4461,7 +4463,7 @@ impl FromCdClient for RebuildComponent {
     }
 }
 
-impl HasKey for RebuildComponent {
+impl HasKey for CdClientRebuildComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4471,7 +4473,7 @@ impl HasKey for RebuildComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RebuildSections {
+pub struct CdClientRebuildSections {
     pub id: i32,
     pub rebuild_id: i32,
     pub object_id: i32,
@@ -4487,8 +4489,8 @@ pub struct RebuildSections {
     pub b_placed: bool,
 }
 
-impl FromCdClient for RebuildSections {
-    const TABLE: &'static str = "RebuildSections";
+impl FromCdClient for CdClientRebuildSections {
+    const TABLE: &'static str = "CdClientRebuildSections";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4509,7 +4511,7 @@ impl FromCdClient for RebuildSections {
     }
 }
 
-impl HasKey for RebuildSections {
+impl HasKey for CdClientRebuildSections {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4519,12 +4521,12 @@ impl HasKey for RebuildSections {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ReleaseVersion {
+pub struct CdClientReleaseVersion {
     pub release_version: String,
     pub release_date: i64,
 }
 
-impl FromCdClient for ReleaseVersion {
+impl FromCdClient for CdClientReleaseVersion {
     const TABLE: &'static str = "Release_Version";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -4535,7 +4537,7 @@ impl FromCdClient for ReleaseVersion {
     }
 }
 
-impl HasKey for ReleaseVersion {
+impl HasKey for CdClientReleaseVersion {
     type Key = String;
 
     fn get_key(&self) -> &Self::Key {
@@ -4545,7 +4547,7 @@ impl HasKey for ReleaseVersion {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RenderComponent {
+pub struct CdClientRenderComponent {
     pub id: i32,
     pub render_asset: Option<String>,
     pub icon_asset: Option<String>,
@@ -4576,7 +4578,7 @@ pub struct RenderComponent {
     pub attach_indicators_to_node: Option<bool>,
 }
 
-impl FromCdClient for RenderComponent {
+impl FromCdClient for CdClientRenderComponent {
     const TABLE: &'static str = "RenderComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -4613,7 +4615,7 @@ impl FromCdClient for RenderComponent {
     }
 }
 
-impl HasKey for RenderComponent {
+impl HasKey for CdClientRenderComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4623,7 +4625,7 @@ impl HasKey for RenderComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RenderComponentFlash {
+pub struct CdClientRenderComponentFlash {
     pub id: i32,
     pub interactive: bool,
     pub animated: bool,
@@ -4633,8 +4635,8 @@ pub struct RenderComponentFlash {
     pub uid: i32,
 }
 
-impl FromCdClient for RenderComponentFlash {
-    const TABLE: &'static str = "RenderComponentFlash";
+impl FromCdClient for CdClientRenderComponentFlash {
+    const TABLE: &'static str = "CdClientRenderComponentFlash";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4649,7 +4651,7 @@ impl FromCdClient for RenderComponentFlash {
     }
 }
 
-impl HasGroupKey for RenderComponentFlash {
+impl HasGroupKey for CdClientRenderComponentFlash {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -4659,13 +4661,13 @@ impl HasGroupKey for RenderComponentFlash {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RenderComponentWrapper {
+pub struct CdClientRenderComponentWrapper {
     pub id: i32,
     pub default_wrapper_asset: String,
 }
 
-impl FromCdClient for RenderComponentWrapper {
-    const TABLE: &'static str = "RenderComponentWrapper";
+impl FromCdClient for CdClientRenderComponentWrapper {
+    const TABLE: &'static str = "CdClientRenderComponentWrapper";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4675,7 +4677,7 @@ impl FromCdClient for RenderComponentWrapper {
     }
 }
 
-impl HasKey for RenderComponentWrapper {
+impl HasKey for CdClientRenderComponentWrapper {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4685,14 +4687,14 @@ impl HasKey for RenderComponentWrapper {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RenderIconAssets {
+pub struct CdClientRenderIconAssets {
     pub id: i32,
     pub icon_asset: Option<String>,
     pub blank_column: Option<String>,
 }
 
-impl FromCdClient for RenderIconAssets {
-    const TABLE: &'static str = "RenderIconAssets";
+impl FromCdClient for CdClientRenderIconAssets {
+    const TABLE: &'static str = "CdClientRenderIconAssets";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4703,7 +4705,7 @@ impl FromCdClient for RenderIconAssets {
     }
 }
 
-impl HasKey for RenderIconAssets {
+impl HasKey for CdClientRenderIconAssets {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4713,14 +4715,14 @@ impl HasKey for RenderIconAssets {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ReputationRewards {
+pub struct CdClientReputationRewards {
     pub rep_level: i32,
     pub sublevel: i32,
     pub reputation: f64,
 }
 
-impl FromCdClient for ReputationRewards {
-    const TABLE: &'static str = "ReputationRewards";
+impl FromCdClient for CdClientReputationRewards {
+    const TABLE: &'static str = "CdClientReputationRewards";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4731,7 +4733,7 @@ impl FromCdClient for ReputationRewards {
     }
 }
 
-impl HasKey for ReputationRewards {
+impl HasKey for CdClientReputationRewards {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4741,7 +4743,7 @@ impl HasKey for ReputationRewards {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RewardCodes {
+pub struct CdClientRewardCodes {
     pub id: i32,
     pub code: String,
     pub attachment_lot: Option<i32>,
@@ -4749,8 +4751,8 @@ pub struct RewardCodes {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for RewardCodes {
-    const TABLE: &'static str = "RewardCodes";
+impl FromCdClient for CdClientRewardCodes {
+    const TABLE: &'static str = "CdClientRewardCodes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4763,7 +4765,7 @@ impl FromCdClient for RewardCodes {
     }
 }
 
-impl HasKey for RewardCodes {
+impl HasKey for CdClientRewardCodes {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4773,7 +4775,7 @@ impl HasKey for RewardCodes {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Rewards {
+pub struct CdClientRewards {
     pub id: i32,
     pub level_id: i32,
     pub mission_id: Option<i32>,
@@ -4782,8 +4784,8 @@ pub struct Rewards {
     pub count: Option<i32>,
 }
 
-impl FromCdClient for Rewards {
-    const TABLE: &'static str = "Rewards";
+impl FromCdClient for CdClientRewards {
+    const TABLE: &'static str = "CdClientRewards";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4797,7 +4799,7 @@ impl FromCdClient for Rewards {
     }
 }
 
-impl HasKey for Rewards {
+impl HasKey for CdClientRewards {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4807,7 +4809,7 @@ impl HasKey for Rewards {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct RocketLaunchpadControlComponent {
+pub struct CdClientRocketLaunchpadControlComponent {
     pub id: i32,
     pub target_zone: i32,
     pub default_zone_id: i32,
@@ -4823,8 +4825,8 @@ pub struct RocketLaunchpadControlComponent {
     pub alt_landing_spawn_point_name: Option<String>,
 }
 
-impl FromCdClient for RocketLaunchpadControlComponent {
-    const TABLE: &'static str = "RocketLaunchpadControlComponent";
+impl FromCdClient for CdClientRocketLaunchpadControlComponent {
+    const TABLE: &'static str = "CdClientRocketLaunchpadControlComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4845,7 +4847,7 @@ impl FromCdClient for RocketLaunchpadControlComponent {
     }
 }
 
-impl HasKey for RocketLaunchpadControlComponent {
+impl HasKey for CdClientRocketLaunchpadControlComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4855,13 +4857,13 @@ impl HasKey for RocketLaunchpadControlComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SceneTable {
+pub struct CdClientSceneTable {
     pub scene_id: i32,
     pub scene_name: String,
 }
 
-impl FromCdClient for SceneTable {
-    const TABLE: &'static str = "SceneTable";
+impl FromCdClient for CdClientSceneTable {
+    const TABLE: &'static str = "CdClientSceneTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4871,7 +4873,7 @@ impl FromCdClient for SceneTable {
     }
 }
 
-impl HasKey for SceneTable {
+impl HasKey for CdClientSceneTable {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4881,14 +4883,14 @@ impl HasKey for SceneTable {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ScriptComponent {
+pub struct CdClientScriptComponent {
     pub id: i32,
     pub script_name: Option<String>,
     pub client_script_name: Option<String>,
 }
 
-impl FromCdClient for ScriptComponent {
-    const TABLE: &'static str = "ScriptComponent";
+impl FromCdClient for CdClientScriptComponent {
+    const TABLE: &'static str = "CdClientScriptComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4899,7 +4901,7 @@ impl FromCdClient for ScriptComponent {
     }
 }
 
-impl HasKey for ScriptComponent {
+impl HasKey for CdClientScriptComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4909,7 +4911,7 @@ impl HasKey for ScriptComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SkillBehavior {
+pub struct CdClientSkillBehavior {
     pub skill_id: i32,
     pub loc_status: i32,
     pub behavior_id: i32,
@@ -4931,7 +4933,7 @@ pub struct SkillBehavior {
     pub cancel_type: Option<i32>,
 }
 
-impl FromCdClient for SkillBehavior {
+impl FromCdClient for CdClientSkillBehavior {
     const TABLE: &'static str = "SkillBehavior";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -4959,7 +4961,7 @@ impl FromCdClient for SkillBehavior {
     }
 }
 
-impl HasKey for SkillBehavior {
+impl HasKey for CdClientSkillBehavior {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -4969,7 +4971,7 @@ impl HasKey for SkillBehavior {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SmashableChain {
+pub struct CdClientSmashableChain {
     pub chain_index: i32,
     pub chain_level: i32,
     pub loot_matrix_id: i32,
@@ -4981,8 +4983,8 @@ pub struct SmashableChain {
     pub chain_step_id: i32,
 }
 
-impl FromCdClient for SmashableChain {
-    const TABLE: &'static str = "SmashableChain";
+impl FromCdClient for CdClientSmashableChain {
+    const TABLE: &'static str = "CdClientSmashableChain";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4999,7 +5001,7 @@ impl FromCdClient for SmashableChain {
     }
 }
 
-impl HasGroupKey for SmashableChain {
+impl HasGroupKey for CdClientSmashableChain {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -5009,15 +5011,15 @@ impl HasGroupKey for SmashableChain {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SmashableChainIndex {
+pub struct CdClientSmashableChainIndex {
     pub id: i32,
     pub target_group: String,
     pub description: String,
     pub continuous: i32,
 }
 
-impl FromCdClient for SmashableChainIndex {
-    const TABLE: &'static str = "SmashableChainIndex";
+impl FromCdClient for CdClientSmashableChainIndex {
+    const TABLE: &'static str = "CdClientSmashableChainIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5029,7 +5031,7 @@ impl FromCdClient for SmashableChainIndex {
     }
 }
 
-impl HasKey for SmashableChainIndex {
+impl HasKey for CdClientSmashableChainIndex {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5039,13 +5041,13 @@ impl HasKey for SmashableChainIndex {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SmashableComponent {
+pub struct CdClientSmashableComponent {
     pub id: i32,
     pub loot_matrix_index: i32,
 }
 
-impl FromCdClient for SmashableComponent {
-    const TABLE: &'static str = "SmashableComponent";
+impl FromCdClient for CdClientSmashableComponent {
+    const TABLE: &'static str = "CdClientSmashableComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5055,7 +5057,7 @@ impl FromCdClient for SmashableComponent {
     }
 }
 
-impl HasKey for SmashableComponent {
+impl HasKey for CdClientSmashableComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5065,13 +5067,13 @@ impl HasKey for SmashableComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SmashableElements {
+pub struct CdClientSmashableElements {
     pub element_id: i32,
     pub drop_weight: i32,
 }
 
-impl FromCdClient for SmashableElements {
-    const TABLE: &'static str = "SmashableElements";
+impl FromCdClient for CdClientSmashableElements {
+    const TABLE: &'static str = "CdClientSmashableElements";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5081,7 +5083,7 @@ impl FromCdClient for SmashableElements {
     }
 }
 
-impl HasKey for SmashableElements {
+impl HasKey for CdClientSmashableElements {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5091,7 +5093,7 @@ impl HasKey for SmashableElements {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SpeedchatMenu {
+pub struct CdClientSpeedchatMenu {
     pub id: i32,
     pub parent_id: Option<i32>,
     pub emote_id: Option<i32>,
@@ -5101,8 +5103,8 @@ pub struct SpeedchatMenu {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for SpeedchatMenu {
-    const TABLE: &'static str = "SpeedchatMenu";
+impl FromCdClient for CdClientSpeedchatMenu {
+    const TABLE: &'static str = "CdClientSpeedchatMenu";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5117,7 +5119,7 @@ impl FromCdClient for SpeedchatMenu {
     }
 }
 
-impl HasKey for SpeedchatMenu {
+impl HasKey for CdClientSpeedchatMenu {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5127,7 +5129,7 @@ impl HasKey for SpeedchatMenu {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SubscriptionPricing {
+pub struct CdClientSubscriptionPricing {
     pub id: i32,
     pub country_code: String,
     pub monthly_fee_gold: String,
@@ -5137,8 +5139,8 @@ pub struct SubscriptionPricing {
     pub symbol_is_appended: bool,
 }
 
-impl FromCdClient for SubscriptionPricing {
-    const TABLE: &'static str = "SubscriptionPricing";
+impl FromCdClient for CdClientSubscriptionPricing {
+    const TABLE: &'static str = "CdClientSubscriptionPricing";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5153,7 +5155,7 @@ impl FromCdClient for SubscriptionPricing {
     }
 }
 
-impl HasKey for SubscriptionPricing {
+impl HasKey for CdClientSubscriptionPricing {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5163,13 +5165,13 @@ impl HasKey for SubscriptionPricing {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SurfaceType {
+pub struct CdClientSurfaceType {
     pub surface_type: i32,
     pub footstep_ndaudio_meta_event_set_name: Option<String>,
 }
 
-impl FromCdClient for SurfaceType {
-    const TABLE: &'static str = "SurfaceType";
+impl FromCdClient for CdClientSurfaceType {
+    const TABLE: &'static str = "CdClientSurfaceType";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5179,7 +5181,7 @@ impl FromCdClient for SurfaceType {
     }
 }
 
-impl HasKey for SurfaceType {
+impl HasKey for CdClientSurfaceType {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5189,7 +5191,7 @@ impl HasKey for SurfaceType {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct TamingBuildPuzzles {
+pub struct CdClientTamingBuildPuzzles {
     pub id: i32,
     pub puzzle_model_lot: i32,
     pub npclot: i32,
@@ -5205,8 +5207,8 @@ pub struct TamingBuildPuzzles {
     pub imag_cost_per_build: i32,
 }
 
-impl FromCdClient for TamingBuildPuzzles {
-    const TABLE: &'static str = "TamingBuildPuzzles";
+impl FromCdClient for CdClientTamingBuildPuzzles {
+    const TABLE: &'static str = "CdClientTamingBuildPuzzles";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5227,7 +5229,7 @@ impl FromCdClient for TamingBuildPuzzles {
     }
 }
 
-impl HasKey for TamingBuildPuzzles {
+impl HasKey for CdClientTamingBuildPuzzles {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5237,13 +5239,13 @@ impl HasKey for TamingBuildPuzzles {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct TextDescription {
+pub struct CdClientTextDescription {
     pub text_id: i32,
     pub test_description: String,
 }
 
-impl FromCdClient for TextDescription {
-    const TABLE: &'static str = "TextDescription";
+impl FromCdClient for CdClientTextDescription {
+    const TABLE: &'static str = "CdClientTextDescription";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5253,7 +5255,7 @@ impl FromCdClient for TextDescription {
     }
 }
 
-impl HasKey for TextDescription {
+impl HasKey for CdClientTextDescription {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5263,14 +5265,14 @@ impl HasKey for TextDescription {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct TextLanguage {
+pub struct CdClientTextLanguage {
     pub text_id: i32,
     pub language_id: i32,
     pub text: String,
 }
 
-impl FromCdClient for TextLanguage {
-    const TABLE: &'static str = "TextLanguage";
+impl FromCdClient for CdClientTextLanguage {
+    const TABLE: &'static str = "CdClientTextLanguage";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5281,7 +5283,7 @@ impl FromCdClient for TextLanguage {
     }
 }
 
-impl HasKey for TextLanguage {
+impl HasKey for CdClientTextLanguage {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5291,7 +5293,7 @@ impl HasKey for TextLanguage {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct TrailEffects {
+pub struct CdClientTrailEffects {
     pub trail_id: i32,
     pub texture_name: String,
     pub blendmode: i32,
@@ -5320,8 +5322,8 @@ pub struct TrailEffects {
     pub end_color_a: f64,
 }
 
-impl FromCdClient for TrailEffects {
-    const TABLE: &'static str = "TrailEffects";
+impl FromCdClient for CdClientTrailEffects {
+    const TABLE: &'static str = "CdClientTrailEffects";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5355,7 +5357,7 @@ impl FromCdClient for TrailEffects {
     }
 }
 
-impl HasKey for TrailEffects {
+impl HasKey for CdClientTrailEffects {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5365,7 +5367,7 @@ impl HasKey for TrailEffects {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct UgBehaviorSounds {
+pub struct CdClientUgBehaviorSounds {
     pub id: i32,
     pub guid: String,
     pub localize: bool,
@@ -5373,7 +5375,7 @@ pub struct UgBehaviorSounds {
     pub gate_version: Option<String>,
 }
 
-impl FromCdClient for UgBehaviorSounds {
+impl FromCdClient for CdClientUgBehaviorSounds {
     const TABLE: &'static str = "UGBehaviorSounds";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -5387,7 +5389,7 @@ impl FromCdClient for UgBehaviorSounds {
     }
 }
 
-impl HasKey for UgBehaviorSounds {
+impl HasKey for CdClientUgBehaviorSounds {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5397,7 +5399,7 @@ impl HasKey for UgBehaviorSounds {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct VehiclePhysics {
+pub struct CdClientVehiclePhysics {
     pub id: i32,
     pub hkx_filename: Option<String>,
     pub f_gravity_scale: f64,
@@ -5503,8 +5505,8 @@ pub struct VehiclePhysics {
     pub b_wheels_visible: Option<bool>,
 }
 
-impl FromCdClient for VehiclePhysics {
-    const TABLE: &'static str = "VehiclePhysics";
+impl FromCdClient for CdClientVehiclePhysics {
+    const TABLE: &'static str = "CdClientVehiclePhysics";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5615,7 +5617,7 @@ impl FromCdClient for VehiclePhysics {
     }
 }
 
-impl HasKey for VehiclePhysics {
+impl HasKey for CdClientVehiclePhysics {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5625,15 +5627,15 @@ impl HasKey for VehiclePhysics {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct VehicleStatMap {
+pub struct CdClientVehicleStatMap {
     pub id: i32,
     pub module_stat: String,
     pub havok_stat: String,
     pub havok_change_per_module_stat: f64,
 }
 
-impl FromCdClient for VehicleStatMap {
-    const TABLE: &'static str = "VehicleStatMap";
+impl FromCdClient for CdClientVehicleStatMap {
+    const TABLE: &'static str = "CdClientVehicleStatMap";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5645,7 +5647,7 @@ impl FromCdClient for VehicleStatMap {
     }
 }
 
-impl HasGroupKey for VehicleStatMap {
+impl HasGroupKey for CdClientVehicleStatMap {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -5655,7 +5657,7 @@ impl HasGroupKey for VehicleStatMap {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct VendorComponent {
+pub struct CdClientVendorComponent {
     pub id: i32,
     pub buy_scalar: f64,
     pub sell_scalar: f64,
@@ -5663,8 +5665,8 @@ pub struct VendorComponent {
     pub loot_matrix_index: i32,
 }
 
-impl FromCdClient for VendorComponent {
-    const TABLE: &'static str = "VendorComponent";
+impl FromCdClient for CdClientVendorComponent {
+    const TABLE: &'static str = "CdClientVendorComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5677,7 +5679,7 @@ impl FromCdClient for VendorComponent {
     }
 }
 
-impl HasKey for VendorComponent {
+impl HasKey for CdClientVendorComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5687,7 +5689,7 @@ impl HasKey for VendorComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct WhatsCoolItemSpotlight {
+pub struct CdClientWhatsCoolItemSpotlight {
     pub id: i32,
     pub item_id: i32,
     pub localize: bool,
@@ -5695,8 +5697,8 @@ pub struct WhatsCoolItemSpotlight {
     pub loc_status: i32,
 }
 
-impl FromCdClient for WhatsCoolItemSpotlight {
-    const TABLE: &'static str = "WhatsCoolItemSpotlight";
+impl FromCdClient for CdClientWhatsCoolItemSpotlight {
+    const TABLE: &'static str = "CdClientWhatsCoolItemSpotlight";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5709,7 +5711,7 @@ impl FromCdClient for WhatsCoolItemSpotlight {
     }
 }
 
-impl HasKey for WhatsCoolItemSpotlight {
+impl HasKey for CdClientWhatsCoolItemSpotlight {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5719,7 +5721,7 @@ impl HasKey for WhatsCoolItemSpotlight {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct WhatsCoolNewsAndTips {
+pub struct CdClientWhatsCoolNewsAndTips {
     pub id: i32,
     pub icon_id: Option<i32>,
     pub r#type: i32,
@@ -5728,8 +5730,8 @@ pub struct WhatsCoolNewsAndTips {
     pub loc_status: i32,
 }
 
-impl FromCdClient for WhatsCoolNewsAndTips {
-    const TABLE: &'static str = "WhatsCoolNewsAndTips";
+impl FromCdClient for CdClientWhatsCoolNewsAndTips {
+    const TABLE: &'static str = "CdClientWhatsCoolNewsAndTips";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5743,7 +5745,7 @@ impl FromCdClient for WhatsCoolNewsAndTips {
     }
 }
 
-impl HasKey for WhatsCoolNewsAndTips {
+impl HasKey for CdClientWhatsCoolNewsAndTips {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5753,7 +5755,7 @@ impl HasKey for WhatsCoolNewsAndTips {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct WorldConfig {
+pub struct CdClientWorldConfig {
     pub world_config_id: i32,
     pub pegravityvalue: f64,
     pub pebroadphaseworldsize: f64,
@@ -5813,8 +5815,8 @@ pub struct WorldConfig {
     pub level_cap_currency_conversion: i32,
 }
 
-impl FromCdClient for WorldConfig {
-    const TABLE: &'static str = "WorldConfig";
+impl FromCdClient for CdClientWorldConfig {
+    const TABLE: &'static str = "CdClientWorldConfig";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5879,7 +5881,7 @@ impl FromCdClient for WorldConfig {
     }
 }
 
-impl HasKey for WorldConfig {
+impl HasKey for CdClientWorldConfig {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5889,7 +5891,7 @@ impl HasKey for WorldConfig {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ZoneLoadingTips {
+pub struct CdClientZoneLoadingTips {
     pub id: i32,
     pub zoneid: i32,
     pub imagelocation: String,
@@ -5900,8 +5902,8 @@ pub struct ZoneLoadingTips {
     pub target_version: Option<String>,
 }
 
-impl FromCdClient for ZoneLoadingTips {
-    const TABLE: &'static str = "ZoneLoadingTips";
+impl FromCdClient for CdClientZoneLoadingTips {
+    const TABLE: &'static str = "CdClientZoneLoadingTips";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5917,7 +5919,7 @@ impl FromCdClient for ZoneLoadingTips {
     }
 }
 
-impl HasKey for ZoneLoadingTips {
+impl HasKey for CdClientZoneLoadingTips {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -5927,15 +5929,15 @@ impl HasKey for ZoneLoadingTips {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ZoneSummary {
+pub struct CdClientZoneSummary {
     pub zone_id: i32,
     pub r#type: i32,
     pub value: Option<i32>,
     pub unique_id: i32,
 }
 
-impl FromCdClient for ZoneSummary {
-    const TABLE: &'static str = "ZoneSummary";
+impl FromCdClient for CdClientZoneSummary {
+    const TABLE: &'static str = "CdClientZoneSummary";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5947,7 +5949,7 @@ impl FromCdClient for ZoneSummary {
     }
 }
 
-impl HasGroupKey for ZoneSummary {
+impl HasGroupKey for CdClientZoneSummary {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -5957,7 +5959,7 @@ impl HasGroupKey for ZoneSummary {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct ZoneTable {
+pub struct CdClientZoneTable {
     pub zone_id: i32,
     pub loc_status: i32,
     pub zone_name: String,
@@ -5987,8 +5989,8 @@ pub struct ZoneTable {
     pub mounts_allowed: bool,
 }
 
-impl FromCdClient for ZoneTable {
-    const TABLE: &'static str = "ZoneTable";
+impl FromCdClient for CdClientZoneTable {
+    const TABLE: &'static str = "CdClientZoneTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -6023,7 +6025,7 @@ impl FromCdClient for ZoneTable {
     }
 }
 
-impl HasKey for ZoneTable {
+impl HasKey for CdClientZoneTable {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6033,14 +6035,14 @@ impl HasKey for ZoneTable {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct BrickAttributes {
+pub struct CdClientBrickAttributes {
     pub id: i32,
     pub icon_asset: String,
     pub display_order: i32,
     pub loc_status: i32,
 }
 
-impl FromCdClient for BrickAttributes {
+impl FromCdClient for CdClientBrickAttributes {
     const TABLE: &'static str = "brickAttributes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6053,7 +6055,7 @@ impl FromCdClient for BrickAttributes {
     }
 }
 
-impl HasKey for BrickAttributes {
+impl HasKey for CdClientBrickAttributes {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6063,7 +6065,7 @@ impl HasKey for BrickAttributes {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Dtproperties {
+pub struct CdClientDtproperties {
     pub id: i32,
     pub objectid: i32,
     pub property: String,
@@ -6073,7 +6075,7 @@ pub struct Dtproperties {
     pub version: i32,
 }
 
-impl FromCdClient for Dtproperties {
+impl FromCdClient for CdClientDtproperties {
     const TABLE: &'static str = "dtproperties";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6089,7 +6091,7 @@ impl FromCdClient for Dtproperties {
     }
 }
 
-impl HasKey for Dtproperties {
+impl HasKey for CdClientDtproperties {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6099,13 +6101,13 @@ impl HasKey for Dtproperties {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapAnimationPriorities {
+pub struct CdClientMapAnimationPriorities {
     pub id: i32,
     pub name: String,
     pub priority: f64,
 }
 
-impl FromCdClient for MapAnimationPriorities {
+impl FromCdClient for CdClientMapAnimationPriorities {
     const TABLE: &'static str = "mapAnimationPriorities";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6117,7 +6119,7 @@ impl FromCdClient for MapAnimationPriorities {
     }
 }
 
-impl HasKey for MapAnimationPriorities {
+impl HasKey for CdClientMapAnimationPriorities {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6127,14 +6129,14 @@ impl HasKey for MapAnimationPriorities {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapAssetType {
+pub struct CdClientMapAssetType {
     pub id: i32,
     pub label: String,
     pub pathdir: String,
     pub typelabel: String,
 }
 
-impl FromCdClient for MapAssetType {
+impl FromCdClient for CdClientMapAssetType {
     const TABLE: &'static str = "mapAssetType";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6147,7 +6149,7 @@ impl FromCdClient for MapAssetType {
     }
 }
 
-impl HasKey for MapAssetType {
+impl HasKey for CdClientMapAssetType {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6157,13 +6159,13 @@ impl HasKey for MapAssetType {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapIcon {
+pub struct CdClientMapIcon {
     pub lot: i32,
     pub icon_id: i32,
     pub icon_state: i32,
 }
 
-impl FromCdClient for MapIcon {
+impl FromCdClient for CdClientMapIcon {
     const TABLE: &'static str = "mapIcon";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6175,7 +6177,7 @@ impl FromCdClient for MapIcon {
     }
 }
 
-impl HasGroupKey for MapIcon {
+impl HasGroupKey for CdClientMapIcon {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
@@ -6185,13 +6187,13 @@ impl HasGroupKey for MapIcon {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapItemTypes {
+pub struct CdClientMapItemTypes {
     pub id: i32,
     pub description: String,
     pub equip_location: Option<String>,
 }
 
-impl FromCdClient for MapItemTypes {
+impl FromCdClient for CdClientMapItemTypes {
     const TABLE: &'static str = "mapItemTypes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6203,7 +6205,7 @@ impl FromCdClient for MapItemTypes {
     }
 }
 
-impl HasKey for MapItemTypes {
+impl HasKey for CdClientMapItemTypes {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6213,13 +6215,13 @@ impl HasKey for MapItemTypes {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapRenderEffects {
+pub struct CdClientMapRenderEffects {
     pub id: i32,
     pub game_id: i32,
     pub description: String,
 }
 
-impl FromCdClient for MapRenderEffects {
+impl FromCdClient for CdClientMapRenderEffects {
     const TABLE: &'static str = "mapRenderEffects";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6231,7 +6233,7 @@ impl FromCdClient for MapRenderEffects {
     }
 }
 
-impl HasKey for MapRenderEffects {
+impl HasKey for CdClientMapRenderEffects {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6241,14 +6243,14 @@ impl HasKey for MapRenderEffects {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapShaders {
+pub struct CdClientMapShaders {
     pub id: i32,
     pub label: String,
     pub game_value: i32,
     pub priority: Option<i32>,
 }
 
-impl FromCdClient for MapShaders {
+impl FromCdClient for CdClientMapShaders {
     const TABLE: &'static str = "mapShaders";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6261,7 +6263,7 @@ impl FromCdClient for MapShaders {
     }
 }
 
-impl HasKey for MapShaders {
+impl HasKey for CdClientMapShaders {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6271,13 +6273,13 @@ impl HasKey for MapShaders {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapTextureResource {
+pub struct CdClientMapTextureResource {
     pub id: i32,
     pub texturepath: String,
     pub surface_type: i32,
 }
 
-impl FromCdClient for MapTextureResource {
+impl FromCdClient for CdClientMapTextureResource {
     const TABLE: &'static str = "mapTextureResource";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6289,7 +6291,7 @@ impl FromCdClient for MapTextureResource {
     }
 }
 
-impl HasKey for MapTextureResource {
+impl HasKey for CdClientMapTextureResource {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6299,13 +6301,13 @@ impl HasKey for MapTextureResource {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapBlueprintCategory {
+pub struct CdClientMapBlueprintCategory {
     pub id: i32,
     pub description: String,
     pub enabled: bool,
 }
 
-impl FromCdClient for MapBlueprintCategory {
+impl FromCdClient for CdClientMapBlueprintCategory {
     const TABLE: &'static str = "map_BlueprintCategory";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6317,7 +6319,7 @@ impl FromCdClient for MapBlueprintCategory {
     }
 }
 
-impl HasKey for MapBlueprintCategory {
+impl HasKey for CdClientMapBlueprintCategory {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6327,7 +6329,7 @@ impl HasKey for MapBlueprintCategory {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Sysdiagrams {
+pub struct CdClientSysdiagrams {
     pub name: String,
     pub principal_id: i32,
     pub diagram_id: i32,
@@ -6335,7 +6337,7 @@ pub struct Sysdiagrams {
     pub definition: String,
 }
 
-impl FromCdClient for Sysdiagrams {
+impl FromCdClient for CdClientSysdiagrams {
     const TABLE: &'static str = "sysdiagrams";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6349,7 +6351,7 @@ impl FromCdClient for Sysdiagrams {
     }
 }
 
-impl HasKey for Sysdiagrams {
+impl HasKey for CdClientSysdiagrams {
     type Key = String;
 
     fn get_key(&self) -> &Self::Key {
@@ -6359,7 +6361,7 @@ impl HasKey for Sysdiagrams {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct PossessableComponent {
+pub struct CdClientPossessableComponent {
     pub id: i32,
     pub control_scheme_id: i32,
     pub minifig_attach_point: Option<String>,
@@ -6380,8 +6382,8 @@ pub struct PossessableComponent {
     pub disable_interactions: Option<bool>,
 }
 
-impl FromCdClient for PossessableComponent {
-    const TABLE: &'static str = "PossessableComponent";
+impl FromCdClient for CdClientPossessableComponent {
+    const TABLE: &'static str = "CdClientPossessableComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -6407,7 +6409,7 @@ impl FromCdClient for PossessableComponent {
     }
 }
 
-impl HasKey for PossessableComponent {
+impl HasKey for CdClientPossessableComponent {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6417,7 +6419,7 @@ impl HasKey for PossessableComponent {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct SkillSets {
+pub struct CdClientSkillSets {
     pub id: i32,
     pub slot1: Option<i32>,
     pub slot2: Option<i32>,
@@ -6427,8 +6429,8 @@ pub struct SkillSets {
     pub description: Option<String>,
 }
 
-impl FromCdClient for SkillSets {
-    const TABLE: &'static str = "SkillSets";
+impl FromCdClient for CdClientSkillSets {
+    const TABLE: &'static str = "CdClientSkillSets";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -6443,7 +6445,7 @@ impl FromCdClient for SkillSets {
     }
 }
 
-impl HasKey for SkillSets {
+impl HasKey for CdClientSkillSets {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {
@@ -6453,7 +6455,7 @@ impl HasKey for SkillSets {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct MapFacesAndHair {
+pub struct CdClientMapFacesAndHair {
     pub id: i32,
     pub eyes: i32,
     pub eyebrows: i32,
@@ -6462,7 +6464,7 @@ pub struct MapFacesAndHair {
     pub hairstyle: i32,
 }
 
-impl FromCdClient for MapFacesAndHair {
+impl FromCdClient for CdClientMapFacesAndHair {
     const TABLE: &'static str = "mapFacesAndHair";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
@@ -6477,7 +6479,7 @@ impl FromCdClient for MapFacesAndHair {
     }
 }
 
-impl HasKey for MapFacesAndHair {
+impl HasKey for CdClientMapFacesAndHair {
     type Key = i32;
 
     fn get_key(&self) -> &Self::Key {

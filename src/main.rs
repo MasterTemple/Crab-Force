@@ -7,8 +7,10 @@ pub mod locale;
 pub mod queries;
 pub mod repeat;
 
+use std::collections::BTreeMap;
 use std::env;
 use std::path::Path;
+use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::time::Instant;
 
 use bot_config::BotConfig;
@@ -37,8 +39,9 @@ use commands::smash::SmashCommand;
 use commands::unpack::UnpackCommand;
 use commands::vendor::VendorCommand;
 use interaction_command::InteractionCommand;
-use locale::LocaleXML;
+use locale::{LocaleTranslation, LocaleXML};
 use once_cell::sync::Lazy;
+use queries::ObjectQueries;
 use serenity::all::{
     CreateActionRow, CreateAutocompleteResponse, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter,
 };
@@ -56,6 +59,100 @@ static LOCALE_XML: Lazy<LocaleXML> =
     Lazy::new(|| LocaleXML::load_xml(Path::new("/home/dgmastertemple/locale.xml")).unwrap());
 
 static CONFIG: Lazy<BotConfig> = Lazy::new(|| BotConfig::default());
+
+#[derive(Default)]
+pub struct LocaleXML2 {
+    pub locales: BTreeMap<String, Arc<RwLock<LocaleTranslation>>>,
+}
+
+static RW_LOCALE_XML: Lazy<Arc<RwLock<LocaleXML2>>> =
+    Lazy::new(|| Arc::new(RwLock::new(LocaleXML2::default())));
+
+static RW_LOCALE: Lazy<Arc<RwLock<LocaleTranslation>>> = Lazy::new(|| {
+    let locale = &CONFIG.locale;
+    // path should be in config
+    let translation = LocaleXML::load_xml(Path::new("/home/dgmastertemple/locale.xml"))
+        .unwrap()
+        .locales
+        .remove(locale)
+        .expect(format!("Could not find locale {:?}", locale).as_str());
+    Arc::new(RwLock::new(translation))
+});
+
+static RW_CD_CLIENT: Lazy<Arc<RwLock<CdClient>>> = Lazy::new(|| {
+    Arc::new(RwLock::new(
+        CdClient::load_sqlite(Path::new("/home/dgmastertemple/cdclient.sqlite")).unwrap(),
+    ))
+});
+
+// ALSO I CAN IMPL THIS ON MY COMMANDS
+pub trait Api {
+    // i think the move is to say in my config which locale i will use and then store a translation
+    // as a static var
+    fn locale(&self) -> RwLockReadGuard<'_, LocaleTranslation> {
+        // let loc = RW_LOCALE_XML.read().unwrap();
+        // let translation = loc.locales.get("en_US").unwrap();
+        // translation.read().unwrap()
+        // let loc = RW_LOCALE_XML.read().unwrap();
+        // let arc = loc.locales.get("en_US").unwrap().clone();
+        // arc.read().unwrap()
+        RW_LOCALE.read().unwrap()
+    }
+
+    fn cdclient(&self) -> RwLockReadGuard<'_, CdClient> {
+        RW_CD_CLIENT.read().unwrap()
+    }
+}
+
+/*
+* Here is the plan:
+* 1. prefix all structs cdclient with 'CdClient'
+* 2. Create new-type to store id
+* 3. Impl trait to give it access to cdclient/locale/config
+* 4. Update HasKey and HasGroupKey to use 'CdClient<ident>Id' so that way I don't pass the wrong
+*    kind of id
+* 5. Make sure I can pass `CdClientObjectsId` to something that takes i32 (or do comparisons)
+* 6. Perhaps with the HasKey, impl a trait with an id() method and a get() method
+* 7. Actually replace the i32 ids with `CdClient{ident}Id` in `CdClient{ident}` structs (idk about that)
+* 8. Consider where custom structs come in; because i can't have a mere newtype wrapper and also
+*    extra fields; i probably just want to return custom structs from newtype wrapper methods
+*/
+pub struct CdClientObjectsId(i32);
+impl Api for CdClientObjectsId {}
+
+// for reference
+pub struct CdClientObjects;
+
+impl CdClientObjectsId {
+    // in haskey trait though
+    pub fn id(&self) -> i32 {
+        self.0
+    }
+
+    // in haskey trait though (which might return &[])
+    pub fn fetch(&self) -> &CdClientObjects {
+        todo!()
+    }
+
+    pub fn name(&self) -> String {
+        self.cdclient()
+            .objects
+            .at_key(&self.0)
+            .and_then(|o| o.name.clone())
+            .unwrap_or(format!("Item {}", self.0))
+    }
+
+    pub fn as_hyperlink_name(&self) -> String {
+        self.cdclient().object_hyperlinked_name(self.0)
+    }
+}
+
+fn idk(int: i32) {
+    let v: Vec<_> = (1..20)
+        .map(CdClientObjectsId)
+        .map(|o| o.as_hyperlink_name())
+        .collect();
+}
 
 struct Handler;
 
