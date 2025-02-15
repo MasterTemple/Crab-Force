@@ -11,6 +11,22 @@ pub trait Mutated: Sized {
 
 impl<T> Mutated for T {}
 
+pub trait CollectIntoOptionalVec<T>: Iterator {
+    fn collect_some(self) -> Option<Vec<T>>;
+}
+impl<I, T> CollectIntoOptionalVec<T> for I
+where
+    I: Iterator<Item = T>,
+{
+    fn collect_some(self) -> Option<Vec<T>>
+    where
+        Self: Sized,
+    {
+        let v: Vec<T> = self.collect();
+        (!v.is_empty()).then_some(v)
+    }
+}
+
 pub trait OptionBuilder: Sized {
     fn try_build<P>(&mut self, param: Option<P>, func: impl Fn(P) -> Self);
 }

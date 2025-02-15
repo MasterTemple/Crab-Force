@@ -210,7 +210,8 @@ impl<T: HasGroupKey> DerefMut for GroupKeyedVec<T> {
 }
 
 impl<T: HasGroupKey> GroupKeyedVec<T> {
-    pub fn at_group_key(&self, key: &T::Key) -> Option<&[T]> {
+    // pub fn at_group_key(&self, key: &T::Key) -> Option<&[T]> {
+    pub fn at_group_key(&self, key: &T::Key) -> Option<Vec<T>> {
         let idx = self.binary_search_by_key(key, |it| it.clone_key()).ok()?;
 
         let mut min_idx = idx;
@@ -232,7 +233,7 @@ impl<T: HasGroupKey> GroupKeyedVec<T> {
             }
         }
 
-        Some(&self.0[min_idx..=max_idx])
+        Some(self.0[min_idx..=max_idx].to_vec())
     }
 }
 
@@ -280,7 +281,7 @@ pub struct CdClientRows {
     pub ai_combat_roles: Vec<CdClientAiCombatRoles>,
     pub accessory_default_loc: Vec<CdClientAccessoryDefaultLoc>,
     pub activities: Vec<CdClientActivities>,
-    pub activity_rewards: Vec<CdClientActivityCdClientRewards>,
+    pub activity_rewards: Vec<CdClientActivityRewards>,
     pub activity_text: Vec<CdClientActivityText>,
     pub animation_index: Vec<CdClientAnimationIndex>,
     pub animations: Vec<CdClientAnimations>,
@@ -425,7 +426,7 @@ impl CdClientRows {
             ai_combat_roles: CdClientAiCombatRoles::load(&conn)?,
             accessory_default_loc: CdClientAccessoryDefaultLoc::load(&conn)?,
             activities: CdClientActivities::load(&conn)?,
-            activity_rewards: CdClientActivityCdClientRewards::load(&conn)?,
+            activity_rewards: CdClientActivityRewards::load(&conn)?,
             activity_text: CdClientActivityText::load(&conn)?,
             animation_index: CdClientAnimationIndex::load(&conn)?,
             animations: CdClientAnimations::load(&conn)?,
@@ -572,7 +573,7 @@ pub struct CdClient {
     pub ai_combat_roles: KeyedVec<CdClientAiCombatRoles>,
     pub accessory_default_loc: KeyedVec<CdClientAccessoryDefaultLoc>,
     pub activities: KeyedVec<CdClientActivities>,
-    pub activity_rewards: GroupKeyedVec<CdClientActivityCdClientRewards>,
+    pub activity_rewards: GroupKeyedVec<CdClientActivityRewards>,
     pub activity_text: GroupKeyedVec<CdClientActivityText>,
     pub animation_index: KeyedVec<CdClientAnimationIndex>,
     pub animations: GroupKeyedVec<CdClientAnimations>,
@@ -993,7 +994,7 @@ impl HasKey for CdClientActivities {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct CdClientActivityCdClientRewards {
+pub struct CdClientActivityRewards {
     pub object_template: i32,
     pub activity_reward_index: i32,
     pub activity_rating: i32,
@@ -1003,8 +1004,8 @@ pub struct CdClientActivityCdClientRewards {
     pub description: String,
 }
 
-impl FromCdClient for CdClientActivityCdClientRewards {
-    const TABLE: &'static str = "ActivityCdClientRewards";
+impl FromCdClient for CdClientActivityRewards {
+    const TABLE: &'static str = "ActivityRewards";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1019,7 +1020,7 @@ impl FromCdClient for CdClientActivityCdClientRewards {
     }
 }
 
-impl HasGroupKey for CdClientActivityCdClientRewards {
+impl HasGroupKey for CdClientActivityRewards {
     type Key = i32;
 
     fn get_group_key(&self) -> &Self::Key {
