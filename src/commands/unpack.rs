@@ -39,7 +39,7 @@ impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for UnpackArguments {
 }
 
 impl InteractionCommand for UnpackCommand {
-    const NAME: &'static str = "get";
+    const NAME: &'static str = "unpack";
 
     const DESCRIPTION: &'static str = "View all packages that drop an item!";
 

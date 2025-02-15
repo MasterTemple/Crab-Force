@@ -39,7 +39,7 @@ impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for RewardArguments {
 }
 
 impl InteractionCommand for RewardCommand {
-    const NAME: &'static str = "get";
+    const NAME: &'static str = "reward";
 
     const DESCRIPTION: &'static str = "View all activities that drop an item!";
 

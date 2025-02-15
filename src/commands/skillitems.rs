@@ -39,7 +39,7 @@ impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for SkillItemsArguments {
 }
 
 impl InteractionCommand for SkillItemsCommand {
-    const NAME: &'static str = "get";
+    const NAME: &'static str = "skill_items";
 
     const DESCRIPTION: &'static str = "View all items that have a skill!";
 
