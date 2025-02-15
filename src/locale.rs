@@ -366,9 +366,9 @@ pub struct SkillBehaviorDescriptionUI {
     /// the whole text
     // text: Option<String>,
     /// the remainder
-    remainder: Option<String>,
+    pub remainder: Option<String>,
     /// segments
-    segments: Option<BTreeMap<String, String>>,
+    pub segments: Option<BTreeMap<String, String>>,
 }
 impl SkillBehaviorDescriptionUI {
     pub fn new(text: &str) -> Self {

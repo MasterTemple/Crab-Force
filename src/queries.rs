@@ -1,16 +1,35 @@
+use std::fmt::Display;
+
 use serenity::all::AutocompleteChoice;
 
 use crate::{
     cdclient::{
         components::{ITEM_COMPONENT, RENDER_COMPONENT, VENDOR_COMPONENT},
-        CdClient, ItemComponent, Objects, RenderComponent, VendorComponent,
+        CdClient, ItemComponent, Objects, RenderComponent, SkillBehavior, VendorComponent,
     },
+    locale::LocaleTranslation,
     CD_CLIENT, CONFIG, LOCALE_XML,
 };
 
 pub struct Queries<'a>(&'a CdClient);
 
 pub type MsgResult<T> = Result<T, String>;
+
+pub trait LocaleQueries {
+    fn locale(&self) -> &LocaleTranslation {
+        LOCALE_XML.locales.get(&CONFIG.locale).unwrap()
+    }
+}
+
+pub fn explorer_link_name(
+    name: impl Display,
+    id: impl Display,
+    explorer_url: impl Display,
+) -> String {
+    format!("{name} [`[{id}]`]({explorer_url})")
+}
+
+impl LocaleQueries for CdClient {}
 
 //------------------//
 // Auto-Completions //
@@ -20,7 +39,7 @@ pub trait AutocompleteQueries {
     // fn autocomplete_item(input: &str) -> Vec<&Objects>;
     // fn autocomplete_enemy(input: &str) -> Vec<&Objects>;
     // fn autocomplete_brick(input: &str) -> Vec<&Objects>;
-    // fn autocomplete_skill(input: &str) -> Vec<&Objects>;
+    fn autocomplete_skill(&self, input: &str) -> Vec<AutocompleteChoice>;
 }
 
 impl AutocompleteQueries for CdClient {
@@ -44,6 +63,23 @@ impl AutocompleteQueries for CdClient {
                 // .clone()
                 // .unwrap_or_else(|| item.name.clone());
                 // AutocompleteChoice::new(format!("[{id}] {name}"), id)
+            })
+            .filter(|(_, name)| name.to_lowercase().contains(input))
+            .take(25)
+            .map(|(id, name)| AutocompleteChoice::new(format!("[{id}] {name}"), id))
+            .collect()
+    }
+
+    fn autocomplete_skill(&self, input: &str) -> Vec<AutocompleteChoice> {
+        if input.len() == 0 {
+            return vec![];
+        }
+        self.skill_behavior
+            .iter()
+            .map(|skill| {
+                let id = skill.skill_id;
+                let name = self.req_skill_name(id);
+                (id, name)
             })
             .filter(|(_, name)| name.to_lowercase().contains(input))
             .take(25)
@@ -156,7 +192,7 @@ impl ObjectQueries for CdClient {
     fn object_hyperlinked_name(&self, item_id: i32) -> String {
         let name = self.req_object_name(item_id);
         let explorer_url = self.object_explorer_url(item_id);
-        format!("{name} [`[{item_id}]`]({explorer_url})")
+        explorer_link_name(name, item_id, explorer_url)
     }
 
     fn get_object(&self, item_id: i32) -> MsgResult<&Objects> {
@@ -310,3 +346,53 @@ impl ObjectQueries for CdClient {
 //         Some(icon_asset_as_url(render_component.icon_asset.as_ref()?))
 //     }
 // }
+
+pub trait SkillQueries {
+    fn skill_name(&self, id: i32) -> Option<String>;
+    fn req_skill_name(&self, id: i32) -> String;
+    fn skill_icon_url(&self, id: i32) -> Option<String>;
+    fn skill_explorer_url(&self, id: i32) -> String;
+    fn skill_hyperlinked_name(&self, id: i32) -> String;
+    fn get_skill(&self, id: i32) -> MsgResult<&SkillBehavior>;
+    fn cooldown_group_hyperlinked_name(&self, cdg: i32) -> String;
+}
+
+impl SkillQueries for CdClient {
+    fn get_skill(&self, id: i32) -> MsgResult<&SkillBehavior> {
+        self.skill_behavior
+            .at_key(&id)
+            .ok_or_else(|| format!("{} does not exist!", CD_CLIENT.skill_hyperlinked_name(id)))
+    }
+
+    fn skill_name(&self, id: i32) -> Option<String> {
+        self.locale()
+            .skill_behavior
+            .get(&id)
+            .map(|skill_behavior| skill_behavior.name.clone())
+            .flatten()
+    }
+
+    fn req_skill_name(&self, id: i32) -> String {
+        self.skill_name(id).unwrap_or_else(|| format!("Skill {id}"))
+    }
+
+    fn skill_explorer_url(&self, id: i32) -> String {
+        CONFIG.explorer_uri(format!("/skills/{}", id))
+    }
+    fn cooldown_group_hyperlinked_name(&self, id: i32) -> String {
+        let url = CONFIG.explorer_uri(format!("/skills/cooldowngroups/{}", id));
+        explorer_link_name(format!("Group {id}"), id, url)
+    }
+
+    fn skill_hyperlinked_name(&self, id: i32) -> String {
+        let name = self.req_skill_name(id);
+        let explorer_url = self.skill_explorer_url(id);
+        explorer_link_name(name, id, explorer_url)
+    }
+
+    fn skill_icon_url(&self, id: i32) -> Option<String> {
+        let skill = self.skill_behavior.at_key(&id)?;
+        let icon = self.icons.at_key(&skill.skill_icon?)?;
+        Some(icon_asset_as_url(icon.icon_path.as_ref()?))
+    }
+}

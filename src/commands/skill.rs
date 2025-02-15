@@ -1,5 +1,5 @@
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
+use crate::queries::{AutocompleteQueries, LocaleQueries, ObjectQueries, SkillQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
 use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
 
@@ -59,22 +59,55 @@ impl InteractionCommand for SkillCommand {
         autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
     ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
         let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
+        Some(CD_CLIENT.autocomplete_skill(input))
     }
 
     fn run(arguments: Self::Arguments) -> CommandResult {
         let SkillArguments { skill: id } = arguments;
 
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
+        let skill = CD_CLIENT.get_skill(id)?;
+
+        let explorer_url = CD_CLIENT.skill_explorer_url(id);
+        let name = CD_CLIENT.req_skill_name(id);
 
         let mut embed = CONFIG
             .default_embed()
             .title(format!("{} [{}]", name, id))
             .url(explorer_url);
 
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
+        if let Some(cdg) = skill.cooldowngroup {
+            embed = embed.field(
+                "Cooldown Group",
+                CD_CLIENT.cooldown_group_hyperlinked_name(cdg),
+                true,
+            );
+        }
+
+        if let Some(cooldown) = skill.cooldown {
+            embed = embed.field("Cooldown Time", format!("`{cooldown}` seconds"), true);
+        }
+
+        embed = embed.field(
+            "Imagination Cost",
+            format!("`{}` Imagination", skill.imaginationcost),
+            true,
+        );
+
+        if let Some(locale) = CD_CLIENT.locale().skill_behavior.get(&id) {
+            if let Some(desc) = &locale.description_ui {
+                if let Some(segments) = &desc.segments {
+                    for (header, value) in segments {
+                        embed = embed.field(header, value, value.len() <= 32);
+                    }
+                }
+
+                if let Some(remainder) = &desc.remainder {
+                    embed = embed.field("Description", remainder, false);
+                }
+            }
+        }
+
+        if let Some(icon_url) = CD_CLIENT.skill_icon_url(id) {
             embed = embed.thumbnail(icon_url);
         }
 

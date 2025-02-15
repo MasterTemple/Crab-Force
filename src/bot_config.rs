@@ -92,7 +92,8 @@ impl Default for BotConfig {
             author_icon: Some(String::from("https://cdn.discordapp.com/avatars/1340084890342785055/4c83403b3a82920365a5007c1aa580ec.webp")),
             color: None, //(0x42, 0xb9, 0xf5),
             footer_message: Some(String::from("LEGO® is a trademark of the LEGO Group which does not sponsor, authorize, or endorse this bot. The data and assets are presented purely for informational purposes.")),
-            footer_icon: Some(String::from("https://cdn.discordapp.com/attachments/813618981247516715/1339979649328877627/170px-LEGO_logo.png?ex=67b0b0cc&is=67af5f4c&hm=7e9d7b9258682dae296a525bc2fb46a7835a3b9ebefbe5cc192519c32cd66402&format=webp&quality=lossless")),
+            footer_icon: None,
+            // footer_icon: Some(String::from("https://cdn.discordapp.com/attachments/813618981247516715/1339979649328877627/170px-LEGO_logo.png?ex=67b0b0cc&is=67af5f4c&hm=7e9d7b9258682dae296a525bc2fb46a7835a3b9ebefbe5cc192519c32cd66402&format=webp&quality=lossless")),
         }
     }
 }
