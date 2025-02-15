@@ -4,9 +4,9 @@ use serenity::all::AutocompleteChoice;
 
 use crate::{
     cdclient::{
-        components::{ITEM_COMPONENT, RENDER_COMPONENT, VENDOR_COMPONENT},
-        CdClient, ItemComponent, Missions, Objects, RenderComponent, SkillBehavior,
-        VendorComponent,
+        components::{ITEM_COMPONENT, PACKAGE_COMPONENT, RENDER_COMPONENT, VENDOR_COMPONENT},
+        CdClient, ItemComponent, Missions, Objects, PackageComponent, RenderComponent,
+        SkillBehavior, VendorComponent,
     },
     locale::LocaleTranslation,
     CD_CLIENT, CONFIG, LOCALE_XML,
@@ -211,9 +211,70 @@ pub trait ObjectQueries {
     fn object_icon_url(&self, item_id: i32) -> Option<String>;
     /// returns vendor ids
     fn object_vendor_ids(&self, item_id: i32) -> MsgResult<Vec<i32>>;
+
+    fn object_package_ids(&self, id: i32) -> MsgResult<Vec<i32>>;
+
+    fn object_package_component(&self, item_id: i32) -> MsgResult<&PackageComponent>;
 }
 
 impl ObjectQueries for CdClient {
+    fn object_package_component(&self, item_id: i32) -> MsgResult<&PackageComponent> {
+        let components = self
+            .components_registry
+            .at_group_key(&item_id)
+            .ok_or_else(|| {
+                format!(
+                    "{} has no Registered Components",
+                    self.object_explorer_url(item_id)
+                )
+            })?;
+
+        let item_component_id = components
+            .iter()
+            .find(|comp| comp.component_type == PACKAGE_COMPONENT)
+            .ok_or_else(|| {
+                format!(
+                    "{} has no Registered Package Component",
+                    self.object_explorer_url(item_id)
+                )
+            })?
+            .component_id;
+
+        let item_component = self
+            .package_component
+            .at_key(&item_component_id)
+            .ok_or_else(|| format!("Package Component `{}` does not exist", item_component_id))?;
+
+        Ok(item_component)
+    }
+
+    fn object_package_ids(&self, item_id: i32) -> MsgResult<Vec<i32>> {
+        let lmis = self.loot_matrix_indexes_with_item(item_id).ok_or_else(|| {
+            format!(
+                "{} it not in any Loot Matrices",
+                self.object_explorer_url(item_id)
+            )
+        })?;
+
+        let pkg_ids: Vec<i32> = self
+            .package_component
+            .iter()
+            .filter(|pkg| lmis.contains(&pkg.loot_matrix_index))
+            .map(|pkg| pkg.id)
+            .collect();
+
+        let object_ids = self
+            .components_registry
+            .iter()
+            .filter(|cr| {
+                cr.component_type == PACKAGE_COMPONENT && pkg_ids.contains(&cr.component_id)
+            })
+            .map(|cr| cr.id)
+            .collect();
+
+        Ok(object_ids)
+    }
+
     fn object_name(&self, item_id: i32) -> Option<String> {
         let item = self.objects.at_key(&item_id)?;
         LOCALE_XML

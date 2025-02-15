@@ -15,6 +15,7 @@ pub mod components {
     pub const SKILL_COMPONENT: i32 = 9;
     pub const ITEM_COMPONENT: i32 = 11;
     pub const VENDOR_COMPONENT: i32 = 16;
+    pub const PACKAGE_COMPONENT: i32 = 53;
     pub const INVENTORY_COMPONENT: i32 = 17;
 }
 
@@ -560,7 +561,7 @@ pub struct CdClient {
     pub proximity_types: KeyedVec<ProximityTypes>,
     pub racing_module_component: KeyedVec<RacingModuleComponent>,
     pub rail_activator_component: KeyedVec<RailActivatorComponent>,
-    pub rarity_table: KeyedVec<RarityTable>,
+    pub rarity_table: GroupKeyedVec<RarityTable>,
     pub rarity_table_index: KeyedVec<RarityTableIndex>,
     pub rebuild_component: KeyedVec<RebuildComponent>,
     pub rebuild_sections: KeyedVec<RebuildSections>,
@@ -705,7 +706,7 @@ impl CdClient {
             proximity_types: KeyedVec::new(cdclient.proximity_types),
             racing_module_component: KeyedVec::new(cdclient.racing_module_component),
             rail_activator_component: KeyedVec::new(cdclient.rail_activator_component),
-            rarity_table: KeyedVec::new(cdclient.rarity_table),
+            rarity_table: GroupKeyedVec::new(cdclient.rarity_table),
             rarity_table_index: KeyedVec::new(cdclient.rarity_table_index),
             rebuild_component: KeyedVec::new(cdclient.rebuild_component),
             rebuild_sections: KeyedVec::new(cdclient.rebuild_sections),
@@ -4394,11 +4395,11 @@ impl FromCdClient for RarityTable {
     }
 }
 
-impl HasKey for RarityTable {
+impl HasGroupKey for RarityTable {
     type Key = i32;
 
-    fn get_key(&self) -> &Self::Key {
-        &self.id
+    fn get_group_key(&self) -> &Self::Key {
+        &self.rarity_table_index
     }
 }
 
