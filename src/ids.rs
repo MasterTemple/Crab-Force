@@ -6,8 +6,10 @@ use crate::{
             DESTROYABLE_COMPONENT, ITEM_COMPONENT, PACKAGE_COMPONENT, RENDER_COMPONENT,
             VENDOR_COMPONENT,
         },
-        CdClientItemComponent, CdClientLootMatrix, CdClientLootTable, CdClientObjects,
-        CdClientRarityTable, CdClientRenderComponent, CdClientVendorComponent,
+        CdClientActivityRewards, CdClientDestructibleComponent, CdClientItemComponent,
+        CdClientLootMatrix, CdClientLootTable, CdClientObjects, CdClientPackageComponent,
+        CdClientRarityTable, CdClientRenderComponent, CdClientSkillBehavior,
+        CdClientVendorComponent,
     },
     custom::CollectIntoOptionalVec,
     Api, CONFIG,
@@ -129,8 +131,8 @@ impl CdClientLootTableId {
 
 /// while there may be loot tables that dont drop certain rarities in that loot table, i don't care
 pub struct LootTableRarityGroup {
-    count: usize,
-    chance: f64,
+    pub count: usize,
+    pub chance: f64,
 }
 impl LootTableRarityGroup {
     pub fn chance_any(&self) -> f64 {
@@ -142,11 +144,11 @@ impl LootTableRarityGroup {
 }
 
 pub struct LootTableChances {
-    lti: CdClientLootTableId,
-    t1: Option<LootTableRarityGroup>,
-    t2: Option<LootTableRarityGroup>,
-    t3: Option<LootTableRarityGroup>,
-    t4: Option<LootTableRarityGroup>,
+    pub lti: CdClientLootTableId,
+    pub t1: Option<LootTableRarityGroup>,
+    pub t2: Option<LootTableRarityGroup>,
+    pub t3: Option<LootTableRarityGroup>,
+    pub t4: Option<LootTableRarityGroup>,
 }
 impl LootTableChances {
     /// like health pickups
@@ -190,7 +192,6 @@ impl CdClientLootMatrixId {
     }
 
     pub fn loot_chances(&self) -> Option<Vec<LootTableChances>> {
-        // let loot_tables = self.loot_tables()?;
         let loot_tables = self.fetch().ok()?;
         loot_tables
             .into_iter()
@@ -525,6 +526,21 @@ impl ComponentId for CdClientDestructibleComponentId {
         self.0
     }
 }
+impl CdClientDestructibleComponentId {
+    pub fn fetch(&self) -> MsgResult<CdClientDestructibleComponent> {
+        self.cdclient()
+            .destructible_component
+            .at_key(&self.0)
+            .cloned()
+            .ok_or_else(|| self.err("does not exist"))
+    }
+
+    pub fn items_dropped(&self) -> Option<Vec<LootTableChances>> {
+        let dc = self.fetch().ok()?;
+        let lmi = CdClientLootMatrixId(dc.loot_matrix_index?);
+        lmi.loot_chances()
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientPackageComponentId(i32);
@@ -534,6 +550,21 @@ impl ComponentId for CdClientPackageComponentId {
     const NAME: &'static str = "Package";
     fn id(&self) -> i32 {
         self.0
+    }
+}
+impl CdClientPackageComponentId {
+    pub fn fetch(&self) -> MsgResult<CdClientPackageComponent> {
+        self.cdclient()
+            .package_component
+            .at_key(&self.0)
+            .cloned()
+            .ok_or_else(|| self.err("does not exist"))
+    }
+
+    pub fn items_dropped(&self) -> Option<Vec<LootTableChances>> {
+        let pc = self.fetch().ok()?;
+        let lmi = CdClientLootMatrixId(pc.loot_matrix_index);
+        lmi.loot_chances()
     }
 }
 
@@ -587,6 +618,21 @@ impl ComponentId for CdClientVendorComponentId {
         self.0
     }
 }
+impl CdClientVendorComponentId {
+    pub fn fetch(&self) -> MsgResult<CdClientVendorComponent> {
+        self.cdclient()
+            .vendor_component
+            .at_key(&self.0)
+            .cloned()
+            .ok_or_else(|| self.err("does not exist"))
+    }
+
+    pub fn items_sold(&self) -> Option<Vec<CdClientObjectsId>> {
+        let vc = self.fetch().ok()?;
+        let lmi = CdClientLootMatrixId(vc.loot_matrix_index);
+        lmi.contained_items()
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientActivityRewardsId(i32);
@@ -618,3 +664,105 @@ impl LUExplorer for CdClientActivityRewardsId {
             })
     }
 }
+impl CdClientActivityRewardsId {
+    pub fn fetch(&self) -> MsgResult<Vec<CdClientActivityRewards>> {
+        self.cdclient()
+            .activity_rewards
+            .at_group_key(&self.0)
+            .clone()
+            .ok_or_else(|| self.err("does not exist"))
+    }
+
+    /// ! use a select menu with description to separate which one is being rewarded
+    pub fn items_rewarded(&self) -> Option<Vec<LootTableChances>> {
+        let activity_rewards = self.fetch().ok()?;
+        activity_rewards
+            .into_iter()
+            .filter_map(|ar| {
+                let lmi = CdClientLootMatrixId(ar.loot_matrix_index?);
+                lmi.loot_chances()
+            })
+            .flatten()
+            .collect_some()
+        // let lmi = CdClientLootMatrixId(activity_rewards.loot_matrix_index?);
+        // lmi.loot_chances()
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct CdClientSkillBehaviorId(i32);
+impl Api for CdClientSkillBehaviorId {}
+impl LUExplorer for CdClientSkillBehaviorId {
+    const NAME: &'static str = "Skill";
+    const ENDPOINT: &'static str = "skills";
+
+    fn id(&self) -> i32 {
+        self.0
+    }
+
+    fn name(&self) -> Option<String> {
+        self.locale()
+            .skill_behavior
+            .get(&self.id())
+            .and_then(|skill_behavior| skill_behavior.name.clone())
+    }
+}
+impl CdClientSkillBehaviorId {
+    pub fn fetch(&self) -> MsgResult<CdClientSkillBehavior> {
+        self.cdclient()
+            .skill_behavior
+            .at_key(&self.0)
+            .cloned()
+            .ok_or_else(|| self.err("does not exist"))
+    }
+
+    pub fn thumbnail(&self) -> Option<String> {
+        let skill = self.fetch().ok()?;
+        let icon = self.cdclient().icons.at_key(&skill.skill_icon?).cloned()?;
+        let asset = icon.icon_path?;
+        Some(icon_asset_as_url(asset))
+    }
+
+    pub fn skill_items(&self) -> Option<Vec<CdClientObjectsId>> {
+        self.cdclient()
+            .object_skills
+            .iter()
+            // .filter_map(|ob| (ob.skill_id == self.0).then(|| CdClientObjectsId(ob.object_template)))
+            .filter(|ob| ob.skill_id == self.0)
+            .map(|ob| CdClientObjectsId(ob.object_template))
+            .collect_some()
+    }
+}
+
+// #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+// pub struct CdClientIconsId(i32);
+// impl Api for CdClientIconsId {}
+// impl LUExplorer for CdClientIconsId {
+//     const NAME: &'static str = "Skill";
+//     const ENDPOINT: &'static str = "skills";
+//
+//     fn id(&self) -> i32 {
+//         self.0
+//     }
+//
+//     fn name(&self) -> Option<String> {
+//         self.locale()
+//             .skill_behavior
+//             .get(&self.id())
+//             .and_then(|skill_behavior| skill_behavior.name.clone())
+//     }
+// }
+// impl CdClientIconsId {
+//     pub fn fetch(&self) -> MsgResult<CdClientIcons> {
+//         self.cdclient()
+//             .skill_behavior
+//             .at_key(&self.0)
+//             .cloned()
+//             .ok_or_else(|| self.err("does not exist"))
+//     }
+//     pub fn thumbnail(&self, id: i32) -> Option<String> {
+//         let skill = self.fetch().ok()?;
+//         // self.get_icon_url(skill.skill_icon?)
+//         Some(icon_asset_as_url(skill.skill_icon?))
+//     }
+// }

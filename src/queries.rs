@@ -484,6 +484,7 @@ impl SkillQueries for CdClient {
     fn skill_explorer_url(&self, id: i32) -> String {
         CONFIG.explorer_uri(format!("/skills/{}", id))
     }
+
     fn cooldown_group_hyperlinked_name(&self, id: i32) -> String {
         let url = CONFIG.explorer_uri(format!("/skills/cooldowngroups/{}", id));
         explorer_link_name(format!("Group {id}"), id, url)
