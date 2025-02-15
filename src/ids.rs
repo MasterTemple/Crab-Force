@@ -179,6 +179,17 @@ impl CdClientObjectsId {
         explorer_hyperlink(name, self.0, explorer_url)
     }
 
+    pub fn get_component<C: ComponentId>(&self, component: impl Fn(i32) -> C) -> MsgResult<C> {
+        self.cdclient()
+            .components_registry
+            .at_group_key(&self.0)
+            .ok_or_else(|| self.err("has no Registered Components"))?
+            .into_iter()
+            .find(|cr| cr.component_type == C::ID)
+            .map(|cr| component(cr.component_id))
+            .ok_or_else(|| self.err(format!("has no Registered {} Component", C::NAME)))
+    }
+
     pub fn get_containing_loot_table_indexes(&self) -> Option<Vec<CdClientLootTableId>> {
         self.cdclient()
             .loot_table
@@ -239,26 +250,7 @@ impl CdClientObjectsId {
     }
 
     pub fn render_component(&self) -> MsgResult<CdClientRenderComponent> {
-        let components = self
-            .cdclient()
-            .components_registry
-            .at_group_key(&self.0)
-            .ok_or_else(|| self.err("has no Registered Components"))?;
-
-        let render_component_id = components
-            .iter()
-            .find(|comp| comp.component_type == RENDER_COMPONENT)
-            .ok_or_else(|| self.err("has no Registered render Component"))?
-            .component_id;
-
-        let render_component = self
-            .cdclient()
-            .render_component
-            .at_key(&render_component_id)
-            .ok_or_else(|| format!("Render Component `{}` does not exist", render_component_id))?
-            .clone();
-
-        Ok(render_component)
+        self.get_component(CdClientRenderComponentId)?.fetch()
     }
 
     pub fn thumbnail(&self) -> Option<String> {
@@ -267,26 +259,7 @@ impl CdClientObjectsId {
     }
 
     pub fn item_component(&self) -> MsgResult<CdClientItemComponent> {
-        let components = self
-            .cdclient()
-            .components_registry
-            .at_group_key(&self.0)
-            .ok_or_else(|| self.err("has no Registered Components"))?;
-
-        let item_component_id = components
-            .iter()
-            .find(|comp| comp.component_type == ITEM_COMPONENT)
-            .ok_or_else(|| self.err("has no Registered Item Component"))?
-            .component_id;
-
-        let item_component = self
-            .cdclient()
-            .item_component
-            .at_key(&item_component_id)
-            .ok_or_else(|| format!("Item Component `{}` does not exist", item_component_id))?
-            .clone();
-
-        Ok(item_component)
+        self.get_component(CdClientItemComponentId)?.fetch()
     }
 
     /// All achievements/missions that earn an object
@@ -484,6 +457,46 @@ impl ComponentId for CdClientPackageComponentId {
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub struct CdClientItemComponentId(i32);
+impl Api for CdClientItemComponentId {}
+impl ComponentId for CdClientItemComponentId {
+    const ID: i32 = ITEM_COMPONENT;
+    const NAME: &'static str = "Item";
+    fn id(&self) -> i32 {
+        self.0
+    }
+}
+impl CdClientItemComponentId {
+    pub fn fetch(&self) -> MsgResult<CdClientItemComponent> {
+        self.cdclient()
+            .item_component
+            .at_key(&self.0)
+            .cloned()
+            .ok_or_else(|| self.err("does not exist"))
+    }
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub struct CdClientRenderComponentId(i32);
+impl Api for CdClientRenderComponentId {}
+impl ComponentId for CdClientRenderComponentId {
+    const ID: i32 = ITEM_COMPONENT;
+    const NAME: &'static str = "Render";
+    fn id(&self) -> i32 {
+        self.0
+    }
+}
+impl CdClientRenderComponentId {
+    pub fn fetch(&self) -> MsgResult<CdClientRenderComponent> {
+        self.cdclient()
+            .render_component
+            .at_key(&self.0)
+            .cloned()
+            .ok_or_else(|| self.err("does not exist"))
+    }
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientVendorComponentId(i32);
 impl Api for CdClientVendorComponentId {}
 impl ComponentId for CdClientVendorComponentId {
@@ -522,23 +535,5 @@ impl LUExplorer for CdClientActivityRewardsId {
                     desc[0..num_idx].to_string()
                 })
             })
-    }
-}
-
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientComponentsRegistryId(Vec<i32>);
-impl Api for CdClientComponentsRegistryId {}
-impl CdClientComponentsRegistryId {
-    pub fn get_objects_with_component<C: ComponentId>(
-        &self,
-        component: C,
-    ) -> Option<Vec<CdClientObjectsId>> {
-        let component_id = component.id();
-        self.cdclient()
-            .components_registry
-            .iter()
-            .filter(|cr| cr.component_type == C::ID && component_id == cr.component_id)
-            .map(|cr| CdClientObjectsId(cr.id))
-            .collect_some()
     }
 }
