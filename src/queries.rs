@@ -5,7 +5,8 @@ use serenity::all::AutocompleteChoice;
 use crate::{
     cdclient::{
         components::{ITEM_COMPONENT, RENDER_COMPONENT, VENDOR_COMPONENT},
-        CdClient, ItemComponent, Objects, RenderComponent, SkillBehavior, VendorComponent,
+        CdClient, ItemComponent, Missions, Objects, RenderComponent, SkillBehavior,
+        VendorComponent,
     },
     locale::LocaleTranslation,
     CD_CLIENT, CONFIG, LOCALE_XML,
@@ -392,7 +393,118 @@ impl SkillQueries for CdClient {
 
     fn skill_icon_url(&self, id: i32) -> Option<String> {
         let skill = self.skill_behavior.at_key(&id)?;
-        let icon = self.icons.at_key(&skill.skill_icon?)?;
+        self.get_icon_url(skill.skill_icon?)
+    }
+}
+
+pub trait IconQueries {
+    fn get_icon_url(&self, icon_id: i32) -> Option<String>;
+}
+impl IconQueries for CdClient {
+    fn get_icon_url(&self, icon_id: i32) -> Option<String> {
+        let icon = self.icons.at_key(&icon_id)?;
         Some(icon_asset_as_url(icon.icon_path.as_ref()?))
+    }
+}
+
+pub trait AchievementQueries {
+    fn achievement_name(&self, id: i32) -> Option<String>;
+    fn req_achievement_name(&self, id: i32) -> String;
+    fn achievement_icon_url(&self, id: i32) -> Option<String>;
+    fn achievement_explorer_url(&self, id: i32) -> String {
+        CONFIG.explorer_uri(format!("/missions/{}", id))
+    }
+    fn achievement_hyperlinked_name(&self, id: i32) -> String {
+        let name = self.req_achievement_name(id);
+        let url = CONFIG.explorer_uri(format!("/missions/{}", id));
+        explorer_link_name(name, id, url)
+    }
+    fn get_achievement(&self, id: i32) -> MsgResult<&Missions>;
+    fn full_achievement_path(&self, id: i32) -> String;
+    fn get_achievement_rewards(&self, id: i32) -> Option<Vec<MissionReward>>;
+}
+
+pub struct MissionReward {
+    item_id: i32,
+    count: i32,
+    repeatable: bool,
+    repeat_count: i32,
+}
+
+impl AchievementQueries for CdClient {
+    // let tasks = self.mission_tasks.iter().find(|mt| mt.id == id)?;
+    fn get_achievement_rewards(&self, id: i32) -> Option<Vec<MissionReward>> {
+        let mission = self.get_achievement(id).ok()?;
+        let mut rewards = vec![];
+        if mission.reward_item1 != -1 {
+            rewards.push(MissionReward {
+                item_id: mission.reward_item1,
+                count: mission.reward_item1_count,
+                repeatable: mission.reward_item1_repeatable != 0,
+                repeat_count: mission.reward_item1_repeat_count,
+            });
+        }
+        if mission.reward_item2 != -1 {
+            rewards.push(MissionReward {
+                item_id: mission.reward_item2,
+                count: mission.reward_item2_count,
+                repeatable: mission.reward_item2_repeatable != 0,
+                repeat_count: mission.reward_item2_repeat_count,
+            });
+        }
+        if mission.reward_item3 != -1 {
+            rewards.push(MissionReward {
+                item_id: mission.reward_item3,
+                count: mission.reward_item3_count,
+                repeatable: mission.reward_item3_repeatable != 0,
+                repeat_count: mission.reward_item3_repeat_count,
+            });
+        }
+        if mission.reward_item4 != -1 {
+            rewards.push(MissionReward {
+                item_id: mission.reward_item4,
+                count: mission.reward_item4_count,
+                repeatable: mission.reward_item4_repeatable != 0,
+                repeat_count: mission.reward_item4_repeat_count,
+            });
+        }
+        Some(rewards)
+    }
+
+    fn full_achievement_path(&self, id: i32) -> String {
+        let name = self.req_achievement_name(id);
+        let Some(mission) = self.missions.at_key(&id) else {
+            return name;
+        };
+        let top = &mission.defined_type;
+        let middle = &mission.defined_subtype;
+        if let Some(middle) = middle {
+            format!("{top} > {middle} > {name}")
+        } else {
+            format!("{top} > {name}")
+        }
+    }
+
+    fn achievement_name(&self, id: i32) -> Option<String> {
+        self.locale().missions.get(&id)?.name.clone()
+    }
+
+    fn req_achievement_name(&self, id: i32) -> String {
+        self.achievement_name(id)
+            .unwrap_or_else(|| format!("Achievement {id}"))
+    }
+
+    fn achievement_icon_url(&self, id: i32) -> Option<String> {
+        let icon_id = self.mission_tasks.iter().find(|mt| mt.id == id)?.icon_id?;
+        self.get_icon_url(icon_id)
+    }
+
+    fn get_achievement(&self, id: i32) -> MsgResult<&Missions> {
+        self.missions.at_key(&id).ok_or_else(|| {
+            format!(
+                "{} does not exist!",
+                CD_CLIENT.achievement_hyperlinked_name(id)
+            )
+        })
     }
 }
