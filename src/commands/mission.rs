@@ -3,6 +3,8 @@ use crate::queries::{AutocompleteQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
 use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
 
+use super::achievement::{AchievementArguments, AchievementCommand};
+
 pub struct MissionCommand;
 
 pub struct MissionArguments {
@@ -59,21 +61,11 @@ impl InteractionCommand for MissionCommand {
         autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
     ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
         let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
+        Some(CD_CLIENT.autocomplete_mission(input))
     }
 
     fn run(arguments: Self::Arguments) -> CommandResult {
         let MissionArguments { mission: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        Ok((embed, None))
+        AchievementCommand::run(AchievementArguments { achievement: id })
     }
 }

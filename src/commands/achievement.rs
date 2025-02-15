@@ -9,7 +9,7 @@ use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, 
 pub struct AchievementCommand;
 
 pub struct AchievementArguments {
-    achievement: i32,
+    pub achievement: i32,
 }
 
 impl ToCustomId for AchievementArguments {

@@ -38,6 +38,7 @@ impl LocaleQueries for CdClient {}
 pub trait AutocompleteQueries {
     fn autocomplete_object(&self, input: &str) -> Vec<AutocompleteChoice>;
     fn autocomplete_achievement(&self, input: &str) -> Vec<AutocompleteChoice>;
+    fn autocomplete_mission(&self, input: &str) -> Vec<AutocompleteChoice>;
     // fn autocomplete_item(input: &str) -> Vec<&Objects>;
     // fn autocomplete_enemy(input: &str) -> Vec<&Objects>;
     // fn autocomplete_brick(input: &str) -> Vec<&Objects>;
@@ -90,6 +91,26 @@ impl AutocompleteQueries for CdClient {
     }
 
     fn autocomplete_achievement(&self, input: &str) -> Vec<AutocompleteChoice> {
+        if input.len() == 0 {
+            return vec![];
+        }
+        self.locale()
+            .missions
+            .iter()
+            .map(|(id, mission)| {
+                let name = mission
+                    .name
+                    .clone()
+                    .unwrap_or_else(|| format!("Mission {id}"));
+                (id, name)
+            })
+            .filter(|(_, name)| name.to_lowercase().contains(input))
+            .take(25)
+            .map(|(id, name)| AutocompleteChoice::new(format!("[{id}] {name}"), *id))
+            .collect()
+    }
+
+    fn autocomplete_mission(&self, input: &str) -> Vec<AutocompleteChoice> {
         if input.len() == 0 {
             return vec![];
         }
