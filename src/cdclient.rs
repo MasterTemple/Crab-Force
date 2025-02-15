@@ -532,7 +532,7 @@ pub struct CdClient {
     pub minifig_decals_torsos: KeyedVec<MinifigDecalsTorsos>,
     pub mission_email: KeyedVec<MissionEmail>,
     pub mission_npccomponent: Vec<MissionNPCComponent>,
-    pub mission_tasks: Vec<MissionTasks>,
+    pub mission_tasks: GroupKeyedVec<MissionTasks>,
     pub mission_text: KeyedVec<MissionText>,
     pub missions: KeyedVec<Missions>,
     pub model_behavior: KeyedVec<ModelBehavior>,
@@ -677,7 +677,7 @@ impl CdClient {
             minifig_decals_torsos: KeyedVec::new(cdclient.minifig_decals_torsos),
             mission_email: KeyedVec::new(cdclient.mission_email),
             mission_npccomponent: cdclient.mission_npccomponent,
-            mission_tasks: cdclient.mission_tasks,
+            mission_tasks: GroupKeyedVec::new(cdclient.mission_tasks),
             mission_text: KeyedVec::new(cdclient.mission_text),
             missions: KeyedVec::new(cdclient.missions),
             model_behavior: KeyedVec::new(cdclient.model_behavior),
@@ -3168,14 +3168,13 @@ impl FromCdClient for MissionTasks {
     }
 }
 
-// impl HasKey for MissionTasks {
-//     type Key = i32;
-//
-//     fn get_key(&self) -> &Self::Key {
-//         todo!("i dont know")
-//         // &self.id
-//     }
-// }
+impl HasGroupKey for MissionTasks {
+    type Key = i32;
+
+    fn get_group_key(&self) -> &Self::Key {
+        &self.id
+    }
+}
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]

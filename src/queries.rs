@@ -37,6 +37,7 @@ impl LocaleQueries for CdClient {}
 //------------------//
 pub trait AutocompleteQueries {
     fn autocomplete_object(&self, input: &str) -> Vec<AutocompleteChoice>;
+    fn autocomplete_achievement(&self, input: &str) -> Vec<AutocompleteChoice>;
     // fn autocomplete_item(input: &str) -> Vec<&Objects>;
     // fn autocomplete_enemy(input: &str) -> Vec<&Objects>;
     // fn autocomplete_brick(input: &str) -> Vec<&Objects>;
@@ -85,6 +86,26 @@ impl AutocompleteQueries for CdClient {
             .filter(|(_, name)| name.to_lowercase().contains(input))
             .take(25)
             .map(|(id, name)| AutocompleteChoice::new(format!("[{id}] {name}"), id))
+            .collect()
+    }
+
+    fn autocomplete_achievement(&self, input: &str) -> Vec<AutocompleteChoice> {
+        if input.len() == 0 {
+            return vec![];
+        }
+        self.locale()
+            .missions
+            .iter()
+            .map(|(id, mission)| {
+                let name = mission
+                    .name
+                    .clone()
+                    .unwrap_or_else(|| format!("Mission {id}"));
+                (id, name)
+            })
+            .filter(|(_, name)| name.to_lowercase().contains(input))
+            .take(25)
+            .map(|(id, name)| AutocompleteChoice::new(format!("[{id}] {name}"), *id))
             .collect()
     }
 }
@@ -425,10 +446,10 @@ pub trait AchievementQueries {
 }
 
 pub struct MissionReward {
-    item_id: i32,
-    count: i32,
-    repeatable: bool,
-    repeat_count: i32,
+    pub item_id: i32,
+    pub count: i32,
+    pub repeatable: bool,
+    pub repeat_count: i32,
 }
 
 impl AchievementQueries for CdClient {
@@ -494,9 +515,20 @@ impl AchievementQueries for CdClient {
             .unwrap_or_else(|| format!("Achievement {id}"))
     }
 
+    // Look into cdclient `Missions > missionIconID`
     fn achievement_icon_url(&self, id: i32) -> Option<String> {
-        let icon_id = self.mission_tasks.iter().find(|mt| mt.id == id)?.icon_id?;
-        self.get_icon_url(icon_id)
+        let url = self
+            .mission_tasks
+            .at_group_key(&id)
+            .map(|slice| {
+                let url = slice.into_iter().find_map(|e| {
+                    self.get_icon_url(e.icon_id?)
+                        .or_else(|| self.get_icon_url(e.large_task_icon_id?))
+                });
+                url
+            })
+            .flatten();
+        url
     }
 
     fn get_achievement(&self, id: i32) -> MsgResult<&Missions> {
