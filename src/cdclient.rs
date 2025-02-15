@@ -522,7 +522,7 @@ pub struct CdClient {
     pub level_progression_lookup: KeyedVec<LevelProgressionLookup>,
     pub loot_matrix: GroupKeyedVec<LootMatrix>,
     pub loot_matrix_index: KeyedVec<LootMatrixIndex>,
-    pub loot_table: Vec<LootTable>,
+    pub loot_table: GroupKeyedVec<LootTable>,
     pub loot_table_index: KeyedVec<LootTableIndex>,
     pub minifig_component: KeyedVec<MinifigComponent>,
     pub minifig_decals_eyebrows: KeyedVec<MinifigDecalsEyebrows>,
@@ -667,7 +667,7 @@ impl CdClient {
             level_progression_lookup: KeyedVec::new(cdclient.level_progression_lookup),
             loot_matrix: GroupKeyedVec::new(cdclient.loot_matrix),
             loot_matrix_index: KeyedVec::new(cdclient.loot_matrix_index),
-            loot_table: cdclient.loot_table,
+            loot_table: GroupKeyedVec::new(cdclient.loot_table),
             loot_table_index: KeyedVec::new(cdclient.loot_table_index),
             minifig_component: KeyedVec::new(cdclient.minifig_component),
             minifig_decals_eyebrows: KeyedVec::new(cdclient.minifig_decals_eyebrows),
@@ -2816,14 +2816,14 @@ impl FromCdClient for LootTable {
     }
 }
 
-// impl HasGroupKey for LootTable {
-//     type Key = i32;
-//
-//     // multiple groupings
-//     fn get_group_key(&self) -> &Self::Key {
-//         &self.itemid
-//     }
-// }
+// multiple groupings, but i will do it by loot_table_index
+impl HasGroupKey for LootTable {
+    type Key = i32;
+
+    fn get_group_key(&self) -> &Self::Key {
+        &self.loot_table_index
+    }
+}
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]

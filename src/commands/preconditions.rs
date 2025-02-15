@@ -110,7 +110,7 @@ impl InteractionCommand for PreconditionsCommand {
 
         let mut embed = CONFIG
             .default_embed()
-            .title(format!("{} {}", name, item_id))
+            .title(format!("{} [{}]", name, item_id))
             .url(explorer_url)
             .field("Preconditions", precondition_text, false);
 

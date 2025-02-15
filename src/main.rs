@@ -5,6 +5,7 @@ pub mod custom;
 pub mod interaction_command;
 pub mod locale;
 pub mod queries;
+pub mod repeat;
 
 use std::env;
 use std::path::Path;
@@ -12,6 +13,7 @@ use std::time::Instant;
 
 use bot_config::BotConfig;
 use cdclient::CdClient;
+use commands::buy::BuyCommand;
 use commands::level::LevelCommand;
 use commands::preconditions::PreconditionsCommand;
 use interaction_command::InteractionCommand;
@@ -47,6 +49,7 @@ impl EventHandler for Handler {
             let start = Instant::now();
             let content = match completion.data.name.as_str() {
                 PreconditionsCommand::NAME => PreconditionsCommand::handle_autocomplete(option),
+                BuyCommand::NAME => BuyCommand::handle_autocomplete(option),
                 _ => None,
             };
             let time = start.elapsed().as_millis();
@@ -64,6 +67,7 @@ impl EventHandler for Handler {
             println!("Received command interaction: {command:#?}");
 
             let content = match command.data.name.as_str() {
+                BuyCommand::NAME => Some(BuyCommand::handle_slash_command(command)),
                 LevelCommand::NAME => Some(LevelCommand::handle_slash_command(command)),
                 PreconditionsCommand::NAME => {
                     Some(PreconditionsCommand::handle_slash_command(command))
@@ -85,6 +89,7 @@ impl EventHandler for Handler {
             let custom_id = interaction.data.custom_id.as_str();
             let cmd = &custom_id[..custom_id.find(":").unwrap_or(0)];
             let content = match cmd {
+                BuyCommand::NAME => Some(BuyCommand::handle_component_interaction(interaction)),
                 LevelCommand::NAME => Some(LevelCommand::handle_component_interaction(interaction)),
                 PreconditionsCommand::NAME => Some(
                     PreconditionsCommand::handle_component_interaction(interaction),
@@ -130,7 +135,11 @@ impl EventHandler for Handler {
         let commands = guild_id
             .set_commands(
                 &ctx.http,
-                vec![LevelCommand::register(), PreconditionsCommand::register()],
+                vec![
+                    BuyCommand::register(),
+                    LevelCommand::register(),
+                    PreconditionsCommand::register(),
+                ],
             )
             .await;
 

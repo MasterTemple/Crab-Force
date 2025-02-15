@@ -2,8 +2,8 @@ use serenity::all::AutocompleteChoice;
 
 use crate::{
     cdclient::{
-        components::{ITEM_COMPONENT, RENDER_COMPONENT},
-        CdClient, ItemComponent, Objects, RenderComponent,
+        components::{ITEM_COMPONENT, RENDER_COMPONENT, VENDOR_COMPONENT},
+        CdClient, ItemComponent, Objects, RenderComponent, VendorComponent,
     },
     CD_CLIENT, CONFIG, LOCALE_XML,
 };
@@ -63,6 +63,57 @@ pub fn icon_asset_as_url(asset: &str) -> String {
     CONFIG.explorer_res_uri(&fix_icon_asset(asset))
 }
 
+pub trait LootQueries {
+    fn loot_table_indexes_with_item(&self, item_id: i32) -> Option<Vec<i32>>;
+    fn loot_matrix_indexes_with_item(&self, item_id: i32) -> Option<Vec<i32>>;
+    fn items_in_loot_matrix_index(&self, lmi: i32) -> Option<Vec<i32>>;
+    fn items_in_loot_table_index(&self, lti: i32) -> Option<Vec<i32>>;
+}
+
+impl LootQueries for CdClient {
+    fn loot_table_indexes_with_item(&self, item_id: i32) -> Option<Vec<i32>> {
+        let ltis: Vec<i32> = self
+            .loot_table
+            .iter()
+            .filter(|lt| lt.itemid == item_id)
+            .map(|lt| lt.loot_table_index)
+            .collect();
+        (ltis.len() != 0).then_some(ltis)
+    }
+
+    fn loot_matrix_indexes_with_item(&self, item_id: i32) -> Option<Vec<i32>> {
+        let ltis = self.loot_table_indexes_with_item(item_id)?;
+        let lmis: Vec<i32> = self
+            .loot_matrix
+            .iter()
+            .filter(|lm| ltis.contains(&lm.loot_table_index))
+            .map(|lm| lm.loot_matrix_index)
+            .collect();
+        (lmis.len() != 0).then_some(lmis)
+    }
+
+    fn items_in_loot_matrix_index(&self, lmi: i32) -> Option<Vec<i32>> {
+        let item_ids: Vec<i32> = self
+            .loot_matrix
+            .iter()
+            .filter(|lm| lm.loot_table_index == lmi)
+            .filter_map(|lm| self.items_in_loot_table_index(lm.loot_table_index))
+            .flatten()
+            .collect();
+        (item_ids.len() != 0).then_some(item_ids)
+    }
+
+    fn items_in_loot_table_index(&self, lti: i32) -> Option<Vec<i32>> {
+        let item_ids: Vec<i32> = self
+            .loot_table
+            .at_group_key(&lti)?
+            .iter()
+            .map(|lt| lt.itemid)
+            .collect();
+        (item_ids.len() != 0).then_some(item_ids)
+    }
+}
+
 pub trait ObjectQueries {
     fn object_name(&self, item_id: i32) -> Option<String>;
 
@@ -76,9 +127,11 @@ pub trait ObjectQueries {
 
     fn object_explorer_url(&self, item_id: i32) -> String;
 
-    fn object_render_component(&self, item_id: i32) -> Option<&RenderComponent>;
+    fn object_render_component(&self, item_id: i32) -> MsgResult<&RenderComponent>;
 
     fn object_icon_url(&self, item_id: i32) -> Option<String>;
+    /// returns vendor ids
+    fn object_vendor_ids(&self, item_id: i32) -> MsgResult<Vec<i32>>;
 }
 
 impl ObjectQueries for CdClient {
@@ -140,7 +193,7 @@ impl ObjectQueries for CdClient {
         let item_component = self
             .item_component
             .at_key(&item_component_id)
-            .ok_or_else(|| format!("Item Component {} does not exist", item_component_id))?;
+            .ok_or_else(|| format!("Item Component `{}` does not exist", item_component_id))?;
 
         Ok(item_component)
     }
@@ -149,22 +202,61 @@ impl ObjectQueries for CdClient {
         CONFIG.explorer_uri(format!("/objects/{}", item_id))
     }
 
-    fn object_render_component(&self, item_id: i32) -> Option<&RenderComponent> {
-        let components = self.components_registry.at_group_key(&item_id)?;
+    fn object_render_component(&self, item_id: i32) -> MsgResult<&RenderComponent> {
+        let components = self
+            .components_registry
+            .at_group_key(&item_id)
+            .ok_or_else(|| {
+                format!(
+                    "{} has no Registered Components",
+                    self.object_explorer_url(item_id)
+                )
+            })?;
 
         let render_component_id = components
             .iter()
-            .find(|comp| comp.component_type == RENDER_COMPONENT)?
+            .find(|comp| comp.component_type == RENDER_COMPONENT)
+            .ok_or_else(|| {
+                format!(
+                    "{} has no Registered Render Component",
+                    self.object_explorer_url(item_id)
+                )
+            })?
             .component_id;
 
-        let render_component = self.render_component.at_key(&render_component_id)?;
+        let render_component = self
+            .render_component
+            .at_key(&render_component_id)
+            .ok_or_else(|| format!("Render Component `{}` does not exist", render_component_id))?;
 
-        Some(render_component)
+        Ok(render_component)
     }
 
     fn object_icon_url(&self, item_id: i32) -> Option<String> {
-        let render_component = self.object_render_component(item_id)?;
+        let render_component = self.object_render_component(item_id).ok()?;
         Some(icon_asset_as_url(render_component.icon_asset.as_ref()?))
+    }
+
+    fn object_vendor_ids(&self, item_id: i32) -> MsgResult<Vec<i32>> {
+        let lmis = self.loot_matrix_indexes_with_item(item_id).ok_or_else(|| {
+            format!(
+                "{} it not in any Loot Matrices",
+                self.object_explorer_url(item_id)
+            )
+        })?;
+        let vc_ids: Vec<i32> = self
+            .vendor_component
+            .iter()
+            .filter(|vc| lmis.contains(&vc.loot_matrix_index))
+            .map(|vc| vc.id)
+            .collect();
+        let object_ids = self
+            .components_registry
+            .iter()
+            .filter(|cr| cr.component_type == VENDOR_COMPONENT && vc_ids.contains(&cr.component_id))
+            .map(|cr| cr.id)
+            .collect();
+        Ok(object_ids)
     }
 }
 
