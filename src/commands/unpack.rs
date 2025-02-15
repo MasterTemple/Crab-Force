@@ -139,7 +139,10 @@ fn calculate_chance_to_drop(lmi: i32, id: i32) -> Option<f64> {
         * chance_to_drop_loot_table
         * (1.0 / number_of_items_of_rarity_in_loot_table as f64);
 
-    Some(chance)
+    // I should still multiple by number drops
+    let avg_dropped = (lm.min_to_drop as f64 + lm.max_to_drop as f64) / 2.0;
+
+    Some(avg_dropped * chance)
 }
 
 fn calc_chance_to_drop_rarity(rarity: i32, rti: i32) -> Option<f64> {
