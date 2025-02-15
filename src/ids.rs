@@ -47,7 +47,7 @@ pub fn icon_asset_as_url(asset: impl AsRef<str>) -> String {
 *    extra fields; i probably just want to return custom structs from newtype wrapper methods
 */
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientLootTableId(i32);
 impl Api for CdClientLootTableId {}
 impl LUExplorer for CdClientLootTableId {
@@ -92,9 +92,70 @@ impl CdClientLootTableId {
                 .count(),
         )
     }
+
+    pub fn loot_chances(&self, rarity_table_index: i32) -> LootTableChances {
+        let rti = CdClientRarityTableId(rarity_table_index);
+        let lt = CdClientLootTableId(self.id());
+
+        let t1 = rti.chance_to_drop_rarity(1).map(|chance| {
+            let count = lt.items_of_rarity(1).unwrap_or(0);
+            LootTableRarityGroup { count, chance }
+        });
+
+        let t2 = rti.chance_to_drop_rarity(2).map(|chance| {
+            let count = lt.items_of_rarity(2).unwrap_or(0);
+            LootTableRarityGroup { count, chance }
+        });
+
+        let t3 = rti.chance_to_drop_rarity(3).map(|chance| {
+            let count = lt.items_of_rarity(3).unwrap_or(0);
+            LootTableRarityGroup { count, chance }
+        });
+
+        let t4 = rti.chance_to_drop_rarity(4).map(|chance| {
+            let count = lt.items_of_rarity(4).unwrap_or(0);
+            LootTableRarityGroup { count, chance }
+        });
+
+        LootTableChances {
+            lti: *self,
+            t1,
+            t2,
+            t3,
+            t4,
+        }
+    }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+/// while there may be loot tables that dont drop certain rarities in that loot table, i don't care
+pub struct LootTableRarityGroup {
+    count: usize,
+    chance: f64,
+}
+impl LootTableRarityGroup {
+    pub fn chance_any(&self) -> f64 {
+        self.chance
+    }
+    pub fn chance_specific(&self) -> f64 {
+        self.chance / self.count as f64
+    }
+}
+
+pub struct LootTableChances {
+    lti: CdClientLootTableId,
+    t1: Option<LootTableRarityGroup>,
+    t2: Option<LootTableRarityGroup>,
+    t3: Option<LootTableRarityGroup>,
+    t4: Option<LootTableRarityGroup>,
+}
+impl LootTableChances {
+    /// like health pickups
+    pub fn has_no_rarity(&self) -> bool {
+        self.t1.is_none() && self.t2.is_none() && self.t3.is_none() && self.t4.is_none()
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientLootMatrixId(i32);
 impl Api for CdClientLootMatrixId {}
 
@@ -119,9 +180,29 @@ impl CdClientLootMatrixId {
             .flatten()
             .collect_some()
     }
+
+    pub fn loot_tables(&self) -> Option<Vec<CdClientLootTableId>> {
+        self.fetch()
+            .ok()?
+            .into_iter()
+            .map(|lm| CdClientLootTableId(lm.loot_table_index))
+            .collect_some()
+    }
+
+    pub fn loot_chances(&self) -> Option<Vec<LootTableChances>> {
+        // let loot_tables = self.loot_tables()?;
+        let loot_tables = self.fetch().ok()?;
+        loot_tables
+            .into_iter()
+            .map(|lm_entry| {
+                CdClientLootTableId(lm_entry.loot_table_index)
+                    .loot_chances(lm_entry.rarity_table_index)
+            })
+            .collect_some()
+    }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientRarityTableId(i32);
 impl Api for CdClientRarityTableId {}
 impl CdClientRarityTableId {
@@ -137,7 +218,7 @@ impl CdClientRarityTableId {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientObjectsId(i32);
 impl Api for CdClientObjectsId {}
 
@@ -230,17 +311,17 @@ impl CdClientObjectsId {
 
         let total_chance: f64 = lms
             .into_iter()
-            .filter_map(|lm| {
-                let chance_to_drop_loot_table = lm.percent;
+            .filter_map(|lm_entry| {
+                let chance_to_drop_loot_table = lm_entry.percent;
                 let number_of_items_of_rarity_in_loot_table =
-                    CdClientLootTableId(lm.loot_table_index).items_of_rarity(rarity)?;
-                let chance_to_drop_rarity =
-                    CdClientRarityTableId(lm.rarity_table_index).chance_to_drop_rarity(rarity)?;
+                    CdClientLootTableId(lm_entry.loot_table_index).items_of_rarity(rarity)?;
+                let chance_to_drop_rarity = CdClientRarityTableId(lm_entry.rarity_table_index)
+                    .chance_to_drop_rarity(rarity)?;
 
                 let chance = chance_to_drop_rarity
                     * chance_to_drop_loot_table
                     * (1.0 / number_of_items_of_rarity_in_loot_table as f64);
-                let avg_dropped = (lm.min_to_drop as f64 + lm.max_to_drop as f64) / 2.0;
+                let avg_dropped = (lm_entry.min_to_drop as f64 + lm_entry.max_to_drop as f64) / 2.0;
 
                 Some(avg_dropped * chance)
             })
@@ -434,7 +515,7 @@ pub trait ComponentId: Api {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientDestructibleComponentId(i32);
 impl Api for CdClientDestructibleComponentId {}
 impl ComponentId for CdClientDestructibleComponentId {
@@ -445,7 +526,7 @@ impl ComponentId for CdClientDestructibleComponentId {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientPackageComponentId(i32);
 impl Api for CdClientPackageComponentId {}
 impl ComponentId for CdClientPackageComponentId {
@@ -456,7 +537,7 @@ impl ComponentId for CdClientPackageComponentId {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientItemComponentId(i32);
 impl Api for CdClientItemComponentId {}
 impl ComponentId for CdClientItemComponentId {
@@ -476,7 +557,7 @@ impl CdClientItemComponentId {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientRenderComponentId(i32);
 impl Api for CdClientRenderComponentId {}
 impl ComponentId for CdClientRenderComponentId {
@@ -496,7 +577,7 @@ impl CdClientRenderComponentId {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientVendorComponentId(i32);
 impl Api for CdClientVendorComponentId {}
 impl ComponentId for CdClientVendorComponentId {
@@ -507,7 +588,7 @@ impl ComponentId for CdClientVendorComponentId {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CdClientActivityRewardsId(i32);
 impl Api for CdClientActivityRewardsId {}
 impl CdClientActivityRewardsId {}
