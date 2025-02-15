@@ -4,19 +4,113 @@ use std::{
     str::FromStr,
 };
 
-// ! I STILL SHOULD TRIM NON-NULLABLE STRINGS
-
-// ! SOME STRINGS ARE ACTUALLY ARRAYS
-
 /// https://docs.lu-dev.net/en/latest/components.html
 pub mod components {
+    pub const CONTROLLABLE_PHYSICS_COMPONENT: i32 = 1;
     pub const RENDER_COMPONENT: i32 = 2;
+    pub const SIMPLE_PHYSICS_COMPONENT: i32 = 3;
+    pub const CHARACTER_COMPONENT: i32 = 4;
+    pub const SCRIPT_COMPONENT: i32 = 5;
+    pub const BOUNCER_COMPONENT: i32 = 6;
     pub const DESTROYABLE_COMPONENT: i32 = 7;
+    pub const GHOST_COMPONENT: i32 = 8;
     pub const SKILL_COMPONENT: i32 = 9;
+    pub const SPAWNER_COMPONENT: i32 = 10;
     pub const ITEM_COMPONENT: i32 = 11;
+    pub const REBUILD_COMPONENT: i32 = 12;
+    pub const REBUILD_START_COMPONENT: i32 = 13;
+    pub const REBUILD_ACTIVATOR_COMPONENT: i32 = 14;
+    pub const ICON_ONLY_COMPONENT: i32 = 15;
     pub const VENDOR_COMPONENT: i32 = 16;
-    pub const PACKAGE_COMPONENT: i32 = 53;
     pub const INVENTORY_COMPONENT: i32 = 17;
+    pub const PROJECTILE_PHYSICS_COMPONENT: i32 = 18;
+    pub const SHOOTING_GALLERY_COMPONENT: i32 = 19;
+    pub const RIGIDBODYPHANTOMPHYSICS_COMPONENT: i32 = 20;
+    pub const DROP_EFFECT_COMPONENT: i32 = 21;
+    pub const CHEST_COMPONENT: i32 = 22;
+    pub const COLLECTIBLE_COMPONENT: i32 = 23;
+    pub const BLUEPRINT_COMPONENT: i32 = 24;
+    pub const MOVING_PLATFORM_COMPONENT: i32 = 25;
+    pub const PET_COMPONENT: i32 = 26;
+    pub const PLATFORM_BOUNDARY_COMPONENT: i32 = 27;
+    pub const MODULE_COMPONENT: i32 = 28;
+    pub const JET_PACK_PAD: i32 = 29;
+    pub const VEHICLE_PHYSICS_COMPONENT: i32 = 30;
+    pub const MOVEMENTAI_COMPONENT: i32 = 31;
+    pub const EXHIBIT_COMPONENT: i32 = 32;
+    pub const OVERHEADICON_COMPONENT: i32 = 33;
+    pub const PET_CONTROL_COMPONENT: i32 = 34;
+    pub const MINIFIG_COMPONENT: i32 = 35;
+    pub const PROPERTY_COMPONENT: i32 = 36;
+    pub const PET_CREATOR_COMPONENT: i32 = 37;
+    pub const MODEL_BUILDER_COMPONENT: i32 = 38;
+    pub const SCRIPTED_ACTIVITY_COMPONENT: i32 = 39;
+    pub const PHANTOM_PHYSICS_COMPONENT: i32 = 40;
+    pub const SPRINGPAD_COMPONENT: i32 = 41;
+    pub const B3_BEHAVIORS_COMPONENT: i32 = 42;
+    pub const PROPERTY_ENTRANCE_COMPONENT: i32 = 43;
+    pub const FX_COMPONENT: i32 = 44;
+    pub const PROPERTY_MANAGEMENT_COMPONENT: i32 = 45;
+    pub const VEHICLE_PHYSICS_COMPONENT2: i32 = 46;
+    pub const PHYSICS_SYSTEM_COMPONENT: i32 = 47;
+    pub const QUICK_BUILD_COMPONENT: i32 = 48;
+    pub const SWITCH_COMPONENT: i32 = 49;
+    pub const MINIGAME_COMPONENT: i32 = 50;
+    pub const CHANGLING_COMPONENT: i32 = 51;
+    pub const CHOICE_BUILD_COMPONENT: i32 = 52;
+    pub const PACKAGE_COMPONENT: i32 = 53;
+    pub const SOUND_REPEATER_COMPONENT: i32 = 54;
+    pub const SOUND_AMBIENT_2D_COMPONENT: i32 = 55;
+    pub const SOUND_AMBIENT_3D_COMPONENT: i32 = 56;
+    pub const PRECONDITION_COMPONENT: i32 = 57;
+    pub const PLAYER_FLAGS_COMPONENT: i32 = 58;
+    pub const CUSTOM_BUILD_ASSEMBLY_COMPONENT: i32 = 59;
+    pub const BASE_COMBAT_AI_COMPONENT: i32 = 60;
+    pub const MODULE_ASSEMBLY_COMPONENT: i32 = 61;
+    pub const SHOWCASE_MODEL_HANDLER_COMPONENT: i32 = 62;
+    pub const RACING_MODULE_COMPONENT: i32 = 63;
+    pub const GENERIC_ACTIVATOR_COMPONENT: i32 = 64;
+    pub const PROPERTY_VENDOR_COMPONENT: i32 = 65;
+    pub const HFLIGHTDIRECTIONGADGET_COMPONENT: i32 = 66;
+    pub const ROCKET_LAUNCH_COMPONENT: i32 = 67;
+    pub const ROCKET_LANDING_COMPONENT: i32 = 68;
+    pub const TRIGGER_COMPONENT: i32 = 69;
+    pub const DROPPED_LOOT_COMPONENT: i32 = 70;
+    pub const RACING_CONTROL_COMPONENT: i32 = 71;
+    pub const FACTION_TRIGGER_COMPONENT: i32 = 72;
+    pub const MISSION_OFFER_COMPONENT: i32 = 73;
+    pub const RACING_STATS_COMPONENT: i32 = 74;
+    pub const LUP_EXHIBIT_COMPONENT: i32 = 75;
+    pub const BBB_COMPONENT: i32 = 76;
+    pub const SOUND_TRIGGER_COMPONENT: i32 = 77;
+    pub const PROXIMITY_MONITOR_COMPONENT: i32 = 78;
+    pub const RACING_SOUND_TRIGGER_COMPONENT: i32 = 79;
+    pub const CHAT_COMPONENT: i32 = 80;
+    pub const FRIENDS_LIST_COMPONENT: i32 = 81;
+    pub const GUILD_COMPONENT: i32 = 82;
+    pub const LOCAL_SYSTEM_COMPONENT: i32 = 83;
+    pub const MISSION_COMPONENT: i32 = 84;
+    pub const MUTABLE_MODEL_BEHAVIORS_COMPONENT: i32 = 85;
+    pub const PATHFINDING_CONTROL_COMPONENT: i32 = 86;
+    pub const PET_TAMING_CONTROL_COMPONENT: i32 = 87;
+    pub const PROPERTY_EDITOR_COMPONENT: i32 = 88;
+    pub const SKINNED_RENDER_COMPONENT: i32 = 89;
+    pub const SLASH_COMMAND_COMPONENT: i32 = 90;
+    pub const STATUS_EFFECT_COMPONENT: i32 = 91;
+    pub const TEAMS_COMPONENT: i32 = 92;
+    pub const TEXT_EFFECT_COMPONENT: i32 = 93;
+    pub const TRADE_COMPONENT: i32 = 94;
+    pub const USER_CONTROL_COMPONENT: i32 = 95;
+    pub const IGNORE_LIST_COMPONENT: i32 = 96;
+    pub const LUP_LAUNCHPAD_COMPONENT: i32 = 97;
+    pub const BUFF_COMPONENT: i32 = 98;
+    pub const INTERACTION_MANAGER_COMPONENT: i32 = 99;
+    pub const DONATION_VENDOR_COMPONENT: i32 = 100;
+    pub const COMBAT_MEDIATOR_COMPONENT: i32 = 101;
+    pub const PLAYER_FORCED_MOVEMENT_COMPONENT: i32 = 106;
+    pub const BRICK_BY_BRICK_COMPONENT: i32 = 107;
+    pub const LEVEL_PROGRESSION_COMPONENT: i32 = 109;
+    pub const POSSESSION_CONTROL_COMPONENT: i32 = 110;
 }
 
 // static LIST_REGEX: Lazy<Regex> =
