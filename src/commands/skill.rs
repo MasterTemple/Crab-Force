@@ -66,7 +66,6 @@ impl InteractionCommand for SkillCommand {
         let SkillArguments { skill: id } = arguments;
 
         let skill = CD_CLIENT.get_skill(id)?;
-
         let explorer_url = CD_CLIENT.skill_explorer_url(id);
         let name = CD_CLIENT.req_skill_name(id);
 

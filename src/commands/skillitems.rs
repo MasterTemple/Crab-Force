@@ -1,5 +1,5 @@
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
+use crate::queries::{AutocompleteQueries, ObjectQueries, SkillQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
 use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
 
@@ -59,24 +59,48 @@ impl InteractionCommand for SkillItemsCommand {
         autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
     ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
         let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
+        Some(CD_CLIENT.autocomplete_skill(input))
     }
 
     fn run(arguments: Self::Arguments) -> CommandResult {
         let SkillItemsArguments { skill: id } = arguments;
 
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
+        let skill = CD_CLIENT.get_skill(id)?;
+        let explorer_url = CD_CLIENT.skill_explorer_url(id);
+        let name = CD_CLIENT.req_skill_name(id);
+
+        let object_skills: Vec<_> = CD_CLIENT
+            .object_skills
+            .iter()
+            .filter(|ob| ob.skill_id == id)
+            .enumerate()
+            .map(|(idx, ob)| {
+                let num = idx + 1;
+                let name = CD_CLIENT.object_hyperlinked_name(ob.object_template);
+                format!("**{num}.** {name}")
+            })
+            .collect();
 
         let mut embed = CONFIG
             .default_embed()
             .title(format!("{} [{}]", name, id))
             .url(explorer_url);
 
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
+        if let Some(icon_url) = CD_CLIENT.skill_icon_url(id) {
             embed = embed.thumbnail(icon_url);
         }
+
+        match object_skills.len() {
+            0 => embed = embed.field("Items", "None", true),
+            1 => embed = embed.field("Item", &object_skills[0], true),
+            _ => {
+                let half = object_skills.len() / 2;
+                let col1 = object_skills[..=half].join("\n");
+                let col2 = object_skills[half + 1..].join("\n");
+                embed = embed.field("Items", col1, true);
+                embed = embed.field("Items", col2, true);
+            }
+        };
 
         Ok((embed, None))
     }
