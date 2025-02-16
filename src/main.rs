@@ -269,21 +269,6 @@ impl EventHandler for Handler {
                 .expect("GUILD_ID must be an integer"),
         );
 
-        {
-            // force it to load
-            let start = Instant::now();
-            let levels = &CD_CLIENT.level_progression_lookup.len();
-            println!("Total levels: {levels}");
-            let end = start.elapsed().as_millis();
-            println!("'cdclient.sqlite' loaded in {end}ms");
-            // force it to load
-            let start = Instant::now();
-            let locale_count = &LOCALE_XML.locales.len();
-            println!("Total locales: {locale_count}");
-            let end = start.elapsed().as_millis();
-            println!("'locale.xml' loaded in {end}ms");
-        }
-
         let commands = guild_id
             .set_commands(
                 &ctx.http,
@@ -323,6 +308,21 @@ impl EventHandler for Handler {
 async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+
+    // {
+    //     // force it to load
+    //     let start = Instant::now();
+    //     let levels = &RW_CD_CLIENT.level_progression_lookup.len();
+    //     println!("Total levels: {levels}");
+    //     let end = start.elapsed().as_millis();
+    //     println!("'cdclient.sqlite' loaded in {end}ms");
+    //     // force it to load
+    //     let start = Instant::now();
+    //     let locale_count = &RW_LOCALE_XML.locales.len();
+    //     println!("Total locales: {locale_count}");
+    //     let end = start.elapsed().as_millis();
+    //     println!("'locale.xml' loaded in {end}ms");
+    // }
 
     // Build our client.
     let mut client = Client::builder(token, GatewayIntents::empty())

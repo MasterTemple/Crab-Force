@@ -1,3 +1,4 @@
+use crate::ids::CdClientObjectsId;
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
 use crate::queries::{AutocompleteQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
@@ -65,17 +66,44 @@ impl InteractionCommand for DropCommand {
     fn run(arguments: Self::Arguments) -> CommandResult {
         let DropArguments { item: id } = arguments;
 
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
+        let object = CdClientObjectsId(id);
+        let name = object.req_name();
 
         let mut embed = CONFIG
             .default_embed()
             .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
+            .url(object.explorer_url());
 
         if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
             embed = embed.thumbnail(icon_url);
+        }
+
+        let page = 1;
+        let page_size = 15;
+
+        let entries = dbg!(object.smashables_chances())?;
+        let start = (page - 1) * page_size;
+        let end = std::cmp::min(start + page_size, entries.len());
+        // -----------------------------------------------------------------------------------------
+        // ! check if they have gone beyond the page and then calculate last page and put them there
+        // -----------------------------------------------------------------------------------------
+        // let paged_entries = &entries[start..end];
+        // for (idx, entry) in paged_entries.into_iter().enumerate() {
+        for (idx, entry) in entries
+            .into_iter()
+            .enumerate()
+            .skip(start)
+            .take(end - start)
+        {
+            let num = idx + 1;
+            let field_name = format!("{}. {:.4}% for {}", num, entry.chance * 100.0, &name);
+            let sources: Vec<_> = entry
+                .sources
+                .into_iter()
+                .map(|source| source.hyperlink_name())
+                .collect();
+            let value = format!("*From* {}", sources.join(", "));
+            embed = embed.field(field_name, value, false);
         }
 
         Ok((embed, None))

@@ -1528,7 +1528,7 @@ pub struct CdClientBuffParameters {
 }
 
 impl FromCdClient for CdClientBuffParameters {
-    const TABLE: &'static str = "CdClientBuffParameters";
+    const TABLE: &'static str = "BuffParameters";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1615,7 +1615,7 @@ pub struct CdClientCamera {
 }
 
 impl FromCdClient for CdClientCamera {
-    const TABLE: &'static str = "CdClientCamera";
+    const TABLE: &'static str = "Camera";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1727,7 +1727,7 @@ pub struct CdClientCelebrationParameters {
 }
 
 impl FromCdClient for CdClientCelebrationParameters {
-    const TABLE: &'static str = "CdClientCelebrationParameters";
+    const TABLE: &'static str = "CelebrationParameters";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1782,7 +1782,7 @@ pub struct CdClientChoiceBuildComponent {
 }
 
 impl FromCdClient for CdClientChoiceBuildComponent {
-    const TABLE: &'static str = "CdClientChoiceBuildComponent";
+    const TABLE: &'static str = "ChoiceBuildComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1809,7 +1809,7 @@ pub struct CdClientCollectibleComponent {
 }
 
 impl FromCdClient for CdClientCollectibleComponent {
-    const TABLE: &'static str = "CdClientCollectibleComponent";
+    const TABLE: &'static str = "CollectibleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1886,7 +1886,7 @@ pub struct CdClientControlSchemes {
 }
 
 impl FromCdClient for CdClientControlSchemes {
-    const TABLE: &'static str = "CdClientControlSchemes";
+    const TABLE: &'static str = "ControlSchemes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1935,7 +1935,7 @@ pub struct CdClientCurrencyDenominations {
 }
 
 impl FromCdClient for CdClientCurrencyDenominations {
-    const TABLE: &'static str = "CdClientCurrencyDenominations";
+    const TABLE: &'static str = "CurrencyDenominations";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -1964,7 +1964,7 @@ pub struct CdClientCurrencyTable {
 }
 
 impl FromCdClient for CdClientCurrencyTable {
-    const TABLE: &'static str = "CdClientCurrencyTable";
+    const TABLE: &'static str = "CurrencyTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2024,7 +2024,7 @@ pub struct CdClientDeletionRestrictions {
 }
 
 impl FromCdClient for CdClientDeletionRestrictions {
-    const TABLE: &'static str = "CdClientDeletionRestrictions";
+    const TABLE: &'static str = "DeletionRestrictions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2067,7 +2067,7 @@ pub struct CdClientDestructibleComponent {
 }
 
 impl FromCdClient for CdClientDestructibleComponent {
-    const TABLE: &'static str = "CdClientDestructibleComponent";
+    const TABLE: &'static str = "DestructibleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2105,7 +2105,7 @@ pub struct CdClientDevModelBehaviors {
 }
 
 impl FromCdClient for CdClientDevModelBehaviors {
-    const TABLE: &'static str = "CdClientDevModelBehaviors";
+    const TABLE: &'static str = "DevModelBehaviors";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2138,7 +2138,7 @@ pub struct CdClientEmotes {
 }
 
 impl FromCdClient for CdClientEmotes {
-    const TABLE: &'static str = "CdClientEmotes";
+    const TABLE: &'static str = "Emotes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2172,7 +2172,7 @@ pub struct CdClientEventGating {
 }
 
 impl FromCdClient for CdClientEventGating {
-    const TABLE: &'static str = "CdClientEventGating";
+    const TABLE: &'static str = "EventGating";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2206,7 +2206,7 @@ pub struct CdClientExhibitComponent {
 }
 
 impl FromCdClient for CdClientExhibitComponent {
-    const TABLE: &'static str = "CdClientExhibitComponent";
+    const TABLE: &'static str = "ExhibitComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2242,7 +2242,7 @@ pub struct CdClientFactions {
 }
 
 impl FromCdClient for CdClientFactions {
-    const TABLE: &'static str = "CdClientFactions";
+    const TABLE: &'static str = "Factions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2274,7 +2274,7 @@ pub struct CdClientFeatureGating {
 }
 
 impl FromCdClient for CdClientFeatureGating {
-    const TABLE: &'static str = "CdClientFeatureGating";
+    const TABLE: &'static str = "FeatureGating";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2303,7 +2303,7 @@ pub struct CdClientFlairTable {
 }
 
 impl FromCdClient for CdClientFlairTable {
-    const TABLE: &'static str = "CdClientFlairTable";
+    const TABLE: &'static str = "FlairTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2330,7 +2330,7 @@ pub struct CdClientIcons {
 }
 
 impl FromCdClient for CdClientIcons {
-    const TABLE: &'static str = "CdClientIcons";
+    const TABLE: &'static str = "Icons";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2359,7 +2359,7 @@ pub struct CdClientInventoryComponent {
 }
 
 impl FromCdClient for CdClientInventoryComponent {
-    const TABLE: &'static str = "CdClientInventoryComponent";
+    const TABLE: &'static str = "InventoryComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2504,7 +2504,7 @@ pub struct CdClientItemEggData {
 }
 
 impl FromCdClient for CdClientItemEggData {
-    const TABLE: &'static str = "CdClientItemEggData";
+    const TABLE: &'static str = "ItemEggData";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2537,7 +2537,7 @@ pub struct CdClientItemFoodData {
 }
 
 impl FromCdClient for CdClientItemFoodData {
-    const TABLE: &'static str = "CdClientItemFoodData";
+    const TABLE: &'static str = "ItemFoodData";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2571,7 +2571,7 @@ pub struct CdClientItemSetSkills {
 }
 
 impl FromCdClient for CdClientItemSetSkills {
-    const TABLE: &'static str = "CdClientItemSetSkills";
+    const TABLE: &'static str = "ItemSetSkills";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2611,7 +2611,7 @@ pub struct CdClientItemSets {
 }
 
 impl FromCdClient for CdClientItemSets {
-    const TABLE: &'static str = "CdClientItemSets";
+    const TABLE: &'static str = "ItemSets";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2654,7 +2654,7 @@ pub struct CdClientJetPackPadComponent {
 }
 
 impl FromCdClient for CdClientJetPackPadComponent {
-    const TABLE: &'static str = "CdClientJetPackPadComponent";
+    const TABLE: &'static str = "JetPackPadComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2689,7 +2689,7 @@ pub struct CdClientLuPExhibitComponent {
 }
 
 impl FromCdClient for CdClientLuPExhibitComponent {
-    const TABLE: &'static str = "LUPCdClientExhibitComponent";
+    const TABLE: &'static str = "LUPExhibitComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2778,7 +2778,7 @@ pub struct CdClientLanguageType {
 }
 
 impl FromCdClient for CdClientLanguageType {
-    const TABLE: &'static str = "CdClientLanguageType";
+    const TABLE: &'static str = "LanguageType";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2805,7 +2805,7 @@ pub struct CdClientLevelProgressionLookup {
 }
 
 impl FromCdClient for CdClientLevelProgressionLookup {
-    const TABLE: &'static str = "CdClientLevelProgressionLookup";
+    const TABLE: &'static str = "LevelProgressionLookup";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2839,7 +2839,7 @@ pub struct CdClientLootMatrix {
 }
 
 impl FromCdClient for CdClientLootMatrix {
-    const TABLE: &'static str = "CdClientLootMatrix";
+    const TABLE: &'static str = "LootMatrix";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2872,7 +2872,7 @@ pub struct CdClientLootMatrixIndex {
 }
 
 impl FromCdClient for CdClientLootMatrixIndex {
-    const TABLE: &'static str = "CdClientLootMatrixIndex";
+    const TABLE: &'static str = "LootMatrixIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2901,7 +2901,7 @@ pub struct CdClientLootTable {
 }
 
 impl FromCdClient for CdClientLootTable {
-    const TABLE: &'static str = "CdClientLootTable";
+    const TABLE: &'static str = "LootTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2930,7 +2930,7 @@ pub struct CdClientLootTableIndex {
 }
 
 impl FromCdClient for CdClientLootTableIndex {
-    const TABLE: &'static str = "CdClientLootTableIndex";
+    const TABLE: &'static str = "LootTableIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -2966,7 +2966,7 @@ pub struct CdClientMinifigComponent {
 }
 
 impl FromCdClient for CdClientMinifigComponent {
-    const TABLE: &'static str = "CdClientMinifigComponent";
+    const TABLE: &'static str = "MinifigComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3169,7 +3169,7 @@ pub struct CdClientMissionEmail {
 }
 
 impl FromCdClient for CdClientMissionEmail {
-    const TABLE: &'static str = "CdClientMissionEmail";
+    const TABLE: &'static str = "MissionEmail";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3204,7 +3204,7 @@ pub struct CdClientMissionNPCComponent {
 }
 
 impl FromCdClient for CdClientMissionNPCComponent {
-    const TABLE: &'static str = "CdClientMissionNPCComponent";
+    const TABLE: &'static str = "MissionNPCComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3245,7 +3245,7 @@ pub struct CdClientMissionTasks {
 }
 
 impl FromCdClient for CdClientMissionTasks {
-    const TABLE: &'static str = "CdClientMissionTasks";
+    const TABLE: &'static str = "MissionTasks";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3313,7 +3313,7 @@ pub struct CdClientMissionText {
 }
 
 impl FromCdClient for CdClientMissionText {
-    const TABLE: &'static str = "CdClientMissionText";
+    const TABLE: &'static str = "MissionText";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3525,7 +3525,7 @@ pub struct CdClientModelBehavior {
 }
 
 impl FromCdClient for CdClientModelBehavior {
-    const TABLE: &'static str = "CdClientModelBehavior";
+    const TABLE: &'static str = "ModelBehavior";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3557,7 +3557,7 @@ pub struct CdClientModularBuildComponent {
 }
 
 impl FromCdClient for CdClientModularBuildComponent {
-    const TABLE: &'static str = "CdClientModularBuildComponent";
+    const TABLE: &'static str = "ModularBuildComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3593,7 +3593,7 @@ pub struct CdClientModuleComponent {
 }
 
 impl FromCdClient for CdClientModuleComponent {
-    const TABLE: &'static str = "CdClientModuleComponent";
+    const TABLE: &'static str = "ModuleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3631,7 +3631,7 @@ pub struct CdClientMotionFX {
 }
 
 impl FromCdClient for CdClientMotionFX {
-    const TABLE: &'static str = "CdClientMotionFX";
+    const TABLE: &'static str = "MotionFX";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3671,7 +3671,7 @@ pub struct CdClientMovementAIComponent {
 }
 
 impl FromCdClient for CdClientMovementAIComponent {
-    const TABLE: &'static str = "CdClientMovementAIComponent";
+    const TABLE: &'static str = "MovementAIComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3709,7 +3709,7 @@ pub struct CdClientMovingPlatforms {
 }
 
 impl FromCdClient for CdClientMovingPlatforms {
-    const TABLE: &'static str = "CdClientMovingPlatforms";
+    const TABLE: &'static str = "MovingPlatforms";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3754,7 +3754,7 @@ pub struct CdClientNpcIcons {
 }
 
 impl FromCdClient for CdClientNpcIcons {
-    const TABLE: &'static str = "CdClientNpcIcons";
+    const TABLE: &'static str = "NpcIcons";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3798,7 +3798,7 @@ pub struct CdClientObjectBehaviorXREF {
 }
 
 impl FromCdClient for CdClientObjectBehaviorXREF {
-    const TABLE: &'static str = "CdClientObjectBehaviorXREF";
+    const TABLE: &'static str = "ObjectBehaviorXREF";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3829,7 +3829,7 @@ pub struct CdClientObjectBehaviors {
 }
 
 impl FromCdClient for CdClientObjectBehaviors {
-    const TABLE: &'static str = "CdClientObjectBehaviors";
+    const TABLE: &'static str = "ObjectBehaviors";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3857,7 +3857,7 @@ pub struct CdClientObjectSkills {
 }
 
 impl FromCdClient for CdClientObjectSkills {
-    const TABLE: &'static str = "CdClientObjectSkills";
+    const TABLE: &'static str = "ObjectSkills";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -3966,7 +3966,7 @@ pub struct CdClientPetAbilities {
 }
 
 impl FromCdClient for CdClientPetAbilities {
-    const TABLE: &'static str = "CdClientPetAbilities";
+    const TABLE: &'static str = "PetAbilities";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4007,7 +4007,7 @@ pub struct CdClientPetComponent {
 }
 
 impl FromCdClient for CdClientPetComponent {
-    const TABLE: &'static str = "CdClientPetComponent";
+    const TABLE: &'static str = "PetComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4046,7 +4046,7 @@ pub struct CdClientPetNestComponent {
 }
 
 impl FromCdClient for CdClientPetNestComponent {
-    const TABLE: &'static str = "CdClientPetNestComponent";
+    const TABLE: &'static str = "PetNestComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4086,7 +4086,7 @@ pub struct CdClientPhysicsComponent {
 }
 
 impl FromCdClient for CdClientPhysicsComponent {
-    const TABLE: &'static str = "CdClientPhysicsComponent";
+    const TABLE: &'static str = "PhysicsComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4128,7 +4128,7 @@ pub struct CdClientPlayerFlags {
 }
 
 impl FromCdClient for CdClientPlayerFlags {
-    const TABLE: &'static str = "CdClientPlayerFlags";
+    const TABLE: &'static str = "PlayerFlags";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4158,7 +4158,7 @@ pub struct CdClientPlayerStatistics {
 }
 
 impl FromCdClient for CdClientPlayerStatistics {
-    const TABLE: &'static str = "CdClientPlayerStatistics";
+    const TABLE: &'static str = "PlayerStatistics";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4194,7 +4194,7 @@ pub struct CdClientPreconditions {
 }
 
 impl FromCdClient for CdClientPreconditions {
-    const TABLE: &'static str = "CdClientPreconditions";
+    const TABLE: &'static str = "Preconditions";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4231,7 +4231,7 @@ pub struct CdClientPropertyEntranceComponent {
 }
 
 impl FromCdClient for CdClientPropertyEntranceComponent {
-    const TABLE: &'static str = "CdClientPropertyEntranceComponent";
+    const TABLE: &'static str = "PropertyEntranceComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4278,7 +4278,7 @@ pub struct CdClientPropertyTemplate {
 }
 
 impl FromCdClient for CdClientPropertyTemplate {
-    const TABLE: &'static str = "CdClientPropertyTemplate";
+    const TABLE: &'static str = "PropertyTemplate";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4324,7 +4324,7 @@ pub struct CdClientProximityMonitorComponent {
 }
 
 impl FromCdClient for CdClientProximityMonitorComponent {
-    const TABLE: &'static str = "CdClientProximityMonitorComponent";
+    const TABLE: &'static str = "ProximityMonitorComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4358,7 +4358,7 @@ pub struct CdClientProximityTypes {
 }
 
 impl FromCdClient for CdClientProximityTypes {
-    const TABLE: &'static str = "CdClientProximityTypes";
+    const TABLE: &'static str = "ProximityTypes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4394,7 +4394,7 @@ pub struct CdClientRacingModuleComponent {
 }
 
 impl FromCdClient for CdClientRacingModuleComponent {
-    const TABLE: &'static str = "CdClientRacingModuleComponent";
+    const TABLE: &'static str = "RacingModuleComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4438,7 +4438,7 @@ pub struct CdClientRailActivatorComponent {
 }
 
 impl FromCdClient for CdClientRailActivatorComponent {
-    const TABLE: &'static str = "CdClientRailActivatorComponent";
+    const TABLE: &'static str = "RailActivatorComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4480,7 +4480,7 @@ pub struct CdClientRarityTable {
 }
 
 impl FromCdClient for CdClientRarityTable {
-    const TABLE: &'static str = "CdClientRarityTable";
+    const TABLE: &'static str = "RarityTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4507,7 +4507,7 @@ pub struct CdClientRarityTableIndex {
 }
 
 impl FromCdClient for CdClientRarityTableIndex {
-    const TABLE: &'static str = "CdClientRarityTableIndex";
+    const TABLE: &'static str = "RarityTableIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4540,7 +4540,7 @@ pub struct CdClientRebuildComponent {
 }
 
 impl FromCdClient for CdClientRebuildComponent {
-    const TABLE: &'static str = "CdClientRebuildComponent";
+    const TABLE: &'static str = "RebuildComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4585,7 +4585,7 @@ pub struct CdClientRebuildSections {
 }
 
 impl FromCdClient for CdClientRebuildSections {
-    const TABLE: &'static str = "CdClientRebuildSections";
+    const TABLE: &'static str = "RebuildSections";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4731,7 +4731,7 @@ pub struct CdClientRenderComponentFlash {
 }
 
 impl FromCdClient for CdClientRenderComponentFlash {
-    const TABLE: &'static str = "CdClientRenderComponentFlash";
+    const TABLE: &'static str = "RenderComponentFlash";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4762,7 +4762,7 @@ pub struct CdClientRenderComponentWrapper {
 }
 
 impl FromCdClient for CdClientRenderComponentWrapper {
-    const TABLE: &'static str = "CdClientRenderComponentWrapper";
+    const TABLE: &'static str = "RenderComponentWrapper";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4789,7 +4789,7 @@ pub struct CdClientRenderIconAssets {
 }
 
 impl FromCdClient for CdClientRenderIconAssets {
-    const TABLE: &'static str = "CdClientRenderIconAssets";
+    const TABLE: &'static str = "RenderIconAssets";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4817,7 +4817,7 @@ pub struct CdClientReputationRewards {
 }
 
 impl FromCdClient for CdClientReputationRewards {
-    const TABLE: &'static str = "CdClientReputationRewards";
+    const TABLE: &'static str = "ReputationRewards";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4847,7 +4847,7 @@ pub struct CdClientRewardCodes {
 }
 
 impl FromCdClient for CdClientRewardCodes {
-    const TABLE: &'static str = "CdClientRewardCodes";
+    const TABLE: &'static str = "RewardCodes";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4880,7 +4880,7 @@ pub struct CdClientRewards {
 }
 
 impl FromCdClient for CdClientRewards {
-    const TABLE: &'static str = "CdClientRewards";
+    const TABLE: &'static str = "Rewards";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4921,7 +4921,7 @@ pub struct CdClientRocketLaunchpadControlComponent {
 }
 
 impl FromCdClient for CdClientRocketLaunchpadControlComponent {
-    const TABLE: &'static str = "CdClientRocketLaunchpadControlComponent";
+    const TABLE: &'static str = "RocketLaunchpadControlComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4958,7 +4958,7 @@ pub struct CdClientSceneTable {
 }
 
 impl FromCdClient for CdClientSceneTable {
-    const TABLE: &'static str = "CdClientSceneTable";
+    const TABLE: &'static str = "SceneTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -4985,7 +4985,7 @@ pub struct CdClientScriptComponent {
 }
 
 impl FromCdClient for CdClientScriptComponent {
-    const TABLE: &'static str = "CdClientScriptComponent";
+    const TABLE: &'static str = "ScriptComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5079,7 +5079,7 @@ pub struct CdClientSmashableChain {
 }
 
 impl FromCdClient for CdClientSmashableChain {
-    const TABLE: &'static str = "CdClientSmashableChain";
+    const TABLE: &'static str = "SmashableChain";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5114,7 +5114,7 @@ pub struct CdClientSmashableChainIndex {
 }
 
 impl FromCdClient for CdClientSmashableChainIndex {
-    const TABLE: &'static str = "CdClientSmashableChainIndex";
+    const TABLE: &'static str = "SmashableChainIndex";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5142,7 +5142,7 @@ pub struct CdClientSmashableComponent {
 }
 
 impl FromCdClient for CdClientSmashableComponent {
-    const TABLE: &'static str = "CdClientSmashableComponent";
+    const TABLE: &'static str = "SmashableComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5168,7 +5168,7 @@ pub struct CdClientSmashableElements {
 }
 
 impl FromCdClient for CdClientSmashableElements {
-    const TABLE: &'static str = "CdClientSmashableElements";
+    const TABLE: &'static str = "SmashableElements";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5199,7 +5199,7 @@ pub struct CdClientSpeedchatMenu {
 }
 
 impl FromCdClient for CdClientSpeedchatMenu {
-    const TABLE: &'static str = "CdClientSpeedchatMenu";
+    const TABLE: &'static str = "SpeedchatMenu";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5235,7 +5235,7 @@ pub struct CdClientSubscriptionPricing {
 }
 
 impl FromCdClient for CdClientSubscriptionPricing {
-    const TABLE: &'static str = "CdClientSubscriptionPricing";
+    const TABLE: &'static str = "SubscriptionPricing";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5266,7 +5266,7 @@ pub struct CdClientSurfaceType {
 }
 
 impl FromCdClient for CdClientSurfaceType {
-    const TABLE: &'static str = "CdClientSurfaceType";
+    const TABLE: &'static str = "SurfaceType";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5303,7 +5303,7 @@ pub struct CdClientTamingBuildPuzzles {
 }
 
 impl FromCdClient for CdClientTamingBuildPuzzles {
-    const TABLE: &'static str = "CdClientTamingBuildPuzzles";
+    const TABLE: &'static str = "TamingBuildPuzzles";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5340,7 +5340,7 @@ pub struct CdClientTextDescription {
 }
 
 impl FromCdClient for CdClientTextDescription {
-    const TABLE: &'static str = "CdClientTextDescription";
+    const TABLE: &'static str = "TextDescription";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5367,7 +5367,7 @@ pub struct CdClientTextLanguage {
 }
 
 impl FromCdClient for CdClientTextLanguage {
-    const TABLE: &'static str = "CdClientTextLanguage";
+    const TABLE: &'static str = "TextLanguage";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5418,7 +5418,7 @@ pub struct CdClientTrailEffects {
 }
 
 impl FromCdClient for CdClientTrailEffects {
-    const TABLE: &'static str = "CdClientTrailEffects";
+    const TABLE: &'static str = "TrailEffects";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5601,7 +5601,7 @@ pub struct CdClientVehiclePhysics {
 }
 
 impl FromCdClient for CdClientVehiclePhysics {
-    const TABLE: &'static str = "CdClientVehiclePhysics";
+    const TABLE: &'static str = "VehiclePhysics";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5730,7 +5730,7 @@ pub struct CdClientVehicleStatMap {
 }
 
 impl FromCdClient for CdClientVehicleStatMap {
-    const TABLE: &'static str = "CdClientVehicleStatMap";
+    const TABLE: &'static str = "VehicleStatMap";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5761,7 +5761,7 @@ pub struct CdClientVendorComponent {
 }
 
 impl FromCdClient for CdClientVendorComponent {
-    const TABLE: &'static str = "CdClientVendorComponent";
+    const TABLE: &'static str = "VendorComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5793,7 +5793,7 @@ pub struct CdClientWhatsCoolItemSpotlight {
 }
 
 impl FromCdClient for CdClientWhatsCoolItemSpotlight {
-    const TABLE: &'static str = "CdClientWhatsCoolItemSpotlight";
+    const TABLE: &'static str = "WhatsCoolItemSpotlight";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5826,7 +5826,7 @@ pub struct CdClientWhatsCoolNewsAndTips {
 }
 
 impl FromCdClient for CdClientWhatsCoolNewsAndTips {
-    const TABLE: &'static str = "CdClientWhatsCoolNewsAndTips";
+    const TABLE: &'static str = "WhatsCoolNewsAndTips";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5911,7 +5911,7 @@ pub struct CdClientWorldConfig {
 }
 
 impl FromCdClient for CdClientWorldConfig {
-    const TABLE: &'static str = "CdClientWorldConfig";
+    const TABLE: &'static str = "WorldConfig";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -5998,7 +5998,7 @@ pub struct CdClientZoneLoadingTips {
 }
 
 impl FromCdClient for CdClientZoneLoadingTips {
-    const TABLE: &'static str = "CdClientZoneLoadingTips";
+    const TABLE: &'static str = "ZoneLoadingTips";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -6032,7 +6032,7 @@ pub struct CdClientZoneSummary {
 }
 
 impl FromCdClient for CdClientZoneSummary {
-    const TABLE: &'static str = "CdClientZoneSummary";
+    const TABLE: &'static str = "ZoneSummary";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -6085,7 +6085,7 @@ pub struct CdClientZoneTable {
 }
 
 impl FromCdClient for CdClientZoneTable {
-    const TABLE: &'static str = "CdClientZoneTable";
+    const TABLE: &'static str = "ZoneTable";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -6478,7 +6478,7 @@ pub struct CdClientPossessableComponent {
 }
 
 impl FromCdClient for CdClientPossessableComponent {
-    const TABLE: &'static str = "CdClientPossessableComponent";
+    const TABLE: &'static str = "PossessableComponent";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {
@@ -6525,7 +6525,7 @@ pub struct CdClientSkillSets {
 }
 
 impl FromCdClient for CdClientSkillSets {
-    const TABLE: &'static str = "CdClientSkillSets";
+    const TABLE: &'static str = "SkillSets";
 
     fn query_map(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
         Ok(Self {

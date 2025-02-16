@@ -1,5 +1,7 @@
 use std::{fmt::Display, ops::Deref};
 
+use itertools::Itertools;
+
 use crate::{
     cdclient::{
         components::{
@@ -50,7 +52,7 @@ pub fn icon_asset_as_url(asset: impl AsRef<str>) -> String {
 */
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientLootTableId(i32);
+pub struct CdClientLootTableId(pub i32);
 impl Api for CdClientLootTableId {}
 impl LUExplorer for CdClientLootTableId {
     const NAME: &'static str = "Loot Table";
@@ -158,7 +160,7 @@ impl LootTableChances {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientLootMatrixId(i32);
+pub struct CdClientLootMatrixId(pub i32);
 impl Api for CdClientLootMatrixId {}
 
 impl CdClientLootMatrixId {
@@ -201,10 +203,14 @@ impl CdClientLootMatrixId {
             })
             .collect_some()
     }
+
+    pub fn id(&self) -> i32 {
+        self.0
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientRarityTableId(i32);
+pub struct CdClientRarityTableId(pub i32);
 impl Api for CdClientRarityTableId {}
 impl CdClientRarityTableId {
     pub fn chance_to_drop_rarity(&self, rarity: i32) -> Option<f64> {
@@ -219,8 +225,15 @@ impl CdClientRarityTableId {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct LootMatrixObjectChances {
+    pub lmi: CdClientLootMatrixId,
+    pub chance: f64,
+    pub sources: Vec<CdClientObjectsId>,
+}
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientObjectsId(i32);
+pub struct CdClientObjectsId(pub i32);
 impl Api for CdClientObjectsId {}
 
 impl CdClientObjectsId {
@@ -405,6 +418,70 @@ impl CdClientObjectsId {
         Ok(smashables)
     }
 
+    // so i need to return the ids and their chances
+    pub fn smashables_chances(&self) -> MsgResult<Vec<LootMatrixObjectChances>> {
+        let lmis = self
+            .get_containing_loot_matrix_indexes()
+            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
+        _ = dbg!(&lmis);
+
+        let smashables: Vec<_> = self
+            .cdclient()
+            .destructible_component
+            .iter()
+            // .filter(|comp| lmis.contains(&CdClientLootMatrixId(comp.loot_matrix_index?)))
+            .filter(|comp| {
+                comp.loot_matrix_index
+                    .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
+            })
+            .group_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index.unwrap()))
+            .into_iter()
+            .filter_map(|(lmi, comps)| {
+                let sources = comps
+                    .filter_map(|comp| {
+                        dbg!(CdClientDestructibleComponentId(comp.id).get_objects_with_component())
+                        // let objects = CdClientDestructibleComponentId(comp.id)
+                        //     .get_objects_with_component()?;
+                        // _ = dbg!(&objects);
+                        // Some(objects
+                    })
+                    .flatten()
+                    .collect();
+                let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
+                _ = dbg!(&chance);
+
+                Some(LootMatrixObjectChances {
+                    lmi,
+                    chance,
+                    sources,
+                })
+            })
+            .collect();
+
+        // let smashables = todo!();
+
+        // .filter_map(|(id, lmi)| {
+        //     // let lmi = CdClientLootMatrixId(comp.loot_matrix_index?);
+        //     // if lmis.contains(&lmi) {
+        //     //     return None;
+        //     // }
+        //     _ = dbg!(&lmi);
+        //     let objects =
+        //         CdClientDestructibleComponentId(comp.id).get_objects_with_component()?;
+        //     _ = dbg!(&objects);
+        //     let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
+        //     _ = dbg!(&chance);
+        //     Some(LootMatrixObjectChances {
+        //         lmi,
+        //         chance,
+        //         sources: objects,
+        //     })
+        // })
+        // .collect();
+
+        Ok(smashables)
+    }
+
     /// All packages that unpack an object
     pub fn packages(&self) -> MsgResult<Vec<CdClientObjectsId>> {
         let lmis = self
@@ -517,7 +594,7 @@ pub trait ComponentId: Api {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientDestructibleComponentId(i32);
+pub struct CdClientDestructibleComponentId(pub i32);
 impl Api for CdClientDestructibleComponentId {}
 impl ComponentId for CdClientDestructibleComponentId {
     const ID: i32 = DESTROYABLE_COMPONENT;
@@ -543,7 +620,7 @@ impl CdClientDestructibleComponentId {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientPackageComponentId(i32);
+pub struct CdClientPackageComponentId(pub i32);
 impl Api for CdClientPackageComponentId {}
 impl ComponentId for CdClientPackageComponentId {
     const ID: i32 = PACKAGE_COMPONENT;
@@ -569,7 +646,7 @@ impl CdClientPackageComponentId {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientItemComponentId(i32);
+pub struct CdClientItemComponentId(pub i32);
 impl Api for CdClientItemComponentId {}
 impl ComponentId for CdClientItemComponentId {
     const ID: i32 = ITEM_COMPONENT;
@@ -589,7 +666,7 @@ impl CdClientItemComponentId {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientRenderComponentId(i32);
+pub struct CdClientRenderComponentId(pub i32);
 impl Api for CdClientRenderComponentId {}
 impl ComponentId for CdClientRenderComponentId {
     const ID: i32 = ITEM_COMPONENT;
@@ -609,7 +686,7 @@ impl CdClientRenderComponentId {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientVendorComponentId(i32);
+pub struct CdClientVendorComponentId(pub i32);
 impl Api for CdClientVendorComponentId {}
 impl ComponentId for CdClientVendorComponentId {
     const ID: i32 = VENDOR_COMPONENT;
@@ -635,7 +712,7 @@ impl CdClientVendorComponentId {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientActivityRewardsId(i32);
+pub struct CdClientActivityRewardsId(pub i32);
 impl Api for CdClientActivityRewardsId {}
 impl CdClientActivityRewardsId {}
 impl LUExplorer for CdClientActivityRewardsId {
@@ -690,7 +767,7 @@ impl CdClientActivityRewardsId {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientSkillBehaviorId(i32);
+pub struct CdClientSkillBehaviorId(pub i32);
 impl Api for CdClientSkillBehaviorId {}
 impl LUExplorer for CdClientSkillBehaviorId {
     const NAME: &'static str = "Skill";
@@ -735,7 +812,7 @@ impl CdClientSkillBehaviorId {
 }
 
 // #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-// pub struct CdClientIconsId(i32);
+// pub struct CdClientIconsId(pub i32);
 // impl Api for CdClientIconsId {}
 // impl LUExplorer for CdClientIconsId {
 //     const NAME: &'static str = "Skill";
