@@ -264,14 +264,15 @@ impl CdClientObjectsId {
         self.name().unwrap_or(format!("Item {}", self.0))
     }
 
+    // this is the stack overflow??
     pub fn explorer_url(&self) -> String {
         self.config().explorer_uri(format!("/objects/{}", self.0))
     }
 
     pub fn hyperlink_name(&self) -> String {
-        let name = self.req_name();
-        let explorer_url = self.explorer_url();
-        explorer_hyperlink(name, self.0, explorer_url)
+        let name = dbg!(self.req_name());
+        let explorer_url = dbg!(self.explorer_url());
+        dbg!(explorer_hyperlink(name, self.0, explorer_url))
     }
 
     pub fn get_component<C: ComponentId>(&self, component: impl Fn(i32) -> C) -> MsgResult<C> {

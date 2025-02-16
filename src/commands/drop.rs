@@ -83,26 +83,33 @@ impl InteractionCommand for DropCommand {
 
         let entries = dbg!(object.smashables_chances())?;
         let start = (page - 1) * page_size;
+        _ = dbg!(&start);
         let end = std::cmp::min(start + page_size, entries.len());
+        _ = dbg!(&end);
         // -----------------------------------------------------------------------------------------
         // ! check if they have gone beyond the page and then calculate last page and put them there
         // -----------------------------------------------------------------------------------------
-        // let paged_entries = &entries[start..end];
-        // for (idx, entry) in paged_entries.into_iter().enumerate() {
-        for (idx, entry) in entries
-            .into_iter()
-            .enumerate()
-            .skip(start)
-            .take(end - start)
-        {
+        let paged_entries = &entries[start..end];
+        _ = dbg!(&paged_entries);
+        for (idx, entry) in paged_entries.into_iter().enumerate() {
+            // for (idx, entry) in entries
+            //     .into_iter()
+            //     .enumerate()
+            //     .skip(start)
+            //     .take(end - start)
+            // {
+
             let num = idx + 1;
             let field_name = format!("{}. {:.4}% for {}", num, entry.chance * 100.0, &name);
+            _ = dbg!(&field_name);
             let sources: Vec<_> = entry
                 .sources
-                .into_iter()
+                .iter()
                 .map(|source| source.hyperlink_name())
                 .collect();
+            _ = dbg!(&sources);
             let value = format!("*From* {}", sources.join(", "));
+            _ = dbg!(&value);
             embed = embed.field(field_name, value, false);
         }
 
