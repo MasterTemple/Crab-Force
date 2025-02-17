@@ -82,6 +82,10 @@ impl InteractionCommand for DropCommand {
         let object = CdClientObjectsId(id);
         let name = object.req_name();
 
+        // ------------ //
+        // Create Embed //
+        // ------------ //
+
         let mut embed = CONFIG
             .default_embed()
             .title(format!("{} [{}]", name, id))
@@ -93,31 +97,21 @@ impl InteractionCommand for DropCommand {
 
         let entries = object.smashables_chances()?;
         let pager = Pager::new(entries, page, 5);
-        dbg!(&pager);
-        dbg!(&pager.this_page());
-
-        let mut smashable_options = vec![];
 
         for (num, entry) in pager.this_page() {
             let field_name = format!("{}. {:.5}% for {}", num, entry.chance * 100.0, &name);
             let sources: Vec<_> = entry
                 .sources
                 .iter()
-                .map(|source| {
-                    if smashable_options.len() < 25 {
-                        smashable_options.push(
-                            SmashArguments {
-                                smashable: source.0,
-                            }
-                            .into(),
-                        );
-                    }
-                    source.hyperlink_name()
-                })
+                .map(|source| source.hyperlink_name())
                 .collect();
             let value = format!("- {}", sources.join("\n- "));
             embed = embed.field(field_name, value, false);
         }
+
+        // ------------------- //
+        // Related Actions Row //
+        // ------------------- //
 
         let page = START_PAGE;
         let item = id;
@@ -135,12 +129,34 @@ impl InteractionCommand for DropCommand {
             buy_button,
         ]);
 
+        // ---------------------- //
+        // Referenced Objects Row //
+        // ---------------------- //
+
+        let smashable_options = pager
+            .this_page()
+            .into_iter()
+            .flat_map(|(_, entry)| {
+                entry.sources.into_iter().map(|source| {
+                    SmashArguments {
+                        smashable: source.0,
+                    }
+                    .into()
+                })
+            })
+            .take(25)
+            .collect();
+
         let smashable_select = CreateActionRow::SelectMenu(CreateSelectMenu::new(
             SmashCommand::NAME,
             CreateSelectMenuKind::String {
                 options: smashable_options,
             },
         ));
+
+        // -------------- //
+        // Pagination Row //
+        // -------------- //
 
         let prev_page_button = DropArguments {
             item: id,
@@ -158,7 +174,6 @@ impl InteractionCommand for DropCommand {
         let page_buttons = CreateActionRow::Buttons(vec![prev_page_button, next_page_button]);
 
         let components = Some(vec![item_buttons, page_buttons, smashable_select]);
-        // let components = Some(vec![item_buttons, smashable_select]);
 
         Ok((embed, components))
     }
