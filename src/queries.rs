@@ -9,6 +9,7 @@ use crate::{
         CdClientPackageComponent, CdClientRenderComponent, CdClientSkillBehavior,
         CdClientVendorComponent,
     },
+    ids::CdClientObjectsId,
     locale::LocaleTranslation,
     CD_CLIENT, CONFIG, LOCALE_XML,
 };
@@ -57,6 +58,7 @@ impl AutocompleteQueries for CdClient {
             // .filter(|item| item.name.len() > 0)
             .map(|item| {
                 let id = item.id;
+                // let name = CdClientObjectsId(id).req_name();
                 let name = item
                     .display_name
                     .clone()

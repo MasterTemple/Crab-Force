@@ -8,6 +8,7 @@ pub struct DropCommand;
 
 pub struct DropArguments {
     item: i32,
+    // page: Option<i32>,
 }
 
 impl ToCustomId for DropArguments {
@@ -15,7 +16,11 @@ impl ToCustomId for DropArguments {
 
     fn parameters(&self) -> String {
         let DropArguments { item } = self;
-        format!("item={item}")
+        vec![
+            format!("item={item}"),
+            // format!("page={page}")
+        ]
+        .join("&")
     }
 }
 
@@ -25,6 +30,7 @@ impl<'a> TryFrom<CustomIdOptions<'a>> for DropArguments {
     fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
         Ok(DropArguments {
             item: options.parse("item")?,
+            // page: options.parse("item")?,
         })
     }
 }
@@ -65,6 +71,8 @@ impl InteractionCommand for DropCommand {
 
     fn run(arguments: Self::Arguments) -> CommandResult {
         let DropArguments { item: id } = arguments;
+        // let page = page.unwrap_or(1);
+        let page = 1;
 
         let object = CdClientObjectsId(id);
         let name = object.req_name();
@@ -78,40 +86,50 @@ impl InteractionCommand for DropCommand {
             embed = embed.thumbnail(icon_url);
         }
 
-        let page = 1;
         let page_size = 15;
 
-        let entries = dbg!(object.smashables_chances())?;
+        let entries = object.smashables_chances()?;
+        dbg!(entries.len());
         let start = (page - 1) * page_size;
-        _ = dbg!(&start);
+        // _ = dbg!(&start);
         let end = std::cmp::min(start + page_size, entries.len());
-        _ = dbg!(&end);
+        // _ = dbg!(&end);
         // -----------------------------------------------------------------------------------------
         // ! check if they have gone beyond the page and then calculate last page and put them there
         // -----------------------------------------------------------------------------------------
         let paged_entries = &entries[start..end];
-        _ = dbg!(&paged_entries);
+        // _ = dbg!(&paged_entries);
         for (idx, entry) in paged_entries.into_iter().enumerate() {
-            // for (idx, entry) in entries
-            //     .into_iter()
-            //     .enumerate()
-            //     .skip(start)
-            //     .take(end - start)
-            // {
-
             let num = idx + 1;
             let field_name = format!("{}. {:.4}% for {}", num, entry.chance * 100.0, &name);
-            _ = dbg!(&field_name);
             let sources: Vec<_> = entry
                 .sources
                 .iter()
                 .map(|source| source.hyperlink_name())
                 .collect();
-            _ = dbg!(&sources);
             let value = format!("*From* {}", sources.join(", "));
-            _ = dbg!(&value);
             embed = embed.field(field_name, value, false);
         }
+
+        // let min_page = 0;
+        // let max_page = entries.len() / page_size;
+        // let prev_page_button = DropArguments {
+        //     item: id,
+        //     // page: page - 1,
+        // }
+        // .to_button(format!("Page {}", page - 1))
+        // .disabled(page - 1 < min_page);
+        // let next_page_button = DropArguments {
+        //     item: id,
+        //     // page: page + 1,
+        // }
+        // .to_button(format!("Page {}", page + 1))
+        // .disabled(page + 1 > max_page);
+        //
+        // let components = Some(vec![CreateActionRow::Buttons(vec![
+        //     prev_page_button,
+        //     next_page_button,
+        // ])]);
 
         Ok((embed, None))
     }

@@ -237,31 +237,44 @@ pub struct CdClientObjectsId(pub i32);
 impl Api for CdClientObjectsId {}
 
 impl CdClientObjectsId {
+    /// - This can cause infinite recursion when it calls [`Self::hyperlink_name`] which calls
+    /// [`Self::try_fetch`], which if it fails calls [`Self::hyperlink_name`]
+    /// - The solution is to make sure that [`Self::hyperlink_name`] does not require
+    /// [`Self::try_fetch`] to succeed
+    /// - So [`Self::req_name`] will check if the object exists or not
     pub fn err(&self, msg: impl Display) -> String {
         format!("{} {}!", self.hyperlink_name(), msg)
     }
 
-    pub fn fetch(&self) -> MsgResult<CdClientObjects> {
-        self.cdclient()
-            .objects
-            .at_key(&self.0)
-            .cloned()
-            .ok_or_else(|| self.err("does not exist"))
+    pub fn fetch(&self) -> Option<CdClientObjects> {
+        self.cdclient().objects.at_key(&self.0).cloned()
+    }
+
+    pub fn is_hq_valid(&self) -> bool {
+        self.fetch()
+            .is_some_and(|ob| ob.hq_valid.is_some_and(|hq_valid| hq_valid))
+    }
+
+    pub fn try_fetch(&self) -> MsgResult<CdClientObjects> {
+        self.fetch().ok_or_else(|| self.err("does not exist"))
     }
 
     pub fn name(&self) -> Option<String> {
-        self.locale()
-            .objects
-            .get(&self.0)
-            .and_then(|o| o.name.clone())
-            .or_else(|| {
-                let item = self.fetch().ok()?;
-                item.display_name.clone().or_else(|| item.name.clone())
-            })
+        let item = self.fetch()?;
+        item.display_name.clone().or_else(|| item.name.clone())
     }
 
     pub fn req_name(&self) -> String {
-        self.name().unwrap_or(format!("Item {}", self.0))
+        self.name().unwrap_or_else(|| format!("Object {}", self.0))
+        // let item = self.cdclient().objects.at_key(&self.0).cloned();
+        // let f = || format!("Object {}", self.0);
+        // item.and_then(f)
+        // if item.is_some() {
+        //     self.name().unwrap_or_else(f)
+        // } else {
+        //     // self.name().unwrap_or(format!("Object {}", self.0))
+        //     f()
+        // }
     }
 
     // this is the stack overflow??
@@ -270,9 +283,9 @@ impl CdClientObjectsId {
     }
 
     pub fn hyperlink_name(&self) -> String {
-        let name = dbg!(self.req_name());
-        let explorer_url = dbg!(self.explorer_url());
-        dbg!(explorer_hyperlink(name, self.0, explorer_url))
+        let name = self.req_name();
+        let explorer_url = self.explorer_url();
+        explorer_hyperlink(name, self.0, explorer_url)
     }
 
     pub fn get_component<C: ComponentId>(&self, component: impl Fn(i32) -> C) -> MsgResult<C> {
@@ -424,7 +437,6 @@ impl CdClientObjectsId {
         let lmis = self
             .get_containing_loot_matrix_indexes()
             .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-        _ = dbg!(&lmis);
 
         let smashables: Vec<_> = self
             .cdclient()
@@ -435,50 +447,25 @@ impl CdClientObjectsId {
                 comp.loot_matrix_index
                     .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
             })
-            .group_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index.unwrap()))
+            .group_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index.expect("Already checked")))
             .into_iter()
             .filter_map(|(lmi, comps)| {
-                let sources = comps
+                let sources: Vec<_> = comps
                     .filter_map(|comp| {
-                        dbg!(CdClientDestructibleComponentId(comp.id).get_objects_with_component())
-                        // let objects = CdClientDestructibleComponentId(comp.id)
-                        //     .get_objects_with_component()?;
-                        // _ = dbg!(&objects);
-                        // Some(objects
+                        CdClientDestructibleComponentId(comp.id).get_objects_with_component()
                     })
                     .flatten()
+                    .filter(|ob| ob.is_hq_valid())
                     .collect();
                 let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
-                _ = dbg!(&chance);
 
                 Some(LootMatrixObjectChances {
                     lmi,
                     chance,
-                    sources,
+                    sources: (sources.len() > 0).then(|| sources)?,
                 })
             })
             .collect();
-
-        // let smashables = todo!();
-
-        // .filter_map(|(id, lmi)| {
-        //     // let lmi = CdClientLootMatrixId(comp.loot_matrix_index?);
-        //     // if lmis.contains(&lmi) {
-        //     //     return None;
-        //     // }
-        //     _ = dbg!(&lmi);
-        //     let objects =
-        //         CdClientDestructibleComponentId(comp.id).get_objects_with_component()?;
-        //     _ = dbg!(&objects);
-        //     let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
-        //     _ = dbg!(&chance);
-        //     Some(LootMatrixObjectChances {
-        //         lmi,
-        //         chance,
-        //         sources: objects,
-        //     })
-        // })
-        // .collect();
 
         Ok(smashables)
     }
