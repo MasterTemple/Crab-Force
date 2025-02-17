@@ -33,10 +33,10 @@ impl ToCustomId for PreconditionsArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for PreconditionsArguments {
+impl TryFrom<&CustomIdOptions> for PreconditionsArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(PreconditionsArguments {
             item: options.parse("item")?,
         })

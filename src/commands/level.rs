@@ -19,10 +19,10 @@ impl ToCustomId for LevelArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for LevelArguments {
+impl TryFrom<&CustomIdOptions> for LevelArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(LevelArguments {
             level: options.parse("level")?,
         })
@@ -88,10 +88,10 @@ impl InteractionCommand for LevelCommand {
             .field("Total", format!("`{}` Experience", total_experience), true);
 
         let prev_level_button = LevelArguments { level: level - 1 }
-            .to_button(format!("Level {}", level - 1))
+            .to_update_button(format!("Level {}", level - 1))
             .disabled(level - 1 < min_level);
         let next_level_button = LevelArguments { level: level + 1 }
-            .to_button(format!("Level {}", level + 1))
+            .to_update_button(format!("Level {}", level + 1))
             .disabled(level + 1 > max_level);
 
         let components = Some(vec![CreateActionRow::Buttons(vec![

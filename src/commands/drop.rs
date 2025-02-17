@@ -1,3 +1,8 @@
+use crate::commands::buy::BuyArguments;
+use crate::commands::earn::EarnArguments;
+use crate::commands::reward::RewardArguments;
+use crate::commands::smash::{SmashArguments, SmashCommand};
+use crate::commands::unpack::UnpackArguments;
 use crate::ids::CdClientObjectsId;
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
 use crate::pager::{Pager, START_PAGE};
@@ -5,14 +10,15 @@ use crate::queries::{AutocompleteQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
 use itertools::Itertools;
 use serenity::all::{
-    AutocompleteChoice, CommandOptionType, CreateActionRow, CreateCommandOption, ResolvedOption,
+    AutocompleteChoice, ButtonStyle, CommandOptionType, CreateActionRow, CreateCommandOption,
+    CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption, ResolvedOption,
 };
 
 pub struct DropCommand;
 
 pub struct DropArguments {
-    item: i32,
-    page: usize,
+    pub item: i32,
+    pub page: usize,
 }
 
 impl ToCustomId for DropArguments {
@@ -24,10 +30,10 @@ impl ToCustomId for DropArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for DropArguments {
+impl TryFrom<&CustomIdOptions> for DropArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(DropArguments {
             item: options.parse("item")?,
             page: options.parse("page")?,
@@ -90,36 +96,69 @@ impl InteractionCommand for DropCommand {
         dbg!(&pager);
         dbg!(&pager.this_page());
 
+        let mut smashable_options = vec![];
+
         for (num, entry) in pager.this_page() {
             let field_name = format!("{}. {:.5}% for {}", num, entry.chance * 100.0, &name);
             let sources: Vec<_> = entry
                 .sources
                 .iter()
-                .map(|source| source.hyperlink_name())
+                .map(|source| {
+                    if smashable_options.len() < 25 {
+                        smashable_options.push(
+                            SmashArguments {
+                                smashable: source.0,
+                            }
+                            .into(),
+                        );
+                    }
+                    source.hyperlink_name()
+                })
                 .collect();
-            // let value = format!("**From** {}", sources.join("**,** "));
             let value = format!("- {}", sources.join("\n- "));
             embed = embed.field(field_name, value, false);
         }
+
+        let page = START_PAGE;
+        let item = id;
+        let earn_button = EarnArguments { item, page }.to_update_button("Earn");
+        let drop_button = DropArguments { item, page }.to_self_button("Drop");
+        let unpack_button = UnpackArguments { item, page }.to_update_button("Unpack");
+        let reward_button = RewardArguments { item, page }.to_update_button("Reward");
+        let buy_button = BuyArguments { item, page }.to_update_button("Buy");
+
+        let item_buttons = CreateActionRow::Buttons(vec![
+            earn_button,
+            drop_button,
+            unpack_button,
+            reward_button,
+            buy_button,
+        ]);
+
+        let smashable_select = CreateActionRow::SelectMenu(CreateSelectMenu::new(
+            SmashCommand::NAME,
+            CreateSelectMenuKind::String {
+                options: smashable_options,
+            },
+        ));
 
         let prev_page_button = DropArguments {
             item: id,
             page: pager.prev(),
         }
-        .to_button(format!("Page {}", pager.prev()))
+        .to_update_button(format!("Page {}", pager.prev()))
         .disabled(pager.is_first_page());
 
         let next_page_button = DropArguments {
             item: id,
             page: pager.next(),
         }
-        .to_button(format!("Page {}", pager.next()))
+        .to_update_button(format!("Page {}", pager.next()))
         .disabled(pager.is_last_page());
+        let page_buttons = CreateActionRow::Buttons(vec![prev_page_button, next_page_button]);
 
-        let components = Some(vec![CreateActionRow::Buttons(vec![
-            prev_page_button,
-            next_page_button,
-        ])]);
+        let components = Some(vec![item_buttons, page_buttons, smashable_select]);
+        // let components = Some(vec![item_buttons, smashable_select]);
 
         Ok((embed, components))
     }

@@ -18,10 +18,10 @@ impl ToCustomId for EnemyArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for EnemyArguments {
+impl TryFrom<&CustomIdOptions> for EnemyArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(EnemyArguments {
             enemy: options.parse("enemy")?,
         })

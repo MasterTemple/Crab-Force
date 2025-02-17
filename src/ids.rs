@@ -19,6 +19,10 @@ use crate::{
 
 pub type MsgResult<T> = Result<T, String>;
 
+pub fn fmt_name_id(name: impl Display, id: impl Display) -> String {
+    format!("{name} [{id}]")
+}
+
 pub fn explorer_hyperlink(
     name: impl Display,
     id: impl Display,
@@ -262,6 +266,10 @@ impl CdClientObjectsId {
     pub fn name(&self) -> Option<String> {
         let item = self.fetch()?;
         item.display_name.clone().or_else(|| item.name.clone())
+    }
+
+    pub fn name_id(&self) -> String {
+        fmt_name_id(self.req_name(), self.0)
     }
 
     pub fn req_name(&self) -> String {

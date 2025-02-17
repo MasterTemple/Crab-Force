@@ -21,10 +21,10 @@ impl ToCustomId for AchievementArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for AchievementArguments {
+impl TryFrom<&CustomIdOptions> for AchievementArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(AchievementArguments {
             achievement: options.parse("achievement")?,
         })

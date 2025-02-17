@@ -11,6 +11,7 @@ pub mod repeat;
 
 use std::collections::BTreeMap;
 use std::env;
+use std::future::Future;
 use std::path::Path;
 use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::time::Instant;
@@ -40,11 +41,12 @@ use commands::skills::SkillsCommand;
 use commands::smash::SmashCommand;
 use commands::unpack::UnpackCommand;
 use commands::vendor::VendorCommand;
-use interaction_command::InteractionCommand;
+use interaction_command::{CustomIdInteractionType, CustomIdOptions, InteractionCommand};
 use locale::{LocaleTranslation, LocaleXML};
 use once_cell::sync::Lazy;
 use queries::ObjectQueries;
 use serenity::all::{
+    AutocompleteChoice, CommandInteraction, ComponentInteraction, ComponentInteractionDataKind,
     CreateActionRow, CreateAutocompleteResponse, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter,
 };
 use serenity::async_trait;
@@ -105,86 +107,194 @@ pub trait Api {
     }
 }
 
+pub fn handle_autocomplete(completion: &CommandInteraction) -> Option<Vec<AutocompleteChoice>> {
+    let option = completion.data.autocomplete()?;
+    let content = match completion.data.name.as_str() {
+        AchievementCommand::NAME => AchievementCommand::handle_autocomplete(option),
+        ActivityCommand::NAME => ActivityCommand::handle_autocomplete(option),
+        BrickCommand::NAME => BrickCommand::handle_autocomplete(option),
+        BuyCommand::NAME => BuyCommand::handle_autocomplete(option),
+        CooldownGroupCommand::NAME => CooldownGroupCommand::handle_autocomplete(option),
+        DropCommand::NAME => DropCommand::handle_autocomplete(option),
+        EarnCommand::NAME => EarnCommand::handle_autocomplete(option),
+        EnemyCommand::NAME => EnemyCommand::handle_autocomplete(option),
+        GetCommand::NAME => GetCommand::handle_autocomplete(option),
+        ItemCommand::NAME => ItemCommand::handle_autocomplete(option),
+        LevelCommand::NAME => LevelCommand::handle_autocomplete(option),
+        LootTableCommand::NAME => LootTableCommand::handle_autocomplete(option),
+        MissionCommand::NAME => MissionCommand::handle_autocomplete(option),
+        NpcCommand::NAME => NpcCommand::handle_autocomplete(option),
+        PackageCommand::NAME => PackageCommand::handle_autocomplete(option),
+        PreconditionsCommand::NAME => PreconditionsCommand::handle_autocomplete(option),
+        RewardCommand::NAME => RewardCommand::handle_autocomplete(option),
+        SkillCommand::NAME => SkillCommand::handle_autocomplete(option),
+        SkillItemsCommand::NAME => SkillItemsCommand::handle_autocomplete(option),
+        SkillsCommand::NAME => SkillsCommand::handle_autocomplete(option),
+        SmashCommand::NAME => SmashCommand::handle_autocomplete(option),
+        UnpackCommand::NAME => UnpackCommand::handle_autocomplete(option),
+        VendorCommand::NAME => VendorCommand::handle_autocomplete(option),
+        _ => None,
+    };
+    content
+}
+
+pub fn handle_slash_command(
+    command: &CommandInteraction,
+) -> Option<CreateInteractionResponseMessage> {
+    match command.data.name.as_str() {
+        AchievementCommand::NAME => Some(AchievementCommand::handle_slash_command(command)),
+        ActivityCommand::NAME => Some(ActivityCommand::handle_slash_command(command)),
+        BrickCommand::NAME => Some(BrickCommand::handle_slash_command(command)),
+        BuyCommand::NAME => Some(BuyCommand::handle_slash_command(command)),
+        CooldownGroupCommand::NAME => Some(CooldownGroupCommand::handle_slash_command(command)),
+        DropCommand::NAME => Some(DropCommand::handle_slash_command(command)),
+        EarnCommand::NAME => Some(EarnCommand::handle_slash_command(command)),
+        EnemyCommand::NAME => Some(EnemyCommand::handle_slash_command(command)),
+        GetCommand::NAME => Some(GetCommand::handle_slash_command(command)),
+        ItemCommand::NAME => Some(ItemCommand::handle_slash_command(command)),
+        LevelCommand::NAME => Some(LevelCommand::handle_slash_command(command)),
+        LootTableCommand::NAME => Some(LootTableCommand::handle_slash_command(command)),
+        MissionCommand::NAME => Some(MissionCommand::handle_slash_command(command)),
+        NpcCommand::NAME => Some(NpcCommand::handle_slash_command(command)),
+        PackageCommand::NAME => Some(PackageCommand::handle_slash_command(command)),
+        PreconditionsCommand::NAME => Some(PreconditionsCommand::handle_slash_command(command)),
+        RewardCommand::NAME => Some(RewardCommand::handle_slash_command(command)),
+        SkillCommand::NAME => Some(SkillCommand::handle_slash_command(command)),
+        SkillItemsCommand::NAME => Some(SkillItemsCommand::handle_slash_command(command)),
+        SkillsCommand::NAME => Some(SkillsCommand::handle_slash_command(command)),
+        SmashCommand::NAME => Some(SmashCommand::handle_slash_command(command)),
+        UnpackCommand::NAME => Some(UnpackCommand::handle_slash_command(command)),
+        VendorCommand::NAME => Some(VendorCommand::handle_slash_command(command)),
+        _ => None,
+    }
+}
+
+pub fn handle_component_interaction(
+    interaction: &ComponentInteraction,
+    options: &CustomIdOptions,
+) -> Option<CreateInteractionResponseMessage> {
+    match options.cmd.as_str() {
+        AchievementCommand::NAME => Some(AchievementCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        ActivityCommand::NAME => Some(ActivityCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        BrickCommand::NAME => Some(BrickCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        BuyCommand::NAME => Some(BuyCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        CooldownGroupCommand::NAME => Some(CooldownGroupCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        DropCommand::NAME => Some(DropCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        EarnCommand::NAME => Some(EarnCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        EnemyCommand::NAME => Some(EnemyCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        GetCommand::NAME => Some(GetCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        ItemCommand::NAME => Some(ItemCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        LevelCommand::NAME => Some(LevelCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        LootTableCommand::NAME => Some(LootTableCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        MissionCommand::NAME => Some(MissionCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        NpcCommand::NAME => Some(NpcCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        PackageCommand::NAME => Some(PackageCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        PreconditionsCommand::NAME => Some(PreconditionsCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        RewardCommand::NAME => Some(RewardCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        SkillCommand::NAME => Some(SkillCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        SkillItemsCommand::NAME => Some(SkillItemsCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        SkillsCommand::NAME => Some(SkillsCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        SmashCommand::NAME => Some(SmashCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        UnpackCommand::NAME => Some(UnpackCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        VendorCommand::NAME => Some(VendorCommand::handle_component_interaction(
+            interaction,
+            options,
+        )),
+        _ => None,
+    }
+}
+
 struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Autocomplete(ref completion) = interaction {
-            let Some(option) = completion.data.autocomplete() else {
-                return;
-            };
             let start = Instant::now();
-            let content = match completion.data.name.as_str() {
-                AchievementCommand::NAME => AchievementCommand::handle_autocomplete(option),
-                ActivityCommand::NAME => ActivityCommand::handle_autocomplete(option),
-                BrickCommand::NAME => BrickCommand::handle_autocomplete(option),
-                BuyCommand::NAME => BuyCommand::handle_autocomplete(option),
-                CooldownGroupCommand::NAME => CooldownGroupCommand::handle_autocomplete(option),
-                DropCommand::NAME => DropCommand::handle_autocomplete(option),
-                EarnCommand::NAME => EarnCommand::handle_autocomplete(option),
-                EnemyCommand::NAME => EnemyCommand::handle_autocomplete(option),
-                GetCommand::NAME => GetCommand::handle_autocomplete(option),
-                ItemCommand::NAME => ItemCommand::handle_autocomplete(option),
-                LevelCommand::NAME => LevelCommand::handle_autocomplete(option),
-                LootTableCommand::NAME => LootTableCommand::handle_autocomplete(option),
-                MissionCommand::NAME => MissionCommand::handle_autocomplete(option),
-                NpcCommand::NAME => NpcCommand::handle_autocomplete(option),
-                PackageCommand::NAME => PackageCommand::handle_autocomplete(option),
-                PreconditionsCommand::NAME => PreconditionsCommand::handle_autocomplete(option),
-                RewardCommand::NAME => RewardCommand::handle_autocomplete(option),
-                SkillCommand::NAME => SkillCommand::handle_autocomplete(option),
-                SkillItemsCommand::NAME => SkillItemsCommand::handle_autocomplete(option),
-                SkillsCommand::NAME => SkillsCommand::handle_autocomplete(option),
-                SmashCommand::NAME => SmashCommand::handle_autocomplete(option),
-                UnpackCommand::NAME => UnpackCommand::handle_autocomplete(option),
-                VendorCommand::NAME => VendorCommand::handle_autocomplete(option),
-                _ => None,
-            };
+            let content = handle_autocomplete(completion);
             let time = start.elapsed().as_millis();
             println!("Autocompletion query took {time}ms");
-            if let Some(content) = content {
-                let data = CreateAutocompleteResponse::new().set_choices(content);
-                let builder = CreateInteractionResponse::Autocomplete(data);
-                if let Err(why) = completion.create_response(&ctx.http, builder).await {
-                    println!("Cannot respond to auto-completion request: {why}");
-                }
+
+            let data =
+                CreateAutocompleteResponse::new().set_choices(content.unwrap_or_else(|| vec![]));
+            let builder = CreateInteractionResponse::Autocomplete(data);
+            if let Err(why) = completion.create_response(&ctx.http, builder).await {
+                println!("Cannot respond to auto-completion request: {why}");
             }
         }
 
         if let Interaction::Command(ref command) = interaction {
-            println!("Received command interaction: {command:#?}");
-
-            let content = match command.data.name.as_str() {
-                AchievementCommand::NAME => Some(AchievementCommand::handle_slash_command(command)),
-                ActivityCommand::NAME => Some(ActivityCommand::handle_slash_command(command)),
-                BrickCommand::NAME => Some(BrickCommand::handle_slash_command(command)),
-                BuyCommand::NAME => Some(BuyCommand::handle_slash_command(command)),
-                CooldownGroupCommand::NAME => {
-                    Some(CooldownGroupCommand::handle_slash_command(command))
-                }
-                DropCommand::NAME => Some(DropCommand::handle_slash_command(command)),
-                EarnCommand::NAME => Some(EarnCommand::handle_slash_command(command)),
-                EnemyCommand::NAME => Some(EnemyCommand::handle_slash_command(command)),
-                GetCommand::NAME => Some(GetCommand::handle_slash_command(command)),
-                ItemCommand::NAME => Some(ItemCommand::handle_slash_command(command)),
-                LevelCommand::NAME => Some(LevelCommand::handle_slash_command(command)),
-                LootTableCommand::NAME => Some(LootTableCommand::handle_slash_command(command)),
-                MissionCommand::NAME => Some(MissionCommand::handle_slash_command(command)),
-                NpcCommand::NAME => Some(NpcCommand::handle_slash_command(command)),
-                PackageCommand::NAME => Some(PackageCommand::handle_slash_command(command)),
-                PreconditionsCommand::NAME => {
-                    Some(PreconditionsCommand::handle_slash_command(command))
-                }
-                RewardCommand::NAME => Some(RewardCommand::handle_slash_command(command)),
-                SkillCommand::NAME => Some(SkillCommand::handle_slash_command(command)),
-                SkillItemsCommand::NAME => Some(SkillItemsCommand::handle_slash_command(command)),
-                SkillsCommand::NAME => Some(SkillsCommand::handle_slash_command(command)),
-                SmashCommand::NAME => Some(SmashCommand::handle_slash_command(command)),
-                UnpackCommand::NAME => Some(UnpackCommand::handle_slash_command(command)),
-                VendorCommand::NAME => Some(VendorCommand::handle_slash_command(command)),
-                _ => None,
-            };
+            // println!("Received command interaction: {command:#?}");
+            let start = Instant::now();
+            let content = handle_slash_command(command);
+            let time = start.elapsed().as_millis();
+            println!("Slash Command query took {time}ms");
 
             if let Some(content) = content {
                 let builder = CreateInteractionResponse::Message(content);
@@ -195,64 +305,31 @@ impl EventHandler for Handler {
         }
 
         if let Interaction::Component(ref interaction) = interaction {
-            println!("Received component interaction: {interaction:#?}");
-
-            let custom_id = interaction.data.custom_id.as_str();
-            let cmd = &custom_id[..custom_id.find(":").unwrap_or(0)];
-            let content = match cmd {
-                AchievementCommand::NAME => Some(AchievementCommand::handle_component_interaction(
-                    interaction,
-                )),
-                ActivityCommand::NAME => {
-                    Some(ActivityCommand::handle_component_interaction(interaction))
+            let Ok(ref options) = (match &interaction.data.kind {
+                ComponentInteractionDataKind::Button => {
+                    CustomIdOptions::from_custom_id(interaction.data.custom_id.as_str())
                 }
-                BrickCommand::NAME => Some(BrickCommand::handle_component_interaction(interaction)),
-                BuyCommand::NAME => Some(BuyCommand::handle_component_interaction(interaction)),
-                CooldownGroupCommand::NAME => Some(
-                    CooldownGroupCommand::handle_component_interaction(interaction),
-                ),
-                DropCommand::NAME => Some(DropCommand::handle_component_interaction(interaction)),
-                EarnCommand::NAME => Some(EarnCommand::handle_component_interaction(interaction)),
-                EnemyCommand::NAME => Some(EnemyCommand::handle_component_interaction(interaction)),
-                GetCommand::NAME => Some(GetCommand::handle_component_interaction(interaction)),
-                ItemCommand::NAME => Some(ItemCommand::handle_component_interaction(interaction)),
-                LevelCommand::NAME => Some(LevelCommand::handle_component_interaction(interaction)),
-                LootTableCommand::NAME => {
-                    Some(LootTableCommand::handle_component_interaction(interaction))
-                }
-                MissionCommand::NAME => {
-                    Some(MissionCommand::handle_component_interaction(interaction))
-                }
-                NpcCommand::NAME => Some(NpcCommand::handle_component_interaction(interaction)),
-                PackageCommand::NAME => {
-                    Some(PackageCommand::handle_component_interaction(interaction))
-                }
-                PreconditionsCommand::NAME => Some(
-                    PreconditionsCommand::handle_component_interaction(interaction),
-                ),
-                RewardCommand::NAME => {
-                    Some(RewardCommand::handle_component_interaction(interaction))
-                }
-                SkillCommand::NAME => Some(SkillCommand::handle_component_interaction(interaction)),
-                SkillItemsCommand::NAME => {
-                    Some(SkillItemsCommand::handle_component_interaction(interaction))
-                }
-                SkillsCommand::NAME => {
-                    Some(SkillsCommand::handle_component_interaction(interaction))
-                }
-                SmashCommand::NAME => Some(SmashCommand::handle_component_interaction(interaction)),
-                UnpackCommand::NAME => {
-                    Some(UnpackCommand::handle_component_interaction(interaction))
-                }
-                VendorCommand::NAME => {
-                    Some(VendorCommand::handle_component_interaction(interaction))
-                }
-                _ => None,
+                ComponentInteractionDataKind::StringSelect { values } => values
+                    .first()
+                    .ok_or_else(|| format!("No selection given"))
+                    .and_then(|value| CustomIdOptions::from_custom_id(value)),
+                _ => Err(format!("Unsupported command interaction type")),
+            }) else {
+                return;
             };
 
-            if let Some(content) = content {
-                // let builder = CreateInteractionResponse::Message(content);
-                let builder = CreateInteractionResponse::Message(content);
+            dbg!(&options);
+
+            let start = Instant::now();
+            if let Some(content) = handle_component_interaction(interaction, options) {
+                let time = start.elapsed().as_millis();
+                println!("Component query took {time}ms");
+                let builder = match options.interaction {
+                    CustomIdInteractionType::Reply => CreateInteractionResponse::Message(content),
+                    CustomIdInteractionType::Update => {
+                        CreateInteractionResponse::UpdateMessage(content)
+                    }
+                };
                 if let Err(why) = interaction.create_response(&ctx.http, builder).await {
                     println!("Cannot respond to slash interaction: {why}");
                 }

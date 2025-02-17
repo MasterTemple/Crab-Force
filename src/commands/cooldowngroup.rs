@@ -18,10 +18,10 @@ impl ToCustomId for CooldownGroupArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for CooldownGroupArguments {
+impl TryFrom<&CustomIdOptions> for CooldownGroupArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(CooldownGroupArguments {
             group: options.parse("group")?,
         })

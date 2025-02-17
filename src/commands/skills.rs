@@ -18,10 +18,10 @@ impl ToCustomId for SkillsArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for SkillsArguments {
+impl TryFrom<&CustomIdOptions> for SkillsArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(SkillsArguments {
             item: options.parse("item")?,
         })

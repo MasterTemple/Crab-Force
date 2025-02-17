@@ -18,10 +18,10 @@ impl ToCustomId for ActivityArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for ActivityArguments {
+impl TryFrom<&CustomIdOptions> for ActivityArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(ActivityArguments {
             activity: options.parse("activity")?,
         })

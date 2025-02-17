@@ -1,5 +1,6 @@
 use crate::cdclient::components::PACKAGE_COMPONENT;
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
+use crate::pager::START_PAGE;
 use crate::queries::{AutocompleteQueries, LootQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
 use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
@@ -7,24 +8,26 @@ use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, 
 pub struct UnpackCommand;
 
 pub struct UnpackArguments {
-    item: i32,
+    pub item: i32,
+    pub page: usize,
 }
 
 impl ToCustomId for UnpackArguments {
     const CMD: &'static str = UnpackCommand::NAME;
 
     fn parameters(&self) -> String {
-        let UnpackArguments { item } = self;
-        format!("item={item}")
+        let UnpackArguments { item, page } = self;
+        vec![format!("item={item}"), format!("page={page}")].join("&")
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for UnpackArguments {
+impl TryFrom<&CustomIdOptions> for UnpackArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(UnpackArguments {
             item: options.parse("item")?,
+            page: options.parse("page")?,
         })
     }
 }
@@ -35,6 +38,7 @@ impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for UnpackArguments {
     fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
         Ok(UnpackArguments {
             item: int_option!(options, "item"),
+            page: START_PAGE,
         })
     }
 }
@@ -64,7 +68,7 @@ impl InteractionCommand for UnpackCommand {
     }
 
     fn run(arguments: Self::Arguments) -> CommandResult {
-        let UnpackArguments { item: id } = arguments;
+        let UnpackArguments { item: id, page } = arguments;
 
         let explorer_url = CD_CLIENT.object_explorer_url(id);
         let name = CD_CLIENT.req_object_name(id);

@@ -20,10 +20,10 @@ impl ToCustomId for MissionArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for MissionArguments {
+impl TryFrom<&CustomIdOptions> for MissionArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(MissionArguments {
             mission: options.parse("mission")?,
         })

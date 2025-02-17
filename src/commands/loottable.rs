@@ -18,10 +18,10 @@ impl ToCustomId for LootTableArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for LootTableArguments {
+impl TryFrom<&CustomIdOptions> for LootTableArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(LootTableArguments {
             table: options.parse("table")?,
         })

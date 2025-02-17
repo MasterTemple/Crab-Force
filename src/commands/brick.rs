@@ -18,10 +18,10 @@ impl ToCustomId for BrickArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for BrickArguments {
+impl TryFrom<&CustomIdOptions> for BrickArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(BrickArguments {
             brick: options.parse("brick")?,
         })

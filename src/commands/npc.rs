@@ -18,10 +18,10 @@ impl ToCustomId for NpcArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for NpcArguments {
+impl TryFrom<&CustomIdOptions> for NpcArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(NpcArguments {
             npc: options.parse("npc")?,
         })

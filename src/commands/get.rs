@@ -18,10 +18,10 @@ impl ToCustomId for GetArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for GetArguments {
+impl TryFrom<&CustomIdOptions> for GetArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(GetArguments {
             item: options.parse("item")?,
         })

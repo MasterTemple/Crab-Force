@@ -18,10 +18,10 @@ impl ToCustomId for PackageArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for PackageArguments {
+impl TryFrom<&CustomIdOptions> for PackageArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(PackageArguments {
             package: options.parse("package")?,
         })

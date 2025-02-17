@@ -18,10 +18,10 @@ impl ToCustomId for VendorArguments {
     }
 }
 
-impl<'a> TryFrom<CustomIdOptions<'a>> for VendorArguments {
+impl TryFrom<&CustomIdOptions> for VendorArguments {
     type Error = String;
 
-    fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
+    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
         Ok(VendorArguments {
             vendor: options.parse("vendor")?,
         })
