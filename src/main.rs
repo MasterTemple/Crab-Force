@@ -5,6 +5,7 @@ pub mod custom;
 pub mod ids;
 pub mod interaction_command;
 pub mod locale;
+pub mod pager;
 pub mod queries;
 pub mod repeat;
 

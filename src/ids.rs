@@ -455,7 +455,7 @@ impl CdClientObjectsId {
                         CdClientDestructibleComponentId(comp.id).get_objects_with_component()
                     })
                     .flatten()
-                    .filter(|ob| ob.is_hq_valid())
+                    // .filter(|ob| ob.is_hq_valid())
                     .collect();
                 let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
 
@@ -465,6 +465,8 @@ impl CdClientObjectsId {
                     sources: (sources.len() > 0).then(|| sources)?,
                 })
             })
+            // .sorted_by_key(|lmioc| -lmioc.chance as f32)
+            .sorted_by(|a, b| f32::total_cmp(&(-a.chance as f32), &(-b.chance as f32)))
             .collect();
 
         Ok(smashables)

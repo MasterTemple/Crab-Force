@@ -1,26 +1,26 @@
 use crate::ids::CdClientObjectsId;
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
+use crate::pager::{Pager, START_PAGE};
 use crate::queries::{AutocompleteQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use itertools::Itertools;
+use serenity::all::{
+    AutocompleteChoice, CommandOptionType, CreateActionRow, CreateCommandOption, ResolvedOption,
+};
 
 pub struct DropCommand;
 
 pub struct DropArguments {
     item: i32,
-    // page: Option<i32>,
+    page: usize,
 }
 
 impl ToCustomId for DropArguments {
     const CMD: &'static str = DropCommand::NAME;
 
     fn parameters(&self) -> String {
-        let DropArguments { item } = self;
-        vec![
-            format!("item={item}"),
-            // format!("page={page}")
-        ]
-        .join("&")
+        let DropArguments { item, page } = self;
+        vec![format!("item={item}"), format!("page={page}")].join("&")
     }
 }
 
@@ -30,7 +30,7 @@ impl<'a> TryFrom<CustomIdOptions<'a>> for DropArguments {
     fn try_from(options: CustomIdOptions<'a>) -> Result<Self, Self::Error> {
         Ok(DropArguments {
             item: options.parse("item")?,
-            // page: options.parse("item")?,
+            page: options.parse("page")?,
         })
     }
 }
@@ -41,6 +41,7 @@ impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for DropArguments {
     fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
         Ok(DropArguments {
             item: int_option!(options, "item"),
+            page: START_PAGE,
         })
     }
 }
@@ -70,9 +71,7 @@ impl InteractionCommand for DropCommand {
     }
 
     fn run(arguments: Self::Arguments) -> CommandResult {
-        let DropArguments { item: id } = arguments;
-        // let page = page.unwrap_or(1);
-        let page = 1;
+        let DropArguments { item: id, page } = arguments;
 
         let object = CdClientObjectsId(id);
         let name = object.req_name();
@@ -86,51 +85,42 @@ impl InteractionCommand for DropCommand {
             embed = embed.thumbnail(icon_url);
         }
 
-        let page_size = 15;
-
         let entries = object.smashables_chances()?;
-        dbg!(entries.len());
-        let start = (page - 1) * page_size;
-        // _ = dbg!(&start);
-        let end = std::cmp::min(start + page_size, entries.len());
-        // _ = dbg!(&end);
-        // -----------------------------------------------------------------------------------------
-        // ! check if they have gone beyond the page and then calculate last page and put them there
-        // -----------------------------------------------------------------------------------------
-        let paged_entries = &entries[start..end];
-        // _ = dbg!(&paged_entries);
-        for (idx, entry) in paged_entries.into_iter().enumerate() {
-            let num = idx + 1;
-            let field_name = format!("{}. {:.4}% for {}", num, entry.chance * 100.0, &name);
+        let pager = Pager::new(entries, page, 5);
+        dbg!(&pager);
+        dbg!(&pager.this_page());
+
+        for (num, entry) in pager.this_page() {
+            let field_name = format!("{}. {:.5}% for {}", num, entry.chance * 100.0, &name);
             let sources: Vec<_> = entry
                 .sources
                 .iter()
                 .map(|source| source.hyperlink_name())
                 .collect();
-            let value = format!("*From* {}", sources.join(", "));
+            // let value = format!("**From** {}", sources.join("**,** "));
+            let value = format!("- {}", sources.join("\n- "));
             embed = embed.field(field_name, value, false);
         }
 
-        // let min_page = 0;
-        // let max_page = entries.len() / page_size;
-        // let prev_page_button = DropArguments {
-        //     item: id,
-        //     // page: page - 1,
-        // }
-        // .to_button(format!("Page {}", page - 1))
-        // .disabled(page - 1 < min_page);
-        // let next_page_button = DropArguments {
-        //     item: id,
-        //     // page: page + 1,
-        // }
-        // .to_button(format!("Page {}", page + 1))
-        // .disabled(page + 1 > max_page);
-        //
-        // let components = Some(vec![CreateActionRow::Buttons(vec![
-        //     prev_page_button,
-        //     next_page_button,
-        // ])]);
+        let prev_page_button = DropArguments {
+            item: id,
+            page: pager.prev(),
+        }
+        .to_button(format!("Page {}", pager.prev()))
+        .disabled(pager.is_first_page());
 
-        Ok((embed, None))
+        let next_page_button = DropArguments {
+            item: id,
+            page: pager.next(),
+        }
+        .to_button(format!("Page {}", pager.next()))
+        .disabled(pager.is_last_page());
+
+        let components = Some(vec![CreateActionRow::Buttons(vec![
+            prev_page_button,
+            next_page_button,
+        ])]);
+
+        Ok((embed, components))
     }
 }
