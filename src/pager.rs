@@ -49,6 +49,14 @@ impl<T: Clone> Pager<T> {
         self.current == self.max_page
     }
 
+    pub fn has_multiple_pages(&self) -> bool {
+        self.min_page != self.max_page
+    }
+
+    pub fn is_one_page(&self) -> bool {
+        self.min_page == self.max_page
+    }
+
     /// This returns all elements on this page with their 1-based entry number and entry
     pub fn this_page(&self) -> Vec<(usize, T)> {
         // page starts at 1

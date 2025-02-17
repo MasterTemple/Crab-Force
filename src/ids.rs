@@ -380,24 +380,24 @@ impl CdClientObjectsId {
     }
 
     /// All achievements/missions that earn an object
-    // pub fn achievements(&self) -> MsgResult<Vec<CdClientActivityRewardsId>> {
-    //     let lmis = self
-    //         .get_containing_loot_matrix_indexes()
-    //         .ok_or_else(|| self.err("it not in any Loot Matrices"))?;
-    //
-    //     let activities: Vec<_> = self
-    //         .cdclient()
-    //         .activity_rewards
-    //         .iter()
-    //         .filter(|activity| {
-    //             activity
-    //                 .loot_matrix_index
-    //                 .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
-    //         })
-    //         .map(|comp| CdClientActivityRewardsId(comp.object_template))
-    //         .collect();
-    //     Ok(activities)
-    // }
+    pub fn achievements(&self) -> MsgResult<Vec<CdClientActivityRewardsId>> {
+        // let lmis = self
+        //     .get_containing_loot_matrix_indexes()
+        //     .ok_or_else(|| self.err("it not in any Loot Matrices"))?;
+        //
+        // let activities: Vec<_> = self
+        //     .cdclient()
+        //     .activity_rewards
+        //     .iter()
+        //     .filter(|activity| {
+        //         activity
+        //             .loot_matrix_index
+        //             .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
+        //     })
+        //     .map(|comp| CdClientActivityRewardsId(comp.object_template))
+        //     .collect();
+        Ok(vec![])
+    }
 
     /// All activities that reward an object
     pub fn activities(&self) -> MsgResult<Vec<CdClientActivityRewardsId>> {
@@ -450,12 +450,11 @@ impl CdClientObjectsId {
             .cdclient()
             .destructible_component
             .iter()
-            // .filter(|comp| lmis.contains(&CdClientLootMatrixId(comp.loot_matrix_index?)))
             .filter(|comp| {
                 comp.loot_matrix_index
                     .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
             })
-            .group_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index.expect("Already checked")))
+            .chunk_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index.expect("Already checked")))
             .into_iter()
             .filter_map(|(lmi, comps)| {
                 let sources: Vec<_> = comps
@@ -463,7 +462,6 @@ impl CdClientObjectsId {
                         CdClientDestructibleComponentId(comp.id).get_objects_with_component()
                     })
                     .flatten()
-                    // .filter(|ob| ob.is_hq_valid())
                     .collect();
                 let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
 
@@ -473,7 +471,6 @@ impl CdClientObjectsId {
                     sources: (sources.len() > 0).then(|| sources)?,
                 })
             })
-            // .sorted_by_key(|lmioc| -lmioc.chance as f32)
             .sorted_by(|a, b| f32::total_cmp(&(-a.chance as f32), &(-b.chance as f32)))
             .collect();
 
@@ -496,6 +493,39 @@ impl CdClientObjectsId {
             .flatten()
             .collect();
         Ok(packages)
+    }
+
+    pub fn packages_chances(&self) -> MsgResult<Vec<LootMatrixObjectChances>> {
+        let lmis = self
+            .get_containing_loot_matrix_indexes()
+            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
+
+        let smashables: Vec<_> = self
+            .cdclient()
+            .package_component
+            .iter()
+            .filter(|comp| lmis.contains(&CdClientLootMatrixId(comp.loot_matrix_index)))
+            .chunk_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index))
+            .into_iter()
+            .filter_map(|(lmi, comps)| {
+                let sources: Vec<_> = comps
+                    .filter_map(|comp| {
+                        CdClientPackageComponentId(comp.id).get_objects_with_component()
+                    })
+                    .flatten()
+                    .collect();
+                let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
+
+                Some(LootMatrixObjectChances {
+                    lmi,
+                    chance,
+                    sources: (sources.len() > 0).then(|| sources)?,
+                })
+            })
+            .sorted_by(|a, b| f32::total_cmp(&(-a.chance as f32), &(-b.chance as f32)))
+            .collect();
+
+        Ok(smashables)
     }
 
     /// All vendors that sell an object

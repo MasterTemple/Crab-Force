@@ -88,7 +88,7 @@ impl InteractionCommand for DropCommand {
 
         let mut embed = CONFIG
             .default_embed()
-            .title(format!("{} [{}]", name, id))
+            .title(object.name_id())
             .url(object.explorer_url());
 
         if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
@@ -109,6 +109,12 @@ impl InteractionCommand for DropCommand {
             embed = embed.field(field_name, value, false);
         }
 
+        // ---------- //
+        // Components //
+        // ---------- //
+
+        let mut components = vec![];
+
         // ------------------- //
         // Related Actions Row //
         // ------------------- //
@@ -121,19 +127,19 @@ impl InteractionCommand for DropCommand {
         let reward_button = RewardArguments { item, page }.to_update_button("Reward");
         let buy_button = BuyArguments { item, page }.to_update_button("Buy");
 
-        let item_buttons = CreateActionRow::Buttons(vec![
+        components.push(CreateActionRow::Buttons(vec![
             earn_button,
             drop_button,
             unpack_button,
             reward_button,
             buy_button,
-        ]);
+        ]));
 
         // ---------------------- //
         // Referenced Objects Row //
         // ---------------------- //
 
-        let smashable_options = pager
+        let options: Vec<CreateSelectMenuOption> = pager
             .this_page()
             .into_iter()
             .flat_map(|(_, entry)| {
@@ -147,12 +153,12 @@ impl InteractionCommand for DropCommand {
             .take(25)
             .collect();
 
-        let smashable_select = CreateActionRow::SelectMenu(CreateSelectMenu::new(
-            SmashCommand::NAME,
-            CreateSelectMenuKind::String {
-                options: smashable_options,
-            },
-        ));
+        if options.len() > 1 {
+            components.push(CreateActionRow::SelectMenu(CreateSelectMenu::new(
+                DropCommand::NAME,
+                CreateSelectMenuKind::String { options },
+            )));
+        }
 
         // -------------- //
         // Pagination Row //
@@ -171,10 +177,14 @@ impl InteractionCommand for DropCommand {
         }
         .to_update_button(format!("Page {}", pager.next()))
         .disabled(pager.is_last_page());
-        let page_buttons = CreateActionRow::Buttons(vec![prev_page_button, next_page_button]);
 
-        let components = Some(vec![item_buttons, page_buttons, smashable_select]);
+        if pager.has_multiple_pages() {
+            components.push(CreateActionRow::Buttons(vec![
+                prev_page_button,
+                next_page_button,
+            ]));
+        }
 
-        Ok((embed, components))
+        Ok((embed, Some(components)))
     }
 }

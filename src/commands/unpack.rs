@@ -1,9 +1,19 @@
 use crate::cdclient::components::PACKAGE_COMPONENT;
+use crate::ids::CdClientObjectsId;
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::pager::START_PAGE;
+use crate::pager::{Pager, START_PAGE};
 use crate::queries::{AutocompleteQueries, LootQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use serenity::all::{
+    AutocompleteChoice, CommandOptionType, CreateActionRow, CreateCommandOption, CreateSelectMenu,
+    CreateSelectMenuKind, CreateSelectMenuOption, ResolvedOption, SelectMenuOption,
+};
+
+use super::buy::BuyArguments;
+use super::drop::DropArguments;
+use super::earn::EarnArguments;
+use super::package::{PackageArguments, PackageCommand};
+use super::reward::RewardArguments;
 
 pub struct UnpackCommand;
 
@@ -70,110 +80,110 @@ impl InteractionCommand for UnpackCommand {
     fn run(arguments: Self::Arguments) -> CommandResult {
         let UnpackArguments { item: id, page } = arguments;
 
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
+        let object = CdClientObjectsId(id);
+        let name = object.req_name();
+
+        // ------------ //
+        // Create Embed //
+        // ------------ //
 
         let mut embed = CONFIG
             .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
+            .title(object.name_id())
+            .url(object.explorer_url());
 
         if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
             embed = embed.thumbnail(icon_url);
         }
 
-        let item_component = CD_CLIENT.object_item_component(id)?;
-        let rarity = item_component
-            .rarity
-            .ok_or_else(|| format!("{} has no Rarity", CD_CLIENT.object_explorer_url(id)))?;
+        let entries = object.packages_chances()?;
+        let pager = Pager::new(entries, page, 5);
 
-        let packages = CD_CLIENT.object_package_ids(id).unwrap_or_else(|_| vec![]);
+        for (num, entry) in pager.this_page() {
+            let field_name = format!("{}. {:.5}% for {}", num, entry.chance * 100.0, &name);
+            let sources: Vec<_> = entry
+                .sources
+                .iter()
+                .map(|source| source.hyperlink_name())
+                .collect();
+            let value = format!("- {}", sources.join("\n- "));
+            embed = embed.field(field_name, value, false);
+        }
 
-        let description = if packages.len() == 0 {
-            format!("This item is not unpacked")
-        } else {
-            let packages = packages
-                .into_iter()
-                .enumerate()
-                .filter_map(|(idx, package_id)| {
-                    let pkg = CD_CLIENT.object_package_component(package_id).ok()?;
-                    let chance = calculate_chance_to_drop(pkg.loot_matrix_index, id)?;
-                    let name = CD_CLIENT.object_hyperlinked_name(package_id);
-                    Some(format!("**{}.** {:.4}% {name}", idx + 1, chance * 100.0))
-                })
-                .collect::<Vec<_>>()
-                .join("\n");
-            format!("**Packages**\n{packages}")
-        };
-        embed = embed.description(description);
+        // ---------- //
+        // Components //
+        // ---------- //
 
-        Ok((embed, None))
+        let mut components = vec![];
+
+        // ------------------- //
+        // Related Actions Row //
+        // ------------------- //
+
+        let page = START_PAGE;
+        let item = id;
+        let earn_button = EarnArguments { item, page }.to_update_button("Earn");
+        let drop_button = DropArguments { item, page }.to_update_button("Drop");
+        let unpack_button = UnpackArguments { item, page }.to_self_button("Unpack");
+        let reward_button = RewardArguments { item, page }.to_update_button("Reward");
+        let buy_button = BuyArguments { item, page }.to_update_button("Buy");
+
+        components.push(CreateActionRow::Buttons(vec![
+            earn_button,
+            drop_button,
+            unpack_button,
+            reward_button,
+            buy_button,
+        ]));
+
+        // ---------------------- //
+        // Referenced Objects Row //
+        // ---------------------- //
+
+        let options: Vec<CreateSelectMenuOption> = pager
+            .this_page()
+            .into_iter()
+            .flat_map(|(_, entry)| {
+                entry
+                    .sources
+                    .into_iter()
+                    .map(|source| PackageArguments { package: source.0 }.into())
+            })
+            .take(25)
+            .collect();
+
+        if options.len() > 1 {
+            components.push(CreateActionRow::SelectMenu(CreateSelectMenu::new(
+                PackageCommand::NAME,
+                CreateSelectMenuKind::String { options },
+            )));
+        }
+
+        // -------------- //
+        // Pagination Row //
+        // -------------- //
+
+        let prev_page_button = UnpackArguments {
+            item: id,
+            page: pager.prev(),
+        }
+        .to_update_button(format!("Page {}", pager.prev()))
+        .disabled(pager.is_first_page());
+
+        let next_page_button = UnpackArguments {
+            item: id,
+            page: pager.next(),
+        }
+        .to_update_button(format!("Page {}", pager.next()))
+        .disabled(pager.is_last_page());
+
+        if pager.has_multiple_pages() {
+            components.push(CreateActionRow::Buttons(vec![
+                prev_page_button,
+                next_page_button,
+            ]));
+        }
+
+        Ok((embed, Some(components)))
     }
-}
-
-fn calculate_chance_to_drop(lmi: i32, id: i32) -> Option<f64> {
-    // "chance to drop loot table" * "chance to drop rarity" * (1 / "number of items of same rarity in loot table")
-    let lm_table = CD_CLIENT.loot_matrix.at_group_key(&lmi)?;
-    let rarity = CD_CLIENT.object_item_component(id).ok()?.rarity?;
-    // for lm in lm_table.iter() {
-    //     let lti = lm.loot_table_index;
-    //     let rti = lm.rarity_table_index;
-    //     let chance_to_drop_rarity = calc_chance_to_drop_rarity(rarity, rti)
-    // }
-
-    // let lm_table = CD_CLIENT.loot_matrix.at_group_key(&lmi)?;
-    let ltis = CD_CLIENT.loot_table_indexes_with_item(id)?;
-    let lm = lm_table
-        .iter()
-        .find(|lm| ltis.contains(&lm.loot_table_index))?;
-
-    let chance_to_drop_loot_table = lm.percent;
-
-    let number_of_items_of_rarity_in_loot_table =
-        calc_number_of_items_of_rarity_in_loot_table(rarity, lm.loot_table_index)?;
-
-    let chance_to_drop_rarity = calc_chance_to_drop_rarity(rarity, lm.rarity_table_index)?;
-    // dbg!(
-    //     &chance_to_drop_rarity,
-    //     &chance_to_drop_loot_table,
-    //     &number_of_items_of_rarity_in_loot_table
-    // );
-
-    let chance = chance_to_drop_rarity
-        * chance_to_drop_loot_table
-        * (1.0 / number_of_items_of_rarity_in_loot_table as f64);
-
-    // I should still multiple by number drops
-    let avg_dropped = (lm.min_to_drop as f64 + lm.max_to_drop as f64) / 2.0;
-
-    Some(avg_dropped * chance)
-}
-
-fn calc_chance_to_drop_rarity(rarity: i32, rti: i32) -> Option<f64> {
-    // let rarity = CD_CLIENT.object_item_component(id).ok()?.rarity?;
-    let rarity_table = CD_CLIENT.rarity_table.at_group_key(&rti)?;
-    let upper_threshold = rarity_table.iter().find(|r| r.rarity == rarity)?.randmax;
-    let lower_threshold = rarity_table
-        .iter()
-        .find_map(|r| (r.rarity == rarity - 1).then(|| r.randmax))
-        .unwrap_or(0.0);
-    let chance_to_drop_rarity = upper_threshold - lower_threshold;
-    Some(chance_to_drop_rarity)
-}
-
-fn calc_number_of_items_of_rarity_in_loot_table(rarity: i32, lti: i32) -> Option<usize> {
-    let loot_table = CD_CLIENT.loot_table.at_group_key(&lti)?;
-    // let object_ids =
-    let count = loot_table
-        .iter()
-        .filter_map(|lt| {
-            CD_CLIENT
-                .object_item_component(lt.itemid)
-                .ok()
-                .map(|ic| ic.rarity)
-                .flatten()
-        })
-        .filter(|comp_rarity| *comp_rarity == rarity)
-        .count();
-    Some(count)
 }
