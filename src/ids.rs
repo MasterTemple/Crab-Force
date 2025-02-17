@@ -419,6 +419,44 @@ impl CdClientObjectsId {
         Ok(activities)
     }
 
+    pub fn activities_chances(&self) -> MsgResult<Vec<LootMatrixObjectChances>> {
+        let lmis = self
+            .get_containing_loot_matrix_indexes()
+            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
+
+        let activities: Vec<_> = self
+            .cdclient()
+            .activity_rewards
+            .iter()
+            .filter(|act| {
+                act.loot_matrix_index
+                    .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
+            })
+            .chunk_by(|act| CdClientLootMatrixId(act.loot_matrix_index.expect("Already checked")))
+            .into_iter()
+            .filter_map(|(lmi, comps)| {
+                let sources: Vec<_> = comps
+                    .unique_by(|act| act.object_template)
+                    .filter_map(|act| {
+                        // CdClientActivityRewardsId(comp.id).get_objects_with_component()
+                        CdClientActivityRewardsId(act.object_template).get_objects_from_activity()
+                    })
+                    .flatten()
+                    .collect();
+                let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
+
+                Some(LootMatrixObjectChances {
+                    lmi,
+                    chance,
+                    sources: (sources.len() > 0).then(|| sources)?,
+                })
+            })
+            .sorted_by(|a, b| f32::total_cmp(&(-a.chance as f32), &(-b.chance as f32)))
+            .collect();
+
+        Ok(activities)
+    }
+
     /// All smashables that drop an object
     pub fn smashables(&self) -> MsgResult<Vec<CdClientObjectsId>> {
         let lmis = self
@@ -786,6 +824,20 @@ impl CdClientActivityRewardsId {
             .filter_map(|ar| {
                 let lmi = CdClientLootMatrixId(ar.loot_matrix_index?);
                 lmi.loot_chances()
+            })
+            .flatten()
+            .collect_some()
+        // let lmi = CdClientLootMatrixId(activity_rewards.loot_matrix_index?);
+        // lmi.loot_chances()
+    }
+
+    pub fn get_objects_from_activity(&self) -> Option<Vec<CdClientObjectsId>> {
+        let activity_rewards = self.fetch().ok()?;
+        activity_rewards
+            .into_iter()
+            .filter_map(|ar| {
+                let lmi = CdClientLootMatrixId(ar.loot_matrix_index?);
+                lmi.contained_items()
             })
             .flatten()
             .collect_some()

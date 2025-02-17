@@ -3,6 +3,8 @@
 * - This doesn't paginate the Discord Embed Description
 */
 
+use crate::commands::package::PackageArguments;
+
 /// Page starts at 1
 pub const MIN_PAGE: usize = 1;
 /// This is an alias for [`MIN_PAGE`]
@@ -23,11 +25,15 @@ pub struct Pager<T: Clone> {
 
 impl<T: Clone> Pager<T> {
     pub fn new(entries: Vec<T>, page: usize, page_size: usize) -> Self {
+        let mut max_page =
+            (entries.len() / page_size) + (if entries.len() % page_size == 0 { 0 } else { 1 });
+        if max_page < MIN_PAGE {
+            max_page = MIN_PAGE;
+        }
         Self {
             current: page,
             min_page: MIN_PAGE,
-            max_page: (entries.len() / page_size)
-                + (if entries.len() % page_size == 0 { 0 } else { 1 }),
+            max_page,
             page_size,
             entries,
         }

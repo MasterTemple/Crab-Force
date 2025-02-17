@@ -1,12 +1,16 @@
+use crate::ids::CdClientObjectsId;
 use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
 use crate::queries::{AutocompleteQueries, ObjectQueries};
 use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use serenity::all::{
+    AutocompleteChoice, CommandOptionType, CreateCommandOption, CreateSelectMenuOption,
+    ResolvedOption,
+};
 
 pub struct ActivityCommand;
 
 pub struct ActivityArguments {
-    activity: i32,
+    pub activity: i32,
 }
 
 impl ToCustomId for ActivityArguments {
@@ -35,6 +39,13 @@ impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for ActivityArguments {
         Ok(ActivityArguments {
             activity: int_option!(options, "activity"),
         })
+    }
+}
+
+impl Into<CreateSelectMenuOption> for ActivityArguments {
+    fn into(self) -> CreateSelectMenuOption {
+        let it = CdClientObjectsId(self.activity);
+        CreateSelectMenuOption::new(it.name_id(), self.to_custom_id(true))
     }
 }
 
