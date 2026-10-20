@@ -1,94 +1,31 @@
-use crate::ids::CdClientObjectsId;
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{
-    AutocompleteChoice, CommandOptionType, CreateCommandOption, CreateSelectMenuOption,
-    ResolvedOption,
-};
+use crate::data::GameData;
+use crate::error::BotError;
+use crate::ids::{CdClientObjectsId, LUExplorer};
+use crate::interaction_command::{CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::search::SearchCategory;
+
+use super::{add_loot_matrix, item_rows, object_embed};
 
 pub struct PackageCommand;
 
-pub struct PackageArguments {
-    pub package: i32,
-}
-
-impl ToCustomId for PackageArguments {
-    const CMD: &'static str = PackageCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let PackageArguments { package } = self;
-        format!("package={package}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for PackageArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(PackageArguments {
-            package: options.parse("package")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for PackageArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(PackageArguments {
-            package: int_option!(options, "package"),
-        })
-    }
-}
-
-impl Into<CreateSelectMenuOption> for PackageArguments {
-    fn into(self) -> CreateSelectMenuOption {
-        let it = CdClientObjectsId(self.package);
-        CreateSelectMenuOption::new(it.name_id(), self.to_custom_id(true))
-    }
-}
-
 impl InteractionCommand for PackageCommand {
     const NAME: &'static str = "package";
+    const DESCRIPTION: &'static str = "View all items given from a package!";
+    const OPTION_NAME: &'static str = "package";
+    const OPTION_DESCRIPTION: &'static str = "A package in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Package);
 
-    const DESCRIPTION: &'static str = "View a package in LEGO Universe!";
-
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "package",
-            "An package in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
-
-    type Arguments = PackageArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let PackageArguments { package: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let package = CdClientObjectsId(target.id);
+        package.try_fetch(d)?;
+        let lmi = package.package_loot_matrix(d).ok_or_else(|| {
+            BotError::not_applicable(format!("{} is not a package.", package.hyperlink_name(d)))
+        })?;
+        let (embed, menu) = add_loot_matrix(d, object_embed(d, package), lmi, Self::NAME);
+        let mut response = Response::new(embed).row(menu);
+        if package.item_component(d).is_some() {
+            response = response.rows(item_rows(d, package, Self::NAME));
         }
-
-        Ok((embed, None))
+        Ok(response)
     }
 }

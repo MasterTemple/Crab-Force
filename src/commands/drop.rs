@@ -1,190 +1,83 @@
-use crate::commands::buy::BuyArguments;
-use crate::commands::earn::EarnArguments;
-use crate::commands::reward::RewardArguments;
-use crate::commands::smash::{SmashArguments, SmashCommand};
-use crate::commands::unpack::UnpackArguments;
-use crate::ids::CdClientObjectsId;
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::pager::{Pager, START_PAGE};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use itertools::Itertools;
-use serenity::all::{
-    AutocompleteChoice, ButtonStyle, CommandOptionType, CreateActionRow, CreateCommandOption,
-    CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption, ResolvedOption,
-};
+use crate::data::GameData;
+use crate::ids::{escape_markdown, CdClientActivityId, CdClientObjectsId, LUExplorer};
+use crate::interaction_command::{select_row, CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::loot::{item_sources, LootSource};
+use crate::pager::Pager;
+use crate::search::SearchCategory;
+
+use super::activity::{activity_page, ActivityCommand};
+use super::{chance_text, item_rows, object_embed, object_select_option};
 
 pub struct DropCommand;
 
-pub struct DropArguments {
-    pub item: i32,
-    pub page: usize,
-}
-
-impl ToCustomId for DropArguments {
-    const CMD: &'static str = DropCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let DropArguments { item, page } = self;
-        vec![format!("item={item}"), format!("page={page}")].join("&")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for DropArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(DropArguments {
-            item: options.parse("item")?,
-            page: options.parse("page")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for DropArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(DropArguments {
-            item: int_option!(options, "item"),
-            page: START_PAGE,
-        })
-    }
-}
-
 impl InteractionCommand for DropCommand {
     const NAME: &'static str = "drop";
-
     const DESCRIPTION: &'static str = "View all smashables that drop an item!";
+    const OPTION_NAME: &'static str = "item";
+    const OPTION_DESCRIPTION: &'static str = "An item in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Item);
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "item",
-            "An item in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
-
-    type Arguments = DropArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let DropArguments { item: id, page } = arguments;
-
-        let object = CdClientObjectsId(id);
-        let name = object.req_name();
-
-        // ------------ //
-        // Create Embed //
-        // ------------ //
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(object.name_id())
-            .url(object.explorer_url());
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
-        }
-
-        let entries = object.smashables_chances()?;
-        let pager = Pager::new(entries, page, 5);
-
-        for (num, entry) in pager.this_page() {
-            let field_name = format!("{}. {:.5}% for {}", num, entry.chance * 100.0, &name);
-            let sources: Vec<_> = entry
-                .sources
-                .iter()
-                .map(|source| source.hyperlink_name())
-                .collect();
-            let value = format!("- {}", sources.join("\n- "));
-            embed = embed.field(field_name, value, false);
-        }
-
-        // ---------- //
-        // Components //
-        // ---------- //
-
-        let mut components = vec![];
-
-        // ------------------- //
-        // Related Actions Row //
-        // ------------------- //
-
-        let page = START_PAGE;
-        let item = id;
-        let earn_button = EarnArguments { item, page }.to_update_button("Earn");
-        let drop_button = DropArguments { item, page }.to_self_button("Drop");
-        let unpack_button = UnpackArguments { item, page }.to_update_button("Unpack");
-        let reward_button = RewardArguments { item, page }.to_update_button("Reward");
-        let buy_button = BuyArguments { item, page }.to_update_button("Buy");
-
-        components.push(CreateActionRow::Buttons(vec![
-            earn_button,
-            drop_button,
-            unpack_button,
-            reward_button,
-            buy_button,
-        ]));
-
-        // ---------------------- //
-        // Referenced Objects Row //
-        // ---------------------- //
-
-        let options: Vec<CreateSelectMenuOption> = pager
-            .this_page()
-            .into_iter()
-            .flat_map(|(_, entry)| {
-                entry.sources.into_iter().map(|source| {
-                    SmashArguments {
-                        smashable: source.0,
-                    }
-                    .into()
-                })
-            })
-            .take(25)
-            .collect();
-
-        if options.len() > 1 {
-            components.push(CreateActionRow::SelectMenu(CreateSelectMenu::new(
-                DropCommand::NAME,
-                CreateSelectMenuKind::String { options },
-            )));
-        }
-
-        // -------------- //
-        // Pagination Row //
-        // -------------- //
-
-        let prev_page_button = DropArguments {
-            item: id,
-            page: pager.prev(),
-        }
-        .to_update_button(format!("Page {}", pager.prev()))
-        .disabled(pager.is_first_page());
-
-        let next_page_button = DropArguments {
-            item: id,
-            page: pager.next(),
-        }
-        .to_update_button(format!("Page {}", pager.next()))
-        .disabled(pager.is_last_page());
-
-        if pager.has_multiple_pages() {
-            components.push(CreateActionRow::Buttons(vec![
-                prev_page_button,
-                next_page_button,
-            ]));
-        }
-
-        Ok((embed, Some(components)))
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        item_sources_response::<Self>(d, target, LootSource::Smashable)
     }
 }
+
+/// Shared by `/drop`, `/unpack`, and `/reward`: where an item comes from and how likely it is
+pub fn item_sources_response<C: InteractionCommand>(d: &GameData, target: Target, kind: LootSource) -> CommandResult {
+    const PAGE_SIZE: usize = 6;
+    let item = CdClientObjectsId(target.id);
+    item.try_fetch(d)?;
+    let name = item.req_name(d);
+
+    let groups = item_sources(d, item, kind);
+    let (verb, source_kind) = match kind {
+        LootSource::Smashable => ("dropped by", "smashable"),
+        LootSource::Package => ("unpacked from", "package"),
+        LootSource::Activity => ("rewarded by", "activity"),
+    };
+    let pager = Pager::new(groups, target.page, PAGE_SIZE);
+
+    let mut embed = object_embed(d, item).title(format!("{}{}", item.name_id(d), pager.title_suffix()));
+    let mut options = vec![];
+    if pager.is_empty() {
+        embed = embed.description(format!("{} is not {verb} any {source_kind}.", item.hyperlink_name(d)));
+    } else {
+        embed = embed.description(format!(
+            "Chance to get at least one **{}** each time.",
+            escape_markdown(&name)
+        ));
+        for (num, group) in pager.this_page() {
+            let mut lines = vec![];
+            for source in &group.sources {
+                let (link, option) = match kind {
+                    LootSource::Activity => {
+                        let activity = CdClientActivityId(source.id);
+                        let (page, reward) = activity_page(d, activity, source.loot_matrix);
+                        let detail = reward.map(|r| format!(" — *{}*", escape_markdown(&r))).unwrap_or_default();
+                        (
+                            format!("{}{detail}", activity.hyperlink_name(d)),
+                            Some(ActivityCommand::select_option(activity.name_id(d), None, Target::new(source.id).page(page))),
+                        )
+                    }
+                    _ => {
+                        let object = CdClientObjectsId(source.id);
+                        (object.hyperlink_name(d), object_select_option(d, object, None))
+                    }
+                };
+                lines.push(format!("- {link}"));
+                if let Some(mut option) = option {
+                    option.description = Some(format!("{} chance", crate::config::config().percent(group.chance)));
+                    options.push(option);
+                }
+            }
+            let field = format!("{}. {}", num, chance_text(group.chance));
+            embed = embed.field_lines(field, &lines, false);
+        }
+    }
+
+    Ok(Response::new(embed)
+        .row(select_row(C::NAME, &format!("Open a {source_kind}…"), options))
+        .row(C::page_row(&pager, target))
+        .rows(item_rows(d, item, C::NAME)))
+}
+

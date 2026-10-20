@@ -1,83 +1,48 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use crate::data::GameData;
+use crate::ids::{CdClientObjectsId, CdClientSkillBehaviorId, LUExplorer};
+use crate::interaction_command::{select_row, CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::search::SearchCategory;
+
+use super::skill::{skill_summary, SkillCommand};
+use super::{item_rows, object_embed};
 
 pub struct SkillsCommand;
 
-pub struct SkillsArguments {
-    item: i32,
-}
-
-impl ToCustomId for SkillsArguments {
-    const CMD: &'static str = SkillsCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let SkillsArguments { item } = self;
-        format!("item={item}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for SkillsArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(SkillsArguments {
-            item: options.parse("item")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for SkillsArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(SkillsArguments {
-            item: int_option!(options, "item"),
-        })
-    }
-}
-
 impl InteractionCommand for SkillsCommand {
     const NAME: &'static str = "skills";
-
     const DESCRIPTION: &'static str = "View all skills attached to an item!";
+    const OPTION_NAME: &'static str = "item";
+    const OPTION_DESCRIPTION: &'static str = "An item in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Item);
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "item",
-            "An item in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let item = CdClientObjectsId(target.id);
+        item.try_fetch(d)?;
 
-    type Arguments = SkillsArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let SkillsArguments { item: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
+        let mut embed = object_embed(d, item);
+        let mut options = vec![];
+        let skills = item.skills(d);
+        if skills.is_empty() {
+            embed = embed.description(format!("{} has no skills.", item.hyperlink_name(d)));
+        }
+        for object_skill in skills {
+            let skill = CdClientSkillBehaviorId(object_skill.skill);
+            let mut value = skill_summary(d, skill);
+            if object_skill.object != item.0 {
+                value = format!("*From {}*\n{value}", CdClientObjectsId(object_skill.object).hyperlink_name(d));
+            }
+            // from the data: passive stat boosts use 1, attacks/abilities use 0
+            let when = match object_skill.cast_on_type {
+                Some(0) => " (on use)",
+                Some(1) => " (on equip)",
+                _ => "",
+            };
+            embed.push_field(format!("{}{when}", skill.name_id(d)), value, false);
+            options.push(SkillCommand::select_option(skill.name_id(d), None, Target::new(skill.0)));
         }
 
-        Ok((embed, None))
+        Ok(Response::new(embed)
+            .row(select_row(Self::NAME, "Open a skill…", options))
+            .rows(item_rows(d, item, Self::NAME)))
     }
 }

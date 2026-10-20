@@ -1,8 +1,9 @@
-/// I only need the phrases in en_US so I will not deal with all the config parts
-use std::{collections::BTreeMap, fs, path::Path};
+//! Parsing of the client's `locale.xml`
+use std::{collections::BTreeMap, fs, path::Path, sync::LazyLock as Lazy};
 
-use once_cell::sync::Lazy;
 use regex::Regex;
+
+use crate::error::LocaleLoadError;
 
 /// trait name says it all
 /// pass a closure to modify an object at an index
@@ -25,169 +26,295 @@ impl<K: Ord + Clone, V: std::fmt::Debug + Default> ModifyExistingOrInsertDefault
     }
 }
 
-#[derive(Debug, Default)]
-pub struct LocaleXML {
-    pub locales: BTreeMap<String, LocaleTranslation>,
+/// Reads the translations for one locale out of `locale.xml`
+///
+/// The file is machine generated with a very regular shape, so a small scanner is used instead
+/// of a full XML parser:
+/// ```xml
+/// <phrase id="Objects_1727_name">
+///     <translation locale="en_US">Bat Lord Cape</translation>
+/// </phrase>
+/// ```
+/// Entities (`&amp;`, `&lt;`, `&#39;`, …) are decoded and in-game markup such as
+/// `<font color='#FF7F00'>` is removed.
+pub fn load_locale(path: &Path, locale: &str) -> Result<LocaleTranslation, LocaleLoadError> {
+    if !path.is_file() {
+        return Err(LocaleLoadError::NotFound(path.to_path_buf()));
+    }
+    let contents = fs::read_to_string(path).map_err(|source| LocaleLoadError::Read {
+        path: path.to_path_buf(),
+        source,
+    })?;
+    parse_locale(&contents, locale)
 }
 
-static PHRASE_REGEX: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"\s*<phrase id="([^"]+)">(\s*<translation locale="[^"]+">.*</translation>\s*)+\s*</phrase>\s*"#).unwrap()
-});
+pub fn parse_locale(contents: &str, locale: &str) -> Result<LocaleTranslation, LocaleLoadError> {
+    let mut translation = LocaleTranslation::default();
+    let mut seen_locales: Vec<&str> = vec![];
+    let mut found = false;
 
-static TRANSLATION_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"<translation locale="([^"]+)">(.*)</translation>"#).unwrap());
+    for (key, phrase_body) in phrases(contents) {
+        for (phrase_locale, raw) in translations(phrase_body) {
+            if !seen_locales.contains(&phrase_locale) {
+                seen_locales.push(phrase_locale);
+            }
+            if phrase_locale != locale {
+                continue;
+            }
+            found = true;
+            let content = clean_text(raw);
+            if content.is_empty() {
+                continue;
+            }
+            translation.insert(key, content);
+        }
+    }
 
-impl LocaleXML {
-    pub fn load_xml(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
-        let contents = fs::read_to_string(path)?;
-        let mut xml = LocaleXML::default();
-        for matched_phase in PHRASE_REGEX.captures_iter(&contents) {
-            let key = matched_phase.get(1).unwrap().as_str();
-            let translations = matched_phase.get(0).unwrap().as_str();
+    if !found {
+        return Err(LocaleLoadError::MissingLocale {
+            locale: locale.to_string(),
+            available: if seen_locales.is_empty() {
+                String::from("none; is this really a locale.xml?")
+            } else {
+                seen_locales.join(", ")
+            },
+        });
+    }
+    Ok(translation)
+}
 
-            for matched_translation in TRANSLATION_REGEX.captures_iter(translations) {
-                let locale = matched_translation.get(1).unwrap().as_str();
-                let content = matched_translation.get(2).unwrap().as_str();
+/// Yields `(phrase id, inner xml)` for every `<phrase id="…">…</phrase>`
+fn phrases(contents: &str) -> impl Iterator<Item = (&str, &str)> {
+    const OPEN: &str = "<phrase id=\"";
+    const CLOSE: &str = "</phrase>";
+    let mut rest = contents;
+    std::iter::from_fn(move || loop {
+        let start = rest.find(OPEN)? + OPEN.len();
+        let after = &rest[start..];
+        let id_end = after.find('"')?;
+        let id = &after[..id_end];
+        let after_id = &after[id_end..];
+        let body_start = after_id.find('>')? + 1;
+        // `<phrase id="x"/>` has no translations
+        if after_id[..body_start].ends_with("/>") {
+            rest = &after_id[body_start..];
+            continue;
+        }
+        let body = &after_id[body_start..];
+        let body_end = body.find(CLOSE).unwrap_or(body.len());
+        rest = &body[body_end..];
+        return Some((id, &body[..body_end]));
+    })
+}
 
-                // get translation object
-                if !xml.locales.contains_key(locale) {
-                    _ = xml
-                        .locales
-                        .insert(locale.to_string(), LocaleTranslation::default());
-                }
-                let translation = xml.locales.get_mut(locale).expect("Key already added");
-                // match phrase key
-                if let Some(rem) = key.starts_with_remainder(LocaleActivities::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_ActivityName") {
-                        translation
-                            .activities
-                            .modify(id, |it| it.activity_name = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocaleItemSets::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_kitName") {
-                        translation
-                            .item_sets
-                            .modify(id, |it| it.kit_name = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocaleMissionEmail::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_announceText") {
-                        translation
-                            .mission_email
-                            .modify(id, |it| it.announce_text = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_bodyText") {
-                        translation
-                            .mission_email
-                            .modify(id, |it| it.body_text = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_senderName") {
-                        translation
-                            .mission_email
-                            .modify(id, |it| it.sender_name = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_subjectText") {
-                        translation
-                            .mission_email
-                            .modify(id, |it| it.subject_text = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocaleMissionTasks::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_description") {
-                        translation
-                            .mission_tasks
-                            .modify(id, |it| it.description = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocaleMissionText::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_accept_chat_bubble") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.accept_chat_bubble = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_1") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.chat_state_1 = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_2") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.chat_state_2 = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_3_turnin") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.chat_state_3_turnin = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_completion_succeed_tip")
-                    {
-                        translation.mission_text.modify(id, |it| {
-                            it.completion_succeed_tip = Some(content.to_string())
-                        });
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_in_progress") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.in_progress = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_offer") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.offer = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_ready_to_complete") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.ready_to_complete = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_description") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.description = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_3") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.chat_state_3 = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_4") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.chat_state_4 = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_4_turnin") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.chat_state_4_turnin = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_offer_repeatable") {
-                        translation
-                            .mission_text
-                            .modify(id, |it| it.offer_repeatable = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocaleMissions::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_name") {
-                        translation
-                            .missions
-                            .modify(id, |it| it.name = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocaleObjects::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_name") {
-                        translation
-                            .objects
-                            .modify(id, |it| it.name = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_description") {
-                        translation
-                            .objects
-                            .modify(id, |it| it.description = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocalePreconditions::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_FailureReason") {
-                        translation
-                            .preconditions
-                            .modify(id, |it| it.failure_reason = Some(content.to_string()));
-                    }
-                } else if let Some(rem) = key.starts_with_remainder(LocaleSkillBehavior::PREFIX) {
-                    if let Some(id) = parse_id_from_remainder(rem, "_name") {
-                        translation
-                            .skill_behavior
-                            .modify(id, |it| it.name = Some(content.to_string()));
-                    } else if let Some(id) = parse_id_from_remainder(rem, "_descriptionUI") {
-                        translation.skill_behavior.modify(id, |it| {
-                            it.description_ui = Some(SkillBehaviorDescriptionUI::new(content))
-                        });
-                    }
-                } else {
-                    _ = translation
-                        .other
-                        .insert(key.to_string(), content.to_string());
-                }
+/// Yields `(locale, raw text)` for every `<translation locale="…">…</translation>`
+fn translations(phrase: &str) -> impl Iterator<Item = (&str, &str)> {
+    const OPEN: &str = "<translation locale=\"";
+    const CLOSE: &str = "</translation>";
+    let mut rest = phrase;
+    std::iter::from_fn(move || loop {
+        let start = rest.find(OPEN)? + OPEN.len();
+        let after = &rest[start..];
+        let locale_end = after.find('"')?;
+        let locale = &after[..locale_end];
+        let after_locale = &after[locale_end..];
+        let text_start = after_locale.find('>')? + 1;
+        if after_locale[..text_start].ends_with("/>") {
+            rest = &after_locale[text_start..];
+            continue;
+        }
+        let text = &after_locale[text_start..];
+        let text_end = text.find(CLOSE).unwrap_or(text.len());
+        rest = &text[text_end..];
+        return Some((locale, &text[..text_end]));
+    })
+}
+
+/// Decodes XML entities, then strips in-game markup tags and surrounding whitespace
+pub fn clean_text(raw: &str) -> String {
+    let decoded = decode_entities(raw);
+    MARKUP_REGEX.replace_all(&decoded, "").trim().to_string()
+}
+
+fn decode_entities(raw: &str) -> String {
+    if !raw.contains('&') {
+        return raw.to_string();
+    }
+    let mut out = String::with_capacity(raw.len());
+    let mut rest = raw;
+    while let Some(amp) = rest.find('&') {
+        out.push_str(&rest[..amp]);
+        let after = &rest[amp..];
+        let decoded = after.find(';').filter(|&end| end <= 10).and_then(|end| {
+            let entity = &after[1..end];
+            let ch = match entity {
+                "amp" => Some('&'),
+                "lt" => Some('<'),
+                "gt" => Some('>'),
+                "quot" => Some('"'),
+                "apos" => Some('\''),
+                "nbsp" => Some(' '),
+                _ => entity
+                    .strip_prefix("#x")
+                    .or_else(|| entity.strip_prefix("#X"))
+                    .and_then(|hex| u32::from_str_radix(hex, 16).ok())
+                    .or_else(|| entity.strip_prefix('#').and_then(|dec| dec.parse().ok()))
+                    .and_then(char::from_u32),
+            };
+            ch.map(|ch| (ch, end))
+        });
+        match decoded {
+            Some((ch, end)) => {
+                out.push(ch);
+                rest = &after[end + 1..];
+            }
+            None => {
+                out.push('&');
+                rest = &after[1..];
             }
         }
-        Ok(xml)
+    }
+    out.push_str(rest);
+    out
+}
+
+/// In-game rich text such as `<font color='#FF7F00'>` and `</font>`
+static MARKUP_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"</?[A-Za-z][^<>]*>").expect("valid regex"));
+
+impl LocaleTranslation {
+    /// Files a phrase under the matching id-based table, or [`LocaleTranslation::other`]
+    fn insert(&mut self, key: &str, content: String) {
+        let translation = self;
+        let content = content.as_str();
+        // match phrase key
+        if let Some(rem) = key.starts_with_remainder(LocaleActivities::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_ActivityName") {
+                translation
+                    .activities
+                    .modify(id, |it| it.activity_name = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocaleItemSets::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_kitName") {
+                translation
+                    .item_sets
+                    .modify(id, |it| it.kit_name = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocaleMissionEmail::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_announceText") {
+                translation
+                    .mission_email
+                    .modify(id, |it| it.announce_text = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_bodyText") {
+                translation
+                    .mission_email
+                    .modify(id, |it| it.body_text = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_senderName") {
+                translation
+                    .mission_email
+                    .modify(id, |it| it.sender_name = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_subjectText") {
+                translation
+                    .mission_email
+                    .modify(id, |it| it.subject_text = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocaleMissionTasks::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_description") {
+                translation
+                    .mission_tasks
+                    .modify(id, |it| it.description = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocaleMissionText::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_accept_chat_bubble") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.accept_chat_bubble = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_1") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.chat_state_1 = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_2") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.chat_state_2 = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_3_turnin") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.chat_state_3_turnin = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_completion_succeed_tip")
+            {
+                translation.mission_text.modify(id, |it| {
+                    it.completion_succeed_tip = Some(content.to_string())
+                });
+            } else if let Some(id) = parse_id_from_remainder(rem, "_in_progress") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.in_progress = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_offer") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.offer = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_ready_to_complete") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.ready_to_complete = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_description") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.description = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_3") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.chat_state_3 = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_4") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.chat_state_4 = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_chat_state_4_turnin") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.chat_state_4_turnin = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_offer_repeatable") {
+                translation
+                    .mission_text
+                    .modify(id, |it| it.offer_repeatable = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocaleMissions::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_name") {
+                translation
+                    .missions
+                    .modify(id, |it| it.name = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocaleObjects::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_name") {
+                translation
+                    .objects
+                    .modify(id, |it| it.name = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_description") {
+                translation
+                    .objects
+                    .modify(id, |it| it.description = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocalePreconditions::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_FailureReason") {
+                translation
+                    .preconditions
+                    .modify(id, |it| it.failure_reason = Some(content.to_string()));
+            }
+        } else if let Some(rem) = key.starts_with_remainder(LocaleSkillBehavior::PREFIX) {
+            if let Some(id) = parse_id_from_remainder(rem, "_name") {
+                translation
+                    .skill_behavior
+                    .modify(id, |it| it.name = Some(content.to_string()));
+            } else if let Some(id) = parse_id_from_remainder(rem, "_descriptionUI") {
+                translation.skill_behavior.modify(id, |it| {
+                    it.description_ui = Some(SkillBehaviorDescriptionUI::new(content))
+                });
+            }
+        } else {
+            _ = translation
+                .other
+                .insert(key.to_string(), content.to_string());
+        }
     }
 }
 
@@ -371,57 +498,95 @@ pub struct SkillBehaviorDescriptionUI {
     pub segments: Option<BTreeMap<String, String>>,
 }
 impl SkillBehaviorDescriptionUI {
+    /// Splits `"Intro %(DamageCombo) 3+4+4 %(ChargeUp)Does 12 damage"` into
+    /// - remainder: `"Intro"`
+    /// - segments: `DamageCombo => "3+4+4"`, `ChargeUp => "Does 12 damage"`
+    ///
+    /// Text without any `%(…)` markers becomes the remainder, and a literal `%` (e.g. `50%`)
+    /// is kept as part of the text.
     pub fn new(text: &str) -> Self {
-        let mut is_first = true;
+        let markers: Vec<_> = SEGMENT_MARKER_REGEX.captures_iter(text).collect();
+        let first_start = markers
+            .first()
+            .and_then(|cap| cap.get(0))
+            .map_or(text.len(), |m| m.start());
+        let remainder = Some(text[..first_start].trim().to_string()).filter(|r| !r.is_empty());
+
         let mut segments = BTreeMap::new();
-        let mut remainder = None;
-        for cap in DESCRIPTION_UI_REGEX.captures_iter(text) {
-            if is_first {
-                is_first = false;
-                let entire_capture = cap.get(0).unwrap();
-                let start = text[..entire_capture.start()].trim();
-                if start.len() > 0 {
-                    remainder = Some(start.to_string());
-                }
+        for (idx, cap) in markers.iter().enumerate() {
+            let (Some(whole), Some(key)) = (cap.get(0), cap.get(1)) else {
+                continue;
+            };
+            let end = markers
+                .get(idx + 1)
+                .and_then(|next| next.get(0))
+                .map_or(text.len(), |m| m.start());
+            let value = text[whole.end()..end].trim();
+            if !value.is_empty() {
+                segments.insert(key.as_str().trim().to_string(), value.to_string());
             }
-            let key = cap.get(1).unwrap().as_str().to_string();
-            let value = cap.get(2).unwrap().as_str().to_string();
-            segments.insert(key, value);
         }
-        let segments = if segments.len() != 0 {
-            Some(segments)
-        } else {
-            None
-        };
+
         Self {
             remainder,
-            segments,
+            segments: (!segments.is_empty()).then_some(segments),
         }
     }
 }
 
-/**
-Given
-```xml
-<translation locale="en_US">%(DamageCombo) 3+4+4 %(ChargeUp)Does 12 damage to enemies</translation>
-```
-Which would have already been parsed to
-```no_run
-"%(DamageCombo) 3+4+4 %(ChargeUp)Does 12 damage to enemies"
-```
-Matches
-```no_run
-Some(Captures({
-    0: Some("%(DamageCombo) 3+4+4 "),
-    1: Some("DamageCombo"),
-    2: Some("3+4+4"),
-})),
-Some(Captures({
-    0: Some("%(ChargeUp)Does 12 damage to enemies\n"),
-    1: Some("ChargeUp"),
-    2: Some("Does 12 damage to enemies"),
-})),
-```
-*/
-static DESCRIPTION_UI_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"%\(([^\)]+)\)\s*([^%]*[^\s%])\s*"#).unwrap());
+/// Matches the `%(SegmentName)` markers in a `SkillBehavior_{ID}_descriptionUI`
+static SEGMENT_MARKER_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"%\(([^)]+)\)").expect("valid regex"));
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn description_segments() {
+        let desc = SkillBehaviorDescriptionUI::new(
+            "%(DamageCombo) 3+4+4 %(ChargeUp)Does 12 damage to enemies\n",
+        );
+        assert_eq!(desc.remainder, None);
+        let segments = desc.segments.unwrap();
+        assert_eq!(segments["DamageCombo"], "3+4+4");
+        assert_eq!(segments["ChargeUp"], "Does 12 damage to enemies");
+    }
+
+    #[test]
+    fn plain_description_is_kept() {
+        let desc = SkillBehaviorDescriptionUI::new("Increases speed by 50% for 10 seconds");
+        assert_eq!(desc.remainder.as_deref(), Some("Increases speed by 50% for 10 seconds"));
+        assert!(desc.segments.is_none());
+    }
+
+    #[test]
+    fn entities_and_markup() {
+        assert_eq!(
+            clean_text("Press &lt;font color=&apos;#FF7F00&apos;&gt;5&lt;/font&gt; now &amp; then &#39;x&#x27;"),
+            "Press 5 now & then 'x'"
+        );
+        assert_eq!(clean_text("Fish &chips & more"), "Fish &chips & more");
+    }
+
+    #[test]
+    fn parses_phrases() {
+        let xml = r#"<localization><phrases count="3">
+            <phrase id="Objects_1727_name">
+                <translation locale="en_US">Bat Lord
+Cape</translation>
+                <translation locale="de_DE">Fledermaus</translation>
+            </phrase>
+            <phrase id="Missions_5_name"><translation locale="en_US">Fish &amp; Chips</translation></phrase>
+            <phrase id="Empty"/>
+            <phrase id="UI_THING"><translation locale="en_US"/></phrase>
+        </phrases></localization>"#;
+        let t = parse_locale(xml, "en_US").unwrap();
+        assert_eq!(t.objects[&1727].name.as_deref(), Some("Bat Lord\nCape"));
+        assert_eq!(t.missions[&5].name.as_deref(), Some("Fish & Chips"));
+        assert!(matches!(
+            parse_locale(xml, "fr_FR"),
+            Err(LocaleLoadError::MissingLocale { .. })
+        ));
+    }
+}

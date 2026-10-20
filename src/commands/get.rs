@@ -1,83 +1,33 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use crate::data::GameData;
+use crate::ids::CdClientObjectsId;
+use crate::interaction_command::{CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::search::SearchCategory;
+
+use super::{item_rows, object_embed, obtainable};
 
 pub struct GetCommand;
 
-pub struct GetArguments {
-    item: i32,
-}
-
-impl ToCustomId for GetArguments {
-    const CMD: &'static str = GetCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let GetArguments { item } = self;
-        format!("item={item}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for GetArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(GetArguments {
-            item: options.parse("item")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for GetArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(GetArguments {
-            item: int_option!(options, "item"),
-        })
-    }
-}
-
 impl InteractionCommand for GetCommand {
     const NAME: &'static str = "get";
-
     const DESCRIPTION: &'static str = "View how to get an item!";
+    const OPTION_NAME: &'static str = "item";
+    const OPTION_DESCRIPTION: &'static str = "An item in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Item);
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "item",
-            "An item in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
-
-    type Arguments = GetArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let GetArguments { item: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
-        }
-
-        Ok((embed, None))
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let item = CdClientObjectsId(target.id);
+        item.try_fetch(d)?;
+        let how = obtainable(d, item);
+        let mark = |yes: bool| if yes { "✅" } else { "❌" };
+        let description = [
+            format!("{} Can be earned from a mission (`/earn`)", mark(how.earn)),
+            format!("{} Can be dropped from a smashable (`/drop`)", mark(how.drop)),
+            format!("{} Can be unpacked from a package (`/unpack`)", mark(how.unpack)),
+            format!("{} Can be rewarded from an activity (`/reward`)", mark(how.reward)),
+            format!("{} Can be bought from a vendor (`/buy`)", mark(how.buy)),
+        ]
+        .join("\n");
+        let embed = object_embed(d, item).description(description);
+        Ok(Response::new(embed).rows(item_rows(d, item, Self::NAME)))
     }
 }

@@ -1,83 +1,48 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use crate::data::GameData;
+use crate::error::BotError;
+use crate::ids::{CdClientObjectsId, LUExplorer};
+use crate::interaction_command::{CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::loot::{format_float, format_number};
+use crate::search::SearchCategory;
+
+use super::{enemy_row, object_embed, smash_coins};
 
 pub struct EnemyCommand;
 
-pub struct EnemyArguments {
-    enemy: i32,
-}
-
-impl ToCustomId for EnemyArguments {
-    const CMD: &'static str = EnemyCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let EnemyArguments { enemy } = self;
-        format!("enemy={enemy}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for EnemyArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(EnemyArguments {
-            enemy: options.parse("enemy")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for EnemyArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(EnemyArguments {
-            enemy: int_option!(options, "enemy"),
-        })
-    }
-}
-
 impl InteractionCommand for EnemyCommand {
     const NAME: &'static str = "enemy";
+    const DESCRIPTION: &'static str = "View the stats of an enemy!";
+    const OPTION_NAME: &'static str = "enemy";
+    const OPTION_DESCRIPTION: &'static str = "An enemy in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Enemy);
 
-    const DESCRIPTION: &'static str = "View an enemy in LEGO Universe!";
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let enemy = CdClientObjectsId(target.id);
+        enemy.try_fetch(d)?;
+        let dc = enemy.destructible_component(d).ok_or_else(|| {
+            BotError::not_applicable(format!("{} has no health and cannot be smashed.", enemy.hyperlink_name(d)))
+        })?;
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "enemy",
-            "An enemy in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
-
-    type Arguments = EnemyArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let EnemyArguments { enemy: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
+        let mut embed = object_embed(d, enemy);
+        if let Some(description) = enemy.description(d) {
+            embed = embed.description(description);
         }
+        let stat = |value: Option<i32>| format!("`{}`", format_number(value.unwrap_or(0).into()));
+        embed = embed
+            .field("Life", stat(dc.life), true)
+            .field("Armor", format!("`{}`", format_float(dc.armor.unwrap_or(0.0))), true)
+            .field("Imagination", stat(dc.imagination), true);
+        if let Some(level) = dc.level.filter(|&l| l > 0) {
+            embed = embed.field("Level", format!("`{level}`"), true);
+        }
+        if let Some(faction) = dc.faction {
+            embed = embed.field("Faction", format!("`{faction}`"), true);
+        }
+        if let Some(coins) = smash_coins(d, dc) {
+            embed = embed.field("Coins Dropped", coins, true);
+        }
+        embed = embed.field("Smashable", if dc.is_smashable { "Yes" } else { "No" }, true);
 
-        Ok((embed, None))
+        Ok(Response::new(embed).row(Some(enemy_row(d, enemy, Self::NAME))))
     }
 }

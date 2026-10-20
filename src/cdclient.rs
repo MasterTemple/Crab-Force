@@ -4,6 +4,8 @@ use std::{
     str::FromStr,
 };
 
+use crate::error::CdClientLoadError;
+
 /// https://docs.lu-dev.net/en/latest/components.html
 pub mod components {
     pub const CONTROLLABLE_PHYSICS_COMPONENT: i32 = 1;
@@ -138,6 +140,14 @@ fn parse_required_list<T: FromStr>(input: String, splitter: char) -> Vec<T> {
     elements
 }
 
+/// Reads a column that older cdclient versions do not have (missing -> `None`)
+fn optional_column<T: rusqlite::types::FromSql>(row: &rusqlite::Row<'_>, idx: usize) -> rusqlite::Result<Option<T>> {
+    match row.get(idx) {
+        Err(rusqlite::Error::InvalidColumnIndex(_)) => Ok(None),
+        other => other,
+    }
+}
+
 /// Trims text and converts values that are completely white-space to be None
 fn trim_and_nullify(value: Option<String>) -> Option<String> {
     let value = value?;
@@ -181,7 +191,7 @@ impl<T: HasKey> DerefMut for KeyedVec<T> {
 
 impl<T: HasKey> KeyedVec<T> {
     pub fn at_key(&self, key: &T::Key) -> Option<&T> {
-        let idx = self.binary_search_by_key(key, |it| it.clone_key()).ok()?;
+        let idx = self.binary_search_by(|it| it.get_key().cmp(key)).ok()?;
         self.0.get(idx)
     }
 }
@@ -210,30 +220,11 @@ impl<T: HasGroupKey> DerefMut for GroupKeyedVec<T> {
 }
 
 impl<T: HasGroupKey> GroupKeyedVec<T> {
-    // pub fn at_group_key(&self, key: &T::Key) -> Option<&[T]> {
-    pub fn at_group_key(&self, key: &T::Key) -> Option<Vec<T>> {
-        let idx = self.binary_search_by_key(key, |it| it.clone_key()).ok()?;
-
-        let mut min_idx = idx;
-        while min_idx > 0 {
-            if self.0[min_idx - 1].get_group_key() == key {
-                min_idx -= 1;
-            } else {
-                break;
-            }
-        }
-
-        let mut max_idx = idx;
-        let max_len = self.0.len() - 1;
-        while max_idx < max_len {
-            if self.0[max_idx + 1].get_group_key() == key {
-                max_idx += 1;
-            } else {
-                break;
-            }
-        }
-
-        Some(self.0[min_idx..=max_idx].to_vec())
+    /// All rows that share the group key (the vec is sorted by key, so they are contiguous)
+    pub fn at_group_key(&self, key: &T::Key) -> Option<&[T]> {
+        let start = self.0.partition_point(|it| it.get_group_key() < key);
+        let end = self.0.partition_point(|it| it.get_group_key() <= key);
+        (start < end).then(|| &self.0[start..end])
     }
 }
 
@@ -264,12 +255,53 @@ pub trait HasGroupKey: Clone {
     }
 }
 
+/// Tables the bot cannot work without; failing to load one of these is fatal
+pub const REQUIRED_TABLES: &[&str] = &[
+    "ComponentsRegistry",
+    "Objects",
+    "ItemComponent",
+    "RenderComponent",
+    "LootTable",
+    "LootMatrix",
+    "RarityTable",
+    "Missions",
+    "SkillBehavior",
+    "ObjectSkills",
+];
+
+/// A non-required table that could not be loaded
+#[derive(Debug)]
+pub struct TableWarning {
+    pub table: &'static str,
+    pub error: rusqlite::Error,
+}
+
+fn load_table<T: FromCdClient>(
+    conn: &rusqlite::Connection,
+    warnings: &mut Vec<TableWarning>,
+) -> Result<Vec<T>, CdClientLoadError> {
+    match T::load(conn) {
+        Ok(rows) => Ok(rows),
+        Err(source) if REQUIRED_TABLES.contains(&T::TABLE) => Err(CdClientLoadError::Table {
+            table: T::TABLE,
+            source,
+        }),
+        Err(error) => {
+            warnings.push(TableWarning {
+                table: T::TABLE,
+                error,
+            });
+            Ok(vec![])
+        }
+    }
+}
+
 // All tables impl this
 pub trait FromCdClient: Sized {
     const TABLE: &'static str;
     fn load(conn: &rusqlite::Connection) -> rusqlite::Result<Vec<Self>> {
-        let mut stmt = conn.prepare(format!("SELECT * FROM {}", Self::TABLE).as_str())?;
-        let result = stmt.query_map([], Self::query_map)?.into_iter().collect();
+        let mut stmt = conn.prepare(&format!("SELECT * FROM \"{}\"", Self::TABLE))?;
+        let result = stmt.query_map([], Self::query_map)?.collect();
         result
     }
     // map row elements to corresponding fields
@@ -420,151 +452,161 @@ pub struct CdClientRows {
 }
 
 impl CdClientRows {
-    pub fn load_sqlite(path: &Path) -> rusqlite::Result<Self> {
-        let conn = rusqlite::Connection::open(path)?;
-        Ok(Self {
-            ai_combat_roles: CdClientAiCombatRoles::load(&conn)?,
-            accessory_default_loc: CdClientAccessoryDefaultLoc::load(&conn)?,
-            activities: CdClientActivities::load(&conn)?,
-            activity_rewards: CdClientActivityRewards::load(&conn)?,
-            activity_text: CdClientActivityText::load(&conn)?,
-            animation_index: CdClientAnimationIndex::load(&conn)?,
-            animations: CdClientAnimations::load(&conn)?,
-            base_combat_aicomponent: CdClientBaseCombatAIComponent::load(&conn)?,
-            behavior_effect: CdClientBehaviorEffect::load(&conn)?,
-            behavior_parameter: CdClientBehaviorParameter::load(&conn)?,
-            behavior_template: CdClientBehaviorTemplate::load(&conn)?,
-            behavior_template_name: CdClientBehaviorTemplateName::load(&conn)?,
-            blueprints: CdClientBlueprints::load(&conn)?,
-            brick_colors: CdClientBrickColors::load(&conn)?,
-            brick_idtable: CdClientBrickIDTable::load(&conn)?,
-            buff_definitions: CdClientBuffDefinitions::load(&conn)?,
-            buff_parameters: CdClientBuffParameters::load(&conn)?,
-            camera: CdClientCamera::load(&conn)?,
-            celebration_parameters: CdClientCelebrationParameters::load(&conn)?,
-            choice_build_component: CdClientChoiceBuildComponent::load(&conn)?,
-            collectible_component: CdClientCollectibleComponent::load(&conn)?,
-            components_registry: CdClientComponentsRegistry::load(&conn)?,
-            control_schemes: CdClientControlSchemes::load(&conn)?,
-            currency_denominations: CdClientCurrencyDenominations::load(&conn)?,
-            currency_table: CdClientCurrencyTable::load(&conn)?,
-            db_exclude: CdClientDbExclude::load(&conn)?,
-            deletion_restrictions: CdClientDeletionRestrictions::load(&conn)?,
-            destructible_component: CdClientDestructibleComponent::load(&conn)?,
-            dev_model_behaviors: CdClientDevModelBehaviors::load(&conn)?,
-            emotes: CdClientEmotes::load(&conn)?,
-            event_gating: CdClientEventGating::load(&conn)?,
-            exhibit_component: CdClientExhibitComponent::load(&conn)?,
-            factions: CdClientFactions::load(&conn)?,
-            feature_gating: CdClientFeatureGating::load(&conn)?,
-            flair_table: CdClientFlairTable::load(&conn)?,
-            icons: CdClientIcons::load(&conn)?,
-            inventory_component: CdClientInventoryComponent::load(&conn)?,
-            item_component: CdClientItemComponent::load(&conn)?,
-            item_egg_data: CdClientItemEggData::load(&conn)?,
-            item_food_data: CdClientItemFoodData::load(&conn)?,
-            item_set_skills: CdClientItemSetSkills::load(&conn)?,
-            item_sets: CdClientItemSets::load(&conn)?,
-            jet_pack_pad_component: CdClientJetPackPadComponent::load(&conn)?,
-            lu_pexhibit_component: CdClientLuPExhibitComponent::load(&conn)?,
-            lu_pexhibit_model_data: CdClientLuPExhibitModelData::load(&conn)?,
-            lu_pzone_ids: CdClientLuPZoneIDs::load(&conn)?,
-            language_type: CdClientLanguageType::load(&conn)?,
-            level_progression_lookup: CdClientLevelProgressionLookup::load(&conn)?,
-            loot_matrix: CdClientLootMatrix::load(&conn)?,
-            loot_matrix_index: CdClientLootMatrixIndex::load(&conn)?,
-            loot_table: CdClientLootTable::load(&conn)?,
-            loot_table_index: CdClientLootTableIndex::load(&conn)?,
-            minifig_component: CdClientMinifigComponent::load(&conn)?,
-            minifig_decals_eyebrows: CdClientMinifigDecalsEyebrows::load(&conn)?,
-            minifig_decals_eyes: CdClientMinifigDecalsEyes::load(&conn)?,
-            minifig_decals_legs: CdClientMinifigDecalsLegs::load(&conn)?,
-            minifig_decals_mouths: CdClientMinifigDecalsMouths::load(&conn)?,
-            minifig_decals_torsos: CdClientMinifigDecalsTorsos::load(&conn)?,
-            mission_email: CdClientMissionEmail::load(&conn)?,
-            mission_npccomponent: CdClientMissionNPCComponent::load(&conn)?,
-            mission_tasks: CdClientMissionTasks::load(&conn)?,
-            mission_text: CdClientMissionText::load(&conn)?,
-            missions: CdClientMissions::load(&conn)?,
-            model_behavior: CdClientModelBehavior::load(&conn)?,
-            modular_build_component: CdClientModularBuildComponent::load(&conn)?,
-            module_component: CdClientModuleComponent::load(&conn)?,
-            motion_fx: CdClientMotionFX::load(&conn)?,
-            movement_aicomponent: CdClientMovementAIComponent::load(&conn)?,
-            moving_platforms: CdClientMovingPlatforms::load(&conn)?,
-            npc_icons: CdClientNpcIcons::load(&conn)?,
-            object_behavior_xref: CdClientObjectBehaviorXREF::load(&conn)?,
-            object_behaviors: CdClientObjectBehaviors::load(&conn)?,
-            object_skills: CdClientObjectSkills::load(&conn)?,
-            objects: CdClientObjects::load(&conn)?,
-            package_component: CdClientPackageComponent::load(&conn)?,
-            pet_abilities: CdClientPetAbilities::load(&conn)?,
-            pet_component: CdClientPetComponent::load(&conn)?,
-            pet_nest_component: CdClientPetNestComponent::load(&conn)?,
-            physics_component: CdClientPhysicsComponent::load(&conn)?,
-            player_flags: CdClientPlayerFlags::load(&conn)?,
-            player_statistics: CdClientPlayerStatistics::load(&conn)?,
-            preconditions: CdClientPreconditions::load(&conn)?,
-            property_entrance_component: CdClientPropertyEntranceComponent::load(&conn)?,
-            property_template: CdClientPropertyTemplate::load(&conn)?,
-            proximity_monitor_component: CdClientProximityMonitorComponent::load(&conn)?,
-            proximity_types: CdClientProximityTypes::load(&conn)?,
-            racing_module_component: CdClientRacingModuleComponent::load(&conn)?,
-            rail_activator_component: CdClientRailActivatorComponent::load(&conn)?,
-            rarity_table: CdClientRarityTable::load(&conn)?,
-            rarity_table_index: CdClientRarityTableIndex::load(&conn)?,
-            rebuild_component: CdClientRebuildComponent::load(&conn)?,
-            rebuild_sections: CdClientRebuildSections::load(&conn)?,
-            release_version: CdClientReleaseVersion::load(&conn)?,
-            render_component: CdClientRenderComponent::load(&conn)?,
-            render_component_flash: CdClientRenderComponentFlash::load(&conn)?,
-            render_component_wrapper: CdClientRenderComponentWrapper::load(&conn)?,
-            render_icon_assets: CdClientRenderIconAssets::load(&conn)?,
-            reputation_rewards: CdClientReputationRewards::load(&conn)?,
-            reward_codes: CdClientRewardCodes::load(&conn)?,
-            rewards: CdClientRewards::load(&conn)?,
-            rocket_launchpad_control_component: CdClientRocketLaunchpadControlComponent::load(
-                &conn,
-            )?,
-            scene_table: CdClientSceneTable::load(&conn)?,
-            script_component: CdClientScriptComponent::load(&conn)?,
-            skill_behavior: CdClientSkillBehavior::load(&conn)?,
-            smashable_chain: CdClientSmashableChain::load(&conn)?,
-            smashable_chain_index: CdClientSmashableChainIndex::load(&conn)?,
-            smashable_component: CdClientSmashableComponent::load(&conn)?,
-            smashable_elements: CdClientSmashableElements::load(&conn)?,
-            speedchat_menu: CdClientSpeedchatMenu::load(&conn)?,
-            subscription_pricing: CdClientSubscriptionPricing::load(&conn)?,
-            surface_type: CdClientSurfaceType::load(&conn)?,
-            taming_build_puzzles: CdClientTamingBuildPuzzles::load(&conn)?,
-            text_description: CdClientTextDescription::load(&conn)?,
-            text_language: CdClientTextLanguage::load(&conn)?,
-            trail_effects: CdClientTrailEffects::load(&conn)?,
-            ug_behavior_sounds: CdClientUgBehaviorSounds::load(&conn)?,
-            vehicle_physics: CdClientVehiclePhysics::load(&conn)?,
-            vehicle_stat_map: CdClientVehicleStatMap::load(&conn)?,
-            vendor_component: CdClientVendorComponent::load(&conn)?,
-            whats_cool_item_spotlight: CdClientWhatsCoolItemSpotlight::load(&conn)?,
-            whats_cool_news_and_tips: CdClientWhatsCoolNewsAndTips::load(&conn)?,
-            world_config: CdClientWorldConfig::load(&conn)?,
-            zone_loading_tips: CdClientZoneLoadingTips::load(&conn)?,
-            zone_summary: CdClientZoneSummary::load(&conn)?,
-            zone_table: CdClientZoneTable::load(&conn)?,
-            brick_attributes: CdClientBrickAttributes::load(&conn)?,
-            dtproperties: CdClientDtproperties::load(&conn)?,
-            map_animation_priorities: CdClientMapAnimationPriorities::load(&conn)?,
-            map_asset_type: CdClientMapAssetType::load(&conn)?,
-            map_icon: CdClientMapIcon::load(&conn)?,
-            map_item_types: CdClientMapItemTypes::load(&conn)?,
-            map_render_effects: CdClientMapRenderEffects::load(&conn)?,
-            map_shaders: CdClientMapShaders::load(&conn)?,
-            map_texture_resource: CdClientMapTextureResource::load(&conn)?,
-            map_blueprint_category: CdClientMapBlueprintCategory::load(&conn)?,
-            sysdiagrams: CdClientSysdiagrams::load(&conn)?,
-            possessable_component: CdClientPossessableComponent::load(&conn)?,
-            skill_sets: CdClientSkillSets::load(&conn)?,
-            map_faces_and_hair: CdClientMapFacesAndHair::load(&conn)?,
-        })
+    pub fn load_sqlite(path: &Path) -> Result<(Self, Vec<TableWarning>), CdClientLoadError> {
+        if !path.is_file() {
+            return Err(CdClientLoadError::NotFound(path.to_path_buf()));
+        }
+        let conn = rusqlite::Connection::open_with_flags(
+            path,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )
+        .map_err(|source| CdClientLoadError::Open {
+            path: path.to_path_buf(),
+            source,
+        })?;
+        let mut warnings = vec![];
+        let rows = Self {
+            ai_combat_roles: load_table::<CdClientAiCombatRoles>(&conn, &mut warnings)?,
+            accessory_default_loc: load_table::<CdClientAccessoryDefaultLoc>(&conn, &mut warnings)?,
+            activities: load_table::<CdClientActivities>(&conn, &mut warnings)?,
+            activity_rewards: load_table::<CdClientActivityRewards>(&conn, &mut warnings)?,
+            activity_text: load_table::<CdClientActivityText>(&conn, &mut warnings)?,
+            animation_index: load_table::<CdClientAnimationIndex>(&conn, &mut warnings)?,
+            animations: load_table::<CdClientAnimations>(&conn, &mut warnings)?,
+            base_combat_aicomponent: load_table::<CdClientBaseCombatAIComponent>(&conn, &mut warnings)?,
+            behavior_effect: load_table::<CdClientBehaviorEffect>(&conn, &mut warnings)?,
+            behavior_parameter: load_table::<CdClientBehaviorParameter>(&conn, &mut warnings)?,
+            behavior_template: load_table::<CdClientBehaviorTemplate>(&conn, &mut warnings)?,
+            behavior_template_name: load_table::<CdClientBehaviorTemplateName>(&conn, &mut warnings)?,
+            blueprints: load_table::<CdClientBlueprints>(&conn, &mut warnings)?,
+            brick_colors: load_table::<CdClientBrickColors>(&conn, &mut warnings)?,
+            brick_idtable: load_table::<CdClientBrickIDTable>(&conn, &mut warnings)?,
+            buff_definitions: load_table::<CdClientBuffDefinitions>(&conn, &mut warnings)?,
+            buff_parameters: load_table::<CdClientBuffParameters>(&conn, &mut warnings)?,
+            camera: load_table::<CdClientCamera>(&conn, &mut warnings)?,
+            celebration_parameters: load_table::<CdClientCelebrationParameters>(&conn, &mut warnings)?,
+            choice_build_component: load_table::<CdClientChoiceBuildComponent>(&conn, &mut warnings)?,
+            collectible_component: load_table::<CdClientCollectibleComponent>(&conn, &mut warnings)?,
+            components_registry: load_table::<CdClientComponentsRegistry>(&conn, &mut warnings)?,
+            control_schemes: load_table::<CdClientControlSchemes>(&conn, &mut warnings)?,
+            currency_denominations: load_table::<CdClientCurrencyDenominations>(&conn, &mut warnings)?,
+            currency_table: load_table::<CdClientCurrencyTable>(&conn, &mut warnings)?,
+            db_exclude: load_table::<CdClientDbExclude>(&conn, &mut warnings)?,
+            deletion_restrictions: load_table::<CdClientDeletionRestrictions>(&conn, &mut warnings)?,
+            destructible_component: load_table::<CdClientDestructibleComponent>(&conn, &mut warnings)?,
+            dev_model_behaviors: load_table::<CdClientDevModelBehaviors>(&conn, &mut warnings)?,
+            emotes: load_table::<CdClientEmotes>(&conn, &mut warnings)?,
+            event_gating: load_table::<CdClientEventGating>(&conn, &mut warnings)?,
+            exhibit_component: load_table::<CdClientExhibitComponent>(&conn, &mut warnings)?,
+            factions: load_table::<CdClientFactions>(&conn, &mut warnings)?,
+            feature_gating: load_table::<CdClientFeatureGating>(&conn, &mut warnings)?,
+            flair_table: load_table::<CdClientFlairTable>(&conn, &mut warnings)?,
+            icons: load_table::<CdClientIcons>(&conn, &mut warnings)?,
+            inventory_component: load_table::<CdClientInventoryComponent>(&conn, &mut warnings)?,
+            item_component: load_table::<CdClientItemComponent>(&conn, &mut warnings)?,
+            item_egg_data: load_table::<CdClientItemEggData>(&conn, &mut warnings)?,
+            item_food_data: load_table::<CdClientItemFoodData>(&conn, &mut warnings)?,
+            item_set_skills: load_table::<CdClientItemSetSkills>(&conn, &mut warnings)?,
+            item_sets: load_table::<CdClientItemSets>(&conn, &mut warnings)?,
+            jet_pack_pad_component: load_table::<CdClientJetPackPadComponent>(&conn, &mut warnings)?,
+            lu_pexhibit_component: load_table::<CdClientLuPExhibitComponent>(&conn, &mut warnings)?,
+            lu_pexhibit_model_data: load_table::<CdClientLuPExhibitModelData>(&conn, &mut warnings)?,
+            lu_pzone_ids: load_table::<CdClientLuPZoneIDs>(&conn, &mut warnings)?,
+            language_type: load_table::<CdClientLanguageType>(&conn, &mut warnings)?,
+            level_progression_lookup: load_table::<CdClientLevelProgressionLookup>(&conn, &mut warnings)?,
+            loot_matrix: load_table::<CdClientLootMatrix>(&conn, &mut warnings)?,
+            loot_matrix_index: load_table::<CdClientLootMatrixIndex>(&conn, &mut warnings)?,
+            loot_table: load_table::<CdClientLootTable>(&conn, &mut warnings)?,
+            loot_table_index: load_table::<CdClientLootTableIndex>(&conn, &mut warnings)?,
+            minifig_component: load_table::<CdClientMinifigComponent>(&conn, &mut warnings)?,
+            minifig_decals_eyebrows: load_table::<CdClientMinifigDecalsEyebrows>(&conn, &mut warnings)?,
+            minifig_decals_eyes: load_table::<CdClientMinifigDecalsEyes>(&conn, &mut warnings)?,
+            minifig_decals_legs: load_table::<CdClientMinifigDecalsLegs>(&conn, &mut warnings)?,
+            minifig_decals_mouths: load_table::<CdClientMinifigDecalsMouths>(&conn, &mut warnings)?,
+            minifig_decals_torsos: load_table::<CdClientMinifigDecalsTorsos>(&conn, &mut warnings)?,
+            mission_email: load_table::<CdClientMissionEmail>(&conn, &mut warnings)?,
+            mission_npccomponent: load_table::<CdClientMissionNPCComponent>(&conn, &mut warnings)?,
+            mission_tasks: load_table::<CdClientMissionTasks>(&conn, &mut warnings)?,
+            mission_text: load_table::<CdClientMissionText>(&conn, &mut warnings)?,
+            missions: load_table::<CdClientMissions>(&conn, &mut warnings)?,
+            model_behavior: load_table::<CdClientModelBehavior>(&conn, &mut warnings)?,
+            modular_build_component: load_table::<CdClientModularBuildComponent>(&conn, &mut warnings)?,
+            module_component: load_table::<CdClientModuleComponent>(&conn, &mut warnings)?,
+            motion_fx: load_table::<CdClientMotionFX>(&conn, &mut warnings)?,
+            movement_aicomponent: load_table::<CdClientMovementAIComponent>(&conn, &mut warnings)?,
+            moving_platforms: load_table::<CdClientMovingPlatforms>(&conn, &mut warnings)?,
+            npc_icons: load_table::<CdClientNpcIcons>(&conn, &mut warnings)?,
+            object_behavior_xref: load_table::<CdClientObjectBehaviorXREF>(&conn, &mut warnings)?,
+            object_behaviors: load_table::<CdClientObjectBehaviors>(&conn, &mut warnings)?,
+            object_skills: load_table::<CdClientObjectSkills>(&conn, &mut warnings)?,
+            objects: load_table::<CdClientObjects>(&conn, &mut warnings)?,
+            package_component: load_table::<CdClientPackageComponent>(&conn, &mut warnings)?,
+            pet_abilities: load_table::<CdClientPetAbilities>(&conn, &mut warnings)?,
+            pet_component: load_table::<CdClientPetComponent>(&conn, &mut warnings)?,
+            pet_nest_component: load_table::<CdClientPetNestComponent>(&conn, &mut warnings)?,
+            physics_component: load_table::<CdClientPhysicsComponent>(&conn, &mut warnings)?,
+            player_flags: load_table::<CdClientPlayerFlags>(&conn, &mut warnings)?,
+            player_statistics: load_table::<CdClientPlayerStatistics>(&conn, &mut warnings)?,
+            preconditions: load_table::<CdClientPreconditions>(&conn, &mut warnings)?,
+            property_entrance_component: load_table::<CdClientPropertyEntranceComponent>(&conn, &mut warnings)?,
+            property_template: load_table::<CdClientPropertyTemplate>(&conn, &mut warnings)?,
+            proximity_monitor_component: load_table::<CdClientProximityMonitorComponent>(&conn, &mut warnings)?,
+            proximity_types: load_table::<CdClientProximityTypes>(&conn, &mut warnings)?,
+            racing_module_component: load_table::<CdClientRacingModuleComponent>(&conn, &mut warnings)?,
+            rail_activator_component: load_table::<CdClientRailActivatorComponent>(&conn, &mut warnings)?,
+            rarity_table: load_table::<CdClientRarityTable>(&conn, &mut warnings)?,
+            rarity_table_index: load_table::<CdClientRarityTableIndex>(&conn, &mut warnings)?,
+            rebuild_component: load_table::<CdClientRebuildComponent>(&conn, &mut warnings)?,
+            rebuild_sections: load_table::<CdClientRebuildSections>(&conn, &mut warnings)?,
+            release_version: load_table::<CdClientReleaseVersion>(&conn, &mut warnings)?,
+            render_component: load_table::<CdClientRenderComponent>(&conn, &mut warnings)?,
+            render_component_flash: load_table::<CdClientRenderComponentFlash>(&conn, &mut warnings)?,
+            render_component_wrapper: load_table::<CdClientRenderComponentWrapper>(&conn, &mut warnings)?,
+            render_icon_assets: load_table::<CdClientRenderIconAssets>(&conn, &mut warnings)?,
+            reputation_rewards: load_table::<CdClientReputationRewards>(&conn, &mut warnings)?,
+            reward_codes: load_table::<CdClientRewardCodes>(&conn, &mut warnings)?,
+            rewards: load_table::<CdClientRewards>(&conn, &mut warnings)?,
+            rocket_launchpad_control_component: load_table::<CdClientRocketLaunchpadControlComponent>(&conn, &mut warnings)?,
+            scene_table: load_table::<CdClientSceneTable>(&conn, &mut warnings)?,
+            script_component: load_table::<CdClientScriptComponent>(&conn, &mut warnings)?,
+            skill_behavior: load_table::<CdClientSkillBehavior>(&conn, &mut warnings)?,
+            smashable_chain: load_table::<CdClientSmashableChain>(&conn, &mut warnings)?,
+            smashable_chain_index: load_table::<CdClientSmashableChainIndex>(&conn, &mut warnings)?,
+            smashable_component: load_table::<CdClientSmashableComponent>(&conn, &mut warnings)?,
+            smashable_elements: load_table::<CdClientSmashableElements>(&conn, &mut warnings)?,
+            speedchat_menu: load_table::<CdClientSpeedchatMenu>(&conn, &mut warnings)?,
+            subscription_pricing: load_table::<CdClientSubscriptionPricing>(&conn, &mut warnings)?,
+            surface_type: load_table::<CdClientSurfaceType>(&conn, &mut warnings)?,
+            taming_build_puzzles: load_table::<CdClientTamingBuildPuzzles>(&conn, &mut warnings)?,
+            text_description: load_table::<CdClientTextDescription>(&conn, &mut warnings)?,
+            text_language: load_table::<CdClientTextLanguage>(&conn, &mut warnings)?,
+            trail_effects: load_table::<CdClientTrailEffects>(&conn, &mut warnings)?,
+            ug_behavior_sounds: load_table::<CdClientUgBehaviorSounds>(&conn, &mut warnings)?,
+            vehicle_physics: load_table::<CdClientVehiclePhysics>(&conn, &mut warnings)?,
+            vehicle_stat_map: load_table::<CdClientVehicleStatMap>(&conn, &mut warnings)?,
+            vendor_component: load_table::<CdClientVendorComponent>(&conn, &mut warnings)?,
+            whats_cool_item_spotlight: load_table::<CdClientWhatsCoolItemSpotlight>(&conn, &mut warnings)?,
+            whats_cool_news_and_tips: load_table::<CdClientWhatsCoolNewsAndTips>(&conn, &mut warnings)?,
+            world_config: load_table::<CdClientWorldConfig>(&conn, &mut warnings)?,
+            zone_loading_tips: load_table::<CdClientZoneLoadingTips>(&conn, &mut warnings)?,
+            zone_summary: load_table::<CdClientZoneSummary>(&conn, &mut warnings)?,
+            zone_table: load_table::<CdClientZoneTable>(&conn, &mut warnings)?,
+            brick_attributes: load_table::<CdClientBrickAttributes>(&conn, &mut warnings)?,
+            dtproperties: load_table::<CdClientDtproperties>(&conn, &mut warnings)?,
+            map_animation_priorities: load_table::<CdClientMapAnimationPriorities>(&conn, &mut warnings)?,
+            map_asset_type: load_table::<CdClientMapAssetType>(&conn, &mut warnings)?,
+            map_icon: load_table::<CdClientMapIcon>(&conn, &mut warnings)?,
+            map_item_types: load_table::<CdClientMapItemTypes>(&conn, &mut warnings)?,
+            map_render_effects: load_table::<CdClientMapRenderEffects>(&conn, &mut warnings)?,
+            map_shaders: load_table::<CdClientMapShaders>(&conn, &mut warnings)?,
+            map_texture_resource: load_table::<CdClientMapTextureResource>(&conn, &mut warnings)?,
+            map_blueprint_category: load_table::<CdClientMapBlueprintCategory>(&conn, &mut warnings)?,
+            sysdiagrams: load_table::<CdClientSysdiagrams>(&conn, &mut warnings)?,
+            possessable_component: load_table::<CdClientPossessableComponent>(&conn, &mut warnings)?,
+            skill_sets: load_table::<CdClientSkillSets>(&conn, &mut warnings)?,
+            map_faces_and_hair: load_table::<CdClientMapFacesAndHair>(&conn, &mut warnings)?,
+        };
+        Ok((rows, warnings))
     }
 }
 
@@ -712,9 +754,12 @@ pub struct CdClient {
 }
 
 impl CdClient {
-    pub fn load_sqlite(path: &Path) -> rusqlite::Result<Self> {
-        let cdclient = CdClientRows::load_sqlite(path)?;
-        Ok(Self {
+    /// Loads every table from `cdclient.sqlite`.
+    /// - Tables in [`REQUIRED_TABLES`] must load or this fails
+    /// - Any other table that fails to load is left empty and reported as a [`TableWarning`]
+    pub fn load_sqlite(path: &Path) -> Result<(Self, Vec<TableWarning>), CdClientLoadError> {
+        let (cdclient, warnings) = CdClientRows::load_sqlite(path)?;
+        let cdclient = Self {
             ai_combat_roles: KeyedVec::new(cdclient.ai_combat_roles),
             accessory_default_loc: KeyedVec::new(cdclient.accessory_default_loc),
             activities: KeyedVec::new(cdclient.activities),
@@ -856,7 +901,8 @@ impl CdClient {
             possessable_component: KeyedVec::new(cdclient.possessable_component),
             skill_sets: KeyedVec::new(cdclient.skill_sets),
             map_faces_and_hair: KeyedVec::new(cdclient.map_faces_and_hair),
-        })
+        };
+        Ok((cdclient, warnings))
     }
 }
 
@@ -3425,27 +3471,34 @@ pub enum MissionPreReqType {
     Required(i32),
 }
 
+/// Every run of digits in `input`, e.g. `"(123|456)"` -> `[123, 456]`, `"789:2"` -> `[789, 2]`
+fn numbers_in(input: &str) -> Vec<i32> {
+    input
+        .split(|c: char| !c.is_ascii_digit())
+        .filter_map(|num| num.parse().ok())
+        .collect()
+}
+
+/// Formats seen in the cdclient:
+/// - `"123"`, `"123,456"` (all required)
+/// - `"(123|456)"`, `"123|456"` (one of)
+/// - `"123:2"` (mission id with a required state; only the mission id matters here)
 fn parse_mission_prereqs(input: Option<String>) -> Option<Vec<MissionPreReqType>> {
     let mut elements = vec![];
-    for value in input?.split(',') {
-        if value.contains("|") {
-            let options = value
+    for value in input?.split([',', '&']) {
+        if value.contains('|') {
+            let options: Vec<i32> = value
                 .split('|')
-                .filter_map(|val| {
-                    let start = val.find(char::is_numeric)?;
-                    let remaining = &val[start..];
-                    let end = remaining
-                        .find(|c| !char::is_numeric(c))
-                        .unwrap_or_else(|| remaining.len());
-                    val[start..start + end].parse().ok()
-                })
+                .filter_map(|option| numbers_in(option).first().copied())
                 .collect();
-            elements.push(MissionPreReqType::OneOf(options));
-        } else {
-            elements.push(MissionPreReqType::Required(value.trim().parse().ok()?));
+            if !options.is_empty() {
+                elements.push(MissionPreReqType::OneOf(options));
+            }
+        } else if let Some(&id) = numbers_in(value).first() {
+            elements.push(MissionPreReqType::Required(id));
         }
     }
-    Some(elements)
+    (!elements.is_empty()).then_some(elements)
 }
 
 impl FromCdClient for CdClientMissions {
@@ -6497,9 +6550,10 @@ impl FromCdClient for CdClientPossessableComponent {
             depossess_on_hit: row.get(12)?,
             hit_stun_time: row.get(13)?,
             skill_set: row.get(14)?,
-            immune_on_possess_time: row.get(15)?,
-            immune_on_depossess_time: row.get(16)?,
-            disable_interactions: row.get(17)?,
+            // newer cdclients only
+            immune_on_possess_time: optional_column(row, 15)?,
+            immune_on_depossess_time: optional_column(row, 16)?,
+            disable_interactions: optional_column(row, 17)?,
         })
     }
 }

@@ -1,83 +1,63 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use crate::data::GameData;
+use crate::error::BotError;
+use crate::ids::{CdClientMissionsId, CdClientObjectsId, LUExplorer};
+use crate::interaction_command::{select_row, CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::pager::Pager;
+use crate::search::SearchCategory;
+
+use super::mission::MissionCommand;
+use super::{npc_row, object_embed};
 
 pub struct NpcCommand;
 
-pub struct NpcArguments {
-    npc: i32,
-}
-
-impl ToCustomId for NpcArguments {
-    const CMD: &'static str = NpcCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let NpcArguments { npc } = self;
-        format!("npc={npc}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for NpcArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(NpcArguments {
-            npc: options.parse("npc")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for NpcArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(NpcArguments {
-            npc: int_option!(options, "npc"),
-        })
-    }
-}
-
 impl InteractionCommand for NpcCommand {
     const NAME: &'static str = "npc";
+    const DESCRIPTION: &'static str = "View all missions from an NPC!";
+    const OPTION_NAME: &'static str = "npc";
+    const OPTION_DESCRIPTION: &'static str = "An NPC in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Npc);
 
-    const DESCRIPTION: &'static str = "View an npc in LEGO Universe!";
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let npc = CdClientObjectsId(target.id);
+        npc.try_fetch(d)?;
+        let missions = npc.npc_missions(d).to_vec();
+        if missions.is_empty() && !npc.is_vendor(d) {
+            return Err(BotError::not_applicable(format!(
+                "{} does not offer or accept any missions.",
+                npc.hyperlink_name(d)
+            )));
+        }
+        let pager = Pager::new(missions, target.page, 8);
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "npc",
-            "An npc in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
-
-    type Arguments = NpcArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let NpcArguments { npc: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
+        let mut embed = object_embed(d, npc).title(format!("{}{}", npc.name_id(d), pager.title_suffix()));
+        let mut options = vec![];
+        if pager.is_empty() {
+            embed = embed.description(format!("{} does not offer or accept any missions.", npc.hyperlink_name(d)));
+        }
+        for (num, entry) in pager.this_page() {
+            let mission = CdClientMissionsId(entry.mission);
+            let role = match (entry.offers, entry.accepts) {
+                (true, true) => "Offers & accepts",
+                (true, false) => "Offers",
+                (false, true) => "Accepts",
+                (false, false) => "Involved in",
+            };
+            let objective = mission.objective(d).unwrap_or_else(|| String::from("No description"));
+            embed.push_field(
+                format!("{num}. {}", mission.full_path(d)),
+                format!("{objective}\n*{role}* {}", mission.hyperlink_name(d)),
+                false,
+            );
+            options.push(MissionCommand::select_option(
+                mission.name_id(d),
+                Some(mission.category_path(d)),
+                Target::new(mission.0),
+            ));
         }
 
-        Ok((embed, None))
+        Ok(Response::new(embed)
+            .row(select_row(Self::NAME, "Open a mission…", options))
+            .row(Self::page_row(&pager, target))
+            .row(Some(npc_row(d, npc, Self::NAME))))
     }
 }
