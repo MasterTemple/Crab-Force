@@ -1,145 +1,91 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::pager::START_PAGE;
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use crate::cdclient::components::VENDOR_COMPONENT;
+use crate::data::GameData;
+use crate::ids::{CdClientObjectsId, LUExplorer};
+use crate::interaction_command::{select_row, CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::loot::format_number;
+use crate::pager::Pager;
+use crate::search::SearchCategory;
+
+use super::{item_rows, numbered, object_embed, object_select_option};
+
+/// Sells items for faction tokens when no vendor lists the item
+const HONOR_ACCOLADE: i32 = 13806;
 
 pub struct BuyCommand;
 
-pub struct BuyArguments {
-    pub item: i32,
-    pub page: usize,
-}
-
-impl ToCustomId for BuyArguments {
-    const CMD: &'static str = BuyCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let BuyArguments { item, page } = self;
-        vec![format!("item={item}"), format!("page={page}")].join("&")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for BuyArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(BuyArguments {
-            item: options.parse("item")?,
-            page: options.parse("page")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for BuyArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(BuyArguments {
-            item: int_option!(options, "item"),
-            page: START_PAGE,
-        })
-    }
+/// The coin price at a vendor, which scales the item's base value
+pub fn vendor_price(base_value: i32, buy_scalar: f64) -> i64 {
+    (base_value as f64 * buy_scalar).floor() as i64
 }
 
 impl InteractionCommand for BuyCommand {
     const NAME: &'static str = "buy";
-
     const DESCRIPTION: &'static str = "View all vendors that sell an item!";
+    const OPTION_NAME: &'static str = "item";
+    const OPTION_DESCRIPTION: &'static str = "An item in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Item);
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "item",
-            "An item in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let item = CdClientObjectsId(target.id);
+        let ic = item.req_item_component(d)?;
+        let base_value = ic.base_value.unwrap_or(0);
 
-    type Arguments = BuyArguments;
+        let mut extra_costs = vec![];
+        if let (Some(cost), Some(lot)) = (ic.commendation_cost.filter(|&c| c > 0), ic.commendation_lot) {
+            extra_costs.push(format!("**{}** × {}", format_number(cost.into()), CdClientObjectsId(lot).hyperlink_name(d)));
+        }
+        if let (Some(cost), Some(lot)) = (ic.alt_currency_cost.filter(|&c| c > 0), ic.currency_lot) {
+            extra_costs.push(format!("**{}** × {}", format_number(cost.into()), CdClientObjectsId(lot).hyperlink_name(d)));
+        }
 
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
+        let mut vendors = item.vendors(d);
+        if vendors.is_empty() && ic.commendation_cost.unwrap_or(0) > 0 && d.cdclient.objects.at_key(&HONOR_ACCOLADE).is_some() {
+            vendors.push(CdClientObjectsId(HONOR_ACCOLADE));
+        }
 
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let BuyArguments {
-            item: item_id,
-            page,
-        } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(item_id);
-        let name = CD_CLIENT.req_object_name(item_id);
-        let item_component = CD_CLIENT.object_item_component(item_id)?;
-
-        let coin_cost = item_component
-            .base_value
-            .map(|cost| format!("**{cost}** coins"));
-
-        let commendation_cost = item_component.commendation_cost.map(|cost| {
-            let lot = item_component.commendation_lot.ok_or_else(|| {
-                format!("Commendation Cost Provided but Commendation Object is not")
-            });
-            lot.map(|lot| {
-                let name = CD_CLIENT.object_hyperlinked_name(lot);
-                format!("**{cost}** {name}")
-            })
-        });
-
-        let alt_cost = item_component.alt_currency_cost.map(|cost| {
-            let lot = item_component.currency_lot.ok_or_else(|| {
-                format!("Alternate Currency Cost Provided but Alternate Currency Object is not")
-            });
-            lot.map(|lot| {
-                let name = CD_CLIENT.object_hyperlinked_name(lot);
-                format!("**{cost}** {name}")
-            })
-        });
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, item_id))
-            .url(explorer_url);
-
-        let vendors = CD_CLIENT
-            .object_vendor_ids(item_id)
-            .unwrap_or_else(|_| vec![]);
-        let description = if vendors.len() == 0 {
-            format!("This item is not sold")
+        let pager = Pager::new(vendors, target.page, 15);
+        let mut embed = object_embed(d, item).title(format!("{}{}", item.name_id(d), pager.title_suffix()));
+        let mut options = vec![];
+        if pager.is_empty() {
+            embed = embed.description(format!("{} is not sold by any vendor.", item.hyperlink_name(d)));
         } else {
-            let vendors = vendors
-                .into_iter()
-                .enumerate()
-                .map(|(idx, vendor_id)| {
-                    let name = CD_CLIENT.object_hyperlinked_name(vendor_id);
-                    format!("{}. {name}", idx + 1)
+            let lines: Vec<String> = pager
+                .this_page()
+                .map(|(num, vendor)| {
+                    let scalar = vendor
+                        .component_id(d, VENDOR_COMPONENT)
+                        .and_then(|comp| d.cdclient.vendor_component.at_key(&comp))
+                        .map_or(1.0, |vc| vc.buy_scalar);
+                    let mut costs = vec![];
+                    if base_value > 0 {
+                        costs.push(format!("**{}** coins", format_number(vendor_price(base_value, scalar))));
+                    }
+                    costs.extend(extra_costs.iter().cloned());
+                    options.extend(object_select_option(d, *vendor, None));
+                    if costs.is_empty() {
+                        numbered(num, vendor.hyperlink_name(d))
+                    } else {
+                        numbered(num, format!("{} for {}", vendor.hyperlink_name(d), costs.join(" + ")))
+                    }
                 })
-                .collect::<Vec<_>>()
-                .join("\n");
-            format!("**Vendors**\n{vendors}")
-        };
-        embed = embed.description(description);
-
-        if let Some(coin_cost) = coin_cost {
-            embed = embed.field("Coins", coin_cost, true);
+                .collect();
+            embed = embed.field_lines("Sold By", &lines, false);
         }
 
-        if let Some(commendation_cost) = commendation_cost {
-            embed = embed.field("Faction Token Cost", commendation_cost?, true);
-        }
+        Ok(Response::new(embed)
+            .row(select_row(Self::NAME, "Open a vendor…", options))
+            .row(Self::page_row(&pager, target))
+            .rows(item_rows(d, item, Self::NAME)))
+    }
+}
 
-        if let Some(alt_cost) = alt_cost {
-            embed = embed.field("Alternate Currency", alt_cost?, true);
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(item_id) {
-            embed = embed.thumbnail(icon_url);
-        }
-
-        Ok((embed, None))
+    #[test]
+    fn prices() {
+        assert_eq!(vendor_price(100, 1.0), 100);
+        assert_eq!(vendor_price(101, 1.5), 151);
     }
 }

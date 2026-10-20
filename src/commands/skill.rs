@@ -1,115 +1,94 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, LocaleQueries, ObjectQueries, SkillQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use crate::data::GameData;
+use crate::embed::Embed;
+use crate::ids::{split_camel_case, CdClientSkillBehaviorId, CooldownGroupId, LUExplorer};
+use crate::interaction_command::{CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::loot::format_float;
+use crate::search::SearchCategory;
+
+use super::skill_row;
 
 pub struct SkillCommand;
 
-pub struct SkillArguments {
-    skill: i32,
-}
-
-impl ToCustomId for SkillArguments {
-    const CMD: &'static str = SkillCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let SkillArguments { skill } = self;
-        format!("skill={skill}")
+/// Cooldown, cost, and description in a few lines (used by `/skills` and `/cooldowngroup`)
+pub fn skill_summary(d: &GameData, skill: CdClientSkillBehaviorId) -> String {
+    let mut lines = vec![];
+    if let Some(text) = skill.description_text(d) {
+        lines.push(text);
     }
-}
-
-impl TryFrom<&CustomIdOptions> for SkillArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(SkillArguments {
-            skill: options.parse("skill")?,
-        })
+    if let Some(sb) = skill.fetch(d) {
+        let mut stats = vec![];
+        if sb.imaginationcost > 0 {
+            stats.push(format!("`{}` imagination", sb.imaginationcost));
+        }
+        if let Some(cooldown) = sb.cooldown.filter(|&c| c > 0.0) {
+            stats.push(format!("`{}s` cooldown", format_float(cooldown)));
+        }
+        for (value, name) in [
+            (sb.armor_bonus_ui, "armor"),
+            (sb.life_bonus_ui, "life"),
+            (sb.im_bonus_ui, "imagination"),
+        ] {
+            if let Some(value) = value.filter(|&v| v != 0) {
+                stats.push(format!("`+{value}` {name}"));
+            }
+        }
+        if !stats.is_empty() {
+            lines.push(stats.join(" • "));
+        }
     }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for SkillArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(SkillArguments {
-            skill: int_option!(options, "skill"),
-        })
+    if lines.is_empty() {
+        String::from("No description")
+    } else {
+        lines.join("\n")
     }
 }
 
 impl InteractionCommand for SkillCommand {
     const NAME: &'static str = "skill";
+    const DESCRIPTION: &'static str = "View the stats of a skill!";
+    const OPTION_NAME: &'static str = "skill";
+    const OPTION_DESCRIPTION: &'static str = "A skill in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Skill);
 
-    const DESCRIPTION: &'static str = "View a skill in LEGO Universe!";
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let id = CdClientSkillBehaviorId(target.id);
+        let skill = id.try_fetch(d)?;
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "skill",
-            "A skill in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
+        let mut embed = Embed::new()
+            .title(id.name_id(d))
+            .url(id.explorer_url())
+            .thumbnail(id.thumbnail(d));
 
-    type Arguments = SkillArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_skill(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let SkillArguments { skill: id } = arguments;
-
-        let skill = CD_CLIENT.get_skill(id)?;
-        let explorer_url = CD_CLIENT.skill_explorer_url(id);
-        let name = CD_CLIENT.req_skill_name(id);
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(cdg) = skill.cooldowngroup {
-            embed = embed.field(
-                "Cooldown Group",
-                CD_CLIENT.cooldown_group_hyperlinked_name(cdg),
-                true,
-            );
+        if let Some(group) = skill.cooldowngroup {
+            embed = embed.field("Cooldown Group", CooldownGroupId(group).hyperlink_name(d), true);
         }
-
         if let Some(cooldown) = skill.cooldown {
-            embed = embed.field("Cooldown Time", format!("`{cooldown}` seconds"), true);
+            embed = embed.field("Cooldown Time", format!("`{}` seconds", format_float(cooldown)), true);
         }
-
-        embed = embed.field(
-            "Imagination Cost",
-            format!("`{}` Imagination", skill.imaginationcost),
-            true,
-        );
-
-        if let Some(locale) = CD_CLIENT.locale().skill_behavior.get(&id) {
-            if let Some(desc) = &locale.description_ui {
-                if let Some(segments) = &desc.segments {
-                    for (header, value) in segments {
-                        embed = embed.field(header, value, value.len() <= 32);
-                    }
-                }
-
-                if let Some(remainder) = &desc.remainder {
-                    embed = embed.field("Description", remainder, false);
-                }
+        embed = embed.field("Imagination Cost", format!("`{}` imagination", skill.imaginationcost), true);
+        for (value, name) in [
+            (skill.armor_bonus_ui, "Armor Bonus"),
+            (skill.life_bonus_ui, "Life Bonus"),
+            (skill.im_bonus_ui, "Imagination Bonus"),
+            (skill.damage_ui, "Damage"),
+        ] {
+            if let Some(value) = value.filter(|&v| v != 0) {
+                embed = embed.field(name, format!("`{value}`"), true);
             }
         }
 
-        if let Some(icon_url) = CD_CLIENT.skill_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
+        if let Some(desc) = id.description(d) {
+            if let Some(remainder) = &desc.remainder {
+                embed = embed.field("Description", remainder, false);
+            }
+            for (header, value) in desc.segments.iter().flatten() {
+                embed = embed.field(split_camel_case(header), value, value.chars().count() <= 32);
+            }
         }
 
-        Ok((embed, None))
+        let count = id.objects(d).len();
+        embed = embed.field("Used By", format!("{count} object{}", if count == 1 { "" } else { "s" }), true);
+
+        Ok(Response::new(embed).row(Some(skill_row(d, id, Self::NAME))))
     }
 }

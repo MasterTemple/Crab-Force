@@ -1,104 +1,62 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::{int_option, CD_CLIENT, CONFIG};
-use serenity::all::{
-    CommandOptionType, CreateActionRow, CreateCommandOption, CreateEmbed, ResolvedOption,
-};
+use serenity::all::CreateActionRow;
+
+use crate::data::GameData;
+use crate::error::BotError;
+use crate::interaction_command::{CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::loot::format_number;
 
 pub struct LevelCommand;
 
-pub struct LevelArguments {
-    level: i32,
-}
-
-impl ToCustomId for LevelArguments {
-    const CMD: &'static str = LevelCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let LevelArguments { level } = self;
-        format!("level={level}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for LevelArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(LevelArguments {
-            level: options.parse("level")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for LevelArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(LevelArguments {
-            level: int_option!(options, "level"),
-        })
-    }
-}
-
 impl InteractionCommand for LevelCommand {
     const NAME: &'static str = "level";
-
     const DESCRIPTION: &'static str = "View stats about a level in LEGO Universe!";
+    const OPTION_NAME: &'static str = "level";
+    const OPTION_DESCRIPTION: &'static str = "A level in LEGO Universe.";
+    const OPTION: OptionKind = OptionKind::Integer { min: 1, max: 1000 };
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "level",
-            "A level in LEGO Universe.",
-        )
-        .required(true)])
-    }
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let levels = &d.cdclient.level_progression_lookup;
+        let (Some(first), Some(last)) = (levels.first(), levels.last()) else {
+            return Err(BotError::not_applicable("No level data was found in the cdclient."));
+        };
+        let (min_level, max_level) = (first.id, last.id);
+        let level = target.id;
+        let progression = levels.at_key(&level).ok_or_else(|| {
+            BotError::not_found(format!("Level `{level}` does not exist. Levels go from {min_level} to {max_level}."))
+        })?;
 
-    type Arguments = LevelArguments;
+        let total = progression.required_uscore;
+        let previous = levels.at_key(&(level - 1)).map_or(0, |l| l.required_uscore);
+        let next = levels.at_key(&(level + 1)).map(|l| l.required_uscore);
 
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let LevelArguments { level } = arguments;
-
-        let progression = CD_CLIENT
-            .level_progression_lookup
-            .at_key(&level)
-            .ok_or_else(|| format!("Level `{level}` does not exist!"))?;
-
-        let total_experience = progression.required_uscore;
-        let experience_for_previous_level = CD_CLIENT
-            .level_progression_lookup
-            .at_key(&(level - 1))
-            .map(|l| l.required_uscore)
-            .unwrap_or(0);
-        let experience_from_previous_level = total_experience - experience_for_previous_level;
-
-        let min_level = CD_CLIENT.level_progression_lookup.first().unwrap().id;
-        let max_level = CD_CLIENT.level_progression_lookup.last().unwrap().id;
-
-        let embed = CONFIG
-            .default_embed()
-            .title(format!("Level {level}!"))
-            .url(CONFIG.explorer_uri("/misc/level-progression"))
-            .thumbnail(CONFIG.explorer_uri("/lu-res/ui/ingame/passport_i90.png"))
-            .field("Requirements", format!("**For Level {level}:**"), true)
-            .field(
+        let config = crate::config::config();
+        let mut embed = crate::embed::Embed::new()
+            .title(format!("Level {level}"))
+            .url(config.explorer_uri("misc/level-progression"))
+            .thumbnail(Some(config.explorer_res_uri("ui/ingame/passport_i90.png")))
+            .field("Total U-Score", format!("`{}`", format_number(total.into())), true);
+        if level > min_level {
+            embed = embed.field(
                 format!("From Level {}", level - 1),
-                format!("`{}` Experience", experience_from_previous_level),
+                format!("`{}`", format_number((total - previous).into())),
                 true,
-            )
-            .field("Total", format!("`{}` Experience", total_experience), true);
+            );
+        }
+        match next {
+            Some(next) => {
+                embed = embed.field(
+                    format!("To Level {}", level + 1),
+                    format!("`{}`", format_number((next - total).into())),
+                    true,
+                )
+            }
+            None => embed = embed.field("Max Level", "This is the highest level!", true),
+        }
 
-        let prev_level_button = LevelArguments { level: level - 1 }
-            .to_update_button(format!("Level {}", level - 1))
-            .disabled(level - 1 < min_level);
-        let next_level_button = LevelArguments { level: level + 1 }
-            .to_update_button(format!("Level {}", level + 1))
-            .disabled(level + 1 > max_level);
-
-        let components = Some(vec![CreateActionRow::Buttons(vec![
-            prev_level_button,
-            next_level_button,
-        ])]);
-
-        Ok((embed, components))
+        let row = CreateActionRow::Buttons(vec![
+            Self::button("‹ Previous Level", Target::new(level - 1)).disabled(level <= min_level),
+            Self::button("Next Level ›", Target::new(level + 1)).disabled(level >= max_level),
+        ]);
+        Ok(Response::new(embed).row(Some(row)))
     }
 }

@@ -1,854 +1,498 @@
-use std::{fmt::Display, ops::Deref};
+//! Typed ids for cdclient rows and the queries on them
+//!
+//! - Each id is a newtype so the wrong kind of id cannot be passed by accident
+//! - Every query takes the `&GameData` snapshot it should read from
 
-use itertools::Itertools;
+use std::fmt::Display;
 
-use crate::{
-    cdclient::{
-        components::{
-            DESTROYABLE_COMPONENT, ITEM_COMPONENT, PACKAGE_COMPONENT, RENDER_COMPONENT,
-            VENDOR_COMPONENT,
-        },
-        CdClientActivityRewards, CdClientDestructibleComponent, CdClientItemComponent,
-        CdClientLootMatrix, CdClientLootTable, CdClientObjects, CdClientPackageComponent,
-        CdClientRarityTable, CdClientRenderComponent, CdClientSkillBehavior,
-        CdClientVendorComponent,
-    },
-    custom::CollectIntoOptionalVec,
-    Api, CONFIG,
+use crate::cdclient::components::{
+    DESTROYABLE_COMPONENT, ITEM_COMPONENT, MISSION_OFFER_COMPONENT, PACKAGE_COMPONENT,
+    RENDER_COMPONENT, VENDOR_COMPONENT,
 };
+use crate::cdclient::{
+    CdClientActivityRewards, CdClientDestructibleComponent, CdClientItemComponent, CdClientMissions,
+    CdClientObjects, CdClientRenderComponent, CdClientSkillBehavior,
+};
+use crate::config::config;
+use crate::data::GameData;
+use crate::error::{BotError, BotResult};
+use crate::locale::SkillBehaviorDescriptionUI;
 
-pub type MsgResult<T> = Result<T, String>;
+/// Escapes characters that Discord markdown would otherwise interpret
+pub fn escape_markdown(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for ch in text.chars() {
+        if matches!(ch, '*' | '_' | '~' | '`' | '|' | '[' | ']' | '\\' | '>') {
+            out.push('\\');
+        }
+        out.push(ch);
+    }
+    out
+}
 
 pub fn fmt_name_id(name: impl Display, id: impl Display) -> String {
     format!("{name} [{id}]")
 }
 
-pub fn explorer_hyperlink(
-    name: impl Display,
-    id: impl Display,
-    explorer_url: impl Display,
-) -> String {
-    format!("{name} [`[{id}]`]({explorer_url})")
-}
-
-pub fn fix_icon_asset(asset: &str) -> String {
-    asset
-        .replace("\\", "/")
-        .replace("../", "")
-        .replace("./", "")
+/// `Name [`[id]`](url)`: the id is the link so names stay readable
+pub fn explorer_hyperlink(name: impl Display, id: impl Display, explorer_url: impl Display) -> String {
+    format!("{} [`[{id}]`]({explorer_url})", escape_markdown(&name.to_string()))
 }
 
 pub fn icon_asset_as_url(asset: impl AsRef<str>) -> String {
-    CONFIG.explorer_res_uri(&fix_icon_asset(asset.as_ref()))
+    config().explorer_res_uri(asset.as_ref())
 }
 
-/*
-* Here is the plan:
-* [x] 1. prefix all structs cdclient with 'CdClient'
-* [ ] 2. Create new-type to store id
-* [ ] 3. Impl trait to give it access to cdclient/locale/config
-* [ ] 4. Update HasKey and HasGroupKey to use 'CdClient<ident>Id' so that way I don't pass the wrong kind of id
-* [ ] 5. Make sure I can pass `CdClientObjectsId` to something that takes i32 (or do comparisons)
-* [ ] 6. Perhaps with the HasKey, impl a trait with an id() method and a get() method
-* [ ] 7. Actually replace the i32 ids with `CdClient{ident}Id` in `CdClient{ident}` structs (idk about that)
-* [ ] 8. Consider where custom structs come in; because i can't have a mere newtype wrapper and also
-*    extra fields; i probably just want to return custom structs from newtype wrapper methods
-*/
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientLootTableId(pub i32);
-impl Api for CdClientLootTableId {}
-impl LUExplorer for CdClientLootTableId {
-    const NAME: &'static str = "Loot Table";
-    const ENDPOINT: &'static str = "objects/loot/table";
-
-    fn id(&self) -> i32 {
-        self.0
-    }
+pub fn icon_url(d: &GameData, icon_id: i32) -> Option<String> {
+    let icon = d.cdclient.icons.at_key(&icon_id)?;
+    Some(icon_asset_as_url(icon.icon_path.as_ref()?))
 }
 
-impl CdClientLootTableId {
-    pub fn fetch(&self) -> MsgResult<Vec<CdClientLootTable>> {
-        self.cdclient()
-            .loot_table
-            .at_group_key(&self.0)
-            .clone()
-            .ok_or_else(|| self.err("does not exist"))
-    }
-
-    pub fn contained_items(&self) -> Option<Vec<CdClientObjectsId>> {
-        self.cdclient()
-            .loot_table
-            .at_group_key(&self.0)?
-            .iter()
-            .map(|lt| CdClientObjectsId(lt.itemid))
-            .collect_some()
-    }
-
-    pub fn items_of_rarity(&self, rarity: i32) -> Option<usize> {
-        Some(
-            self.fetch()
-                .ok()?
-                .into_iter()
-                .filter(|lt| {
-                    CdClientObjectsId(lt.itemid)
-                        .item_component()
-                        .is_ok_and(|item| {
-                            item.rarity.is_some_and(|item_rarity| item_rarity == rarity)
-                        })
-                })
-                .count(),
-        )
-    }
-
-    pub fn loot_chances(&self, rarity_table_index: i32) -> LootTableChances {
-        let rti = CdClientRarityTableId(rarity_table_index);
-        let lt = CdClientLootTableId(self.id());
-
-        let t1 = rti.chance_to_drop_rarity(1).map(|chance| {
-            let count = lt.items_of_rarity(1).unwrap_or(0);
-            LootTableRarityGroup { count, chance }
-        });
-
-        let t2 = rti.chance_to_drop_rarity(2).map(|chance| {
-            let count = lt.items_of_rarity(2).unwrap_or(0);
-            LootTableRarityGroup { count, chance }
-        });
-
-        let t3 = rti.chance_to_drop_rarity(3).map(|chance| {
-            let count = lt.items_of_rarity(3).unwrap_or(0);
-            LootTableRarityGroup { count, chance }
-        });
-
-        let t4 = rti.chance_to_drop_rarity(4).map(|chance| {
-            let count = lt.items_of_rarity(4).unwrap_or(0);
-            LootTableRarityGroup { count, chance }
-        });
-
-        LootTableChances {
-            lti: *self,
-            t1,
-            t2,
-            t3,
-            t4,
-        }
-    }
-}
-
-/// while there may be loot tables that dont drop certain rarities in that loot table, i don't care
-pub struct LootTableRarityGroup {
-    pub count: usize,
-    pub chance: f64,
-}
-impl LootTableRarityGroup {
-    pub fn chance_any(&self) -> f64 {
-        self.chance
-    }
-    pub fn chance_specific(&self) -> f64 {
-        self.chance / self.count as f64
-    }
-}
-
-pub struct LootTableChances {
-    pub lti: CdClientLootTableId,
-    pub t1: Option<LootTableRarityGroup>,
-    pub t2: Option<LootTableRarityGroup>,
-    pub t3: Option<LootTableRarityGroup>,
-    pub t4: Option<LootTableRarityGroup>,
-}
-impl LootTableChances {
-    /// like health pickups
-    pub fn has_no_rarity(&self) -> bool {
-        self.t1.is_none() && self.t2.is_none() && self.t3.is_none() && self.t4.is_none()
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientLootMatrixId(pub i32);
-impl Api for CdClientLootMatrixId {}
-
-impl CdClientLootMatrixId {
-    pub fn fetch(&self) -> MsgResult<Vec<CdClientLootMatrix>> {
-        self.cdclient()
-            .loot_matrix
-            .at_group_key(&self.0)
-            .clone()
-            .ok_or_else(|| format!("Loot Matrix `{}` does not exist", self.0))
-    }
-
-    pub fn contained_items(&self) -> Option<Vec<CdClientObjectsId>> {
-        self.cdclient()
-            .loot_matrix
-            .at_group_key(&self.0)?
-            .iter()
-            .filter_map(|lm| {
-                let lti = CdClientLootTableId(lm.loot_table_index);
-                lti.contained_items()
-            })
-            .flatten()
-            .collect_some()
-    }
-
-    pub fn loot_tables(&self) -> Option<Vec<CdClientLootTableId>> {
-        self.fetch()
-            .ok()?
-            .into_iter()
-            .map(|lm| CdClientLootTableId(lm.loot_table_index))
-            .collect_some()
-    }
-
-    pub fn loot_chances(&self) -> Option<Vec<LootTableChances>> {
-        let loot_tables = self.fetch().ok()?;
-        loot_tables
-            .into_iter()
-            .map(|lm_entry| {
-                CdClientLootTableId(lm_entry.loot_table_index)
-                    .loot_chances(lm_entry.rarity_table_index)
-            })
-            .collect_some()
-    }
-
-    pub fn id(&self) -> i32 {
-        self.0
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientRarityTableId(pub i32);
-impl Api for CdClientRarityTableId {}
-impl CdClientRarityTableId {
-    pub fn chance_to_drop_rarity(&self, rarity: i32) -> Option<f64> {
-        let rarity_table = self.cdclient().rarity_table.at_group_key(&self.0)?;
-        let upper_threshold = rarity_table.iter().find(|r| r.rarity == rarity)?.randmax;
-        let lower_threshold = rarity_table
-            .iter()
-            .find_map(|r| (r.rarity == rarity - 1).then(|| r.randmax))
-            .unwrap_or(0.0);
-        let chance_to_drop_rarity = upper_threshold - lower_threshold;
-        Some(chance_to_drop_rarity)
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct LootMatrixObjectChances {
-    pub lmi: CdClientLootMatrixId,
-    pub chance: f64,
-    pub sources: Vec<CdClientObjectsId>,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientObjectsId(pub i32);
-impl Api for CdClientObjectsId {}
-
-impl CdClientObjectsId {
-    /// - This can cause infinite recursion when it calls [`Self::hyperlink_name`] which calls
-    /// [`Self::try_fetch`], which if it fails calls [`Self::hyperlink_name`]
-    /// - The solution is to make sure that [`Self::hyperlink_name`] does not require
-    /// [`Self::try_fetch`] to succeed
-    /// - So [`Self::req_name`] will check if the object exists or not
-    pub fn err(&self, msg: impl Display) -> String {
-        format!("{} {}!", self.hyperlink_name(), msg)
-    }
-
-    pub fn fetch(&self) -> Option<CdClientObjects> {
-        self.cdclient().objects.at_key(&self.0).cloned()
-    }
-
-    pub fn is_hq_valid(&self) -> bool {
-        self.fetch()
-            .is_some_and(|ob| ob.hq_valid.is_some_and(|hq_valid| hq_valid))
-    }
-
-    pub fn try_fetch(&self) -> MsgResult<CdClientObjects> {
-        self.fetch().ok_or_else(|| self.err("does not exist"))
-    }
-
-    pub fn name(&self) -> Option<String> {
-        let item = self.fetch()?;
-        item.display_name.clone().or_else(|| item.name.clone())
-    }
-
-    pub fn name_id(&self) -> String {
-        fmt_name_id(self.req_name(), self.0)
-    }
-
-    pub fn req_name(&self) -> String {
-        self.name().unwrap_or_else(|| format!("Object {}", self.0))
-        // let item = self.cdclient().objects.at_key(&self.0).cloned();
-        // let f = || format!("Object {}", self.0);
-        // item.and_then(f)
-        // if item.is_some() {
-        //     self.name().unwrap_or_else(f)
-        // } else {
-        //     // self.name().unwrap_or(format!("Object {}", self.0))
-        //     f()
-        // }
-    }
-
-    // this is the stack overflow??
-    pub fn explorer_url(&self) -> String {
-        self.config().explorer_uri(format!("/objects/{}", self.0))
-    }
-
-    pub fn hyperlink_name(&self) -> String {
-        let name = self.req_name();
-        let explorer_url = self.explorer_url();
-        explorer_hyperlink(name, self.0, explorer_url)
-    }
-
-    pub fn get_component<C: ComponentId>(&self, component: impl Fn(i32) -> C) -> MsgResult<C> {
-        self.cdclient()
-            .components_registry
-            .at_group_key(&self.0)
-            .ok_or_else(|| self.err("has no Registered Components"))?
-            .into_iter()
-            .find(|cr| cr.component_type == C::ID)
-            .map(|cr| component(cr.component_id))
-            .ok_or_else(|| self.err(format!("has no Registered {} Component", C::NAME)))
-    }
-
-    pub fn get_containing_loot_table_indexes(&self) -> Option<Vec<CdClientLootTableId>> {
-        self.cdclient()
-            .loot_table
-            .iter()
-            .filter(|lt| lt.itemid == self.0)
-            .map(|lt| CdClientLootTableId(lt.loot_table_index))
-            .collect_some()
-    }
-
-    pub fn get_containing_loot_matrix_indexes(&self) -> Option<Vec<CdClientLootMatrixId>> {
-        let ltis = self.get_containing_loot_table_indexes()?;
-        self.cdclient()
-            .loot_matrix
-            .iter()
-            .filter(|lm| ltis.contains(&CdClientLootTableId(lm.loot_table_index)))
-            .map(|lm| CdClientLootMatrixId(lm.loot_matrix_index))
-            .collect_some()
-    }
-
-    pub fn rarity(&self) -> MsgResult<i32> {
-        self.item_component()?
-            .rarity
-            .ok_or_else(|| self.err("has no rarity"))
-    }
-
-    pub fn chance_from_loot_matrix_index(&self, lmi: CdClientLootMatrixId) -> MsgResult<f64> {
-        let rarity = self.rarity()?;
-        let ltis = self
-            .get_containing_loot_table_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Tables"))?;
-
-        // I think there is generally no repeats, but we will calculate anyway
-        let lms: Vec<_> = lmi
-            .fetch()?
-            .into_iter()
-            .filter(|lm| ltis.contains(&CdClientLootTableId(lm.loot_table_index)))
-            .collect();
-
-        let total_chance: f64 = lms
-            .into_iter()
-            .filter_map(|lm_entry| {
-                let chance_to_drop_loot_table = lm_entry.percent;
-                let number_of_items_of_rarity_in_loot_table =
-                    CdClientLootTableId(lm_entry.loot_table_index).items_of_rarity(rarity)?;
-                let chance_to_drop_rarity = CdClientRarityTableId(lm_entry.rarity_table_index)
-                    .chance_to_drop_rarity(rarity)?;
-
-                let chance = chance_to_drop_rarity
-                    * chance_to_drop_loot_table
-                    * (1.0 / number_of_items_of_rarity_in_loot_table as f64);
-                let avg_dropped = (lm_entry.min_to_drop as f64 + lm_entry.max_to_drop as f64) / 2.0;
-
-                Some(avg_dropped * chance)
-            })
-            .sum();
-
-        Ok(total_chance)
-    }
-
-    pub fn render_component(&self) -> MsgResult<CdClientRenderComponent> {
-        self.get_component(CdClientRenderComponentId)?.fetch()
-    }
-
-    pub fn thumbnail(&self) -> Option<String> {
-        let render_component = self.render_component().ok()?;
-        Some(icon_asset_as_url(render_component.icon_asset?))
-    }
-
-    pub fn item_component(&self) -> MsgResult<CdClientItemComponent> {
-        self.get_component(CdClientItemComponentId)?.fetch()
-    }
-
-    /// All achievements/missions that earn an object
-    pub fn achievements(&self) -> MsgResult<Vec<CdClientActivityRewardsId>> {
-        // let lmis = self
-        //     .get_containing_loot_matrix_indexes()
-        //     .ok_or_else(|| self.err("it not in any Loot Matrices"))?;
-        //
-        // let activities: Vec<_> = self
-        //     .cdclient()
-        //     .activity_rewards
-        //     .iter()
-        //     .filter(|activity| {
-        //         activity
-        //             .loot_matrix_index
-        //             .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
-        //     })
-        //     .map(|comp| CdClientActivityRewardsId(comp.object_template))
-        //     .collect();
-        Ok(vec![])
-    }
-
-    /// All activities that reward an object
-    pub fn activities(&self) -> MsgResult<Vec<CdClientActivityRewardsId>> {
-        let lmis = self
-            .get_containing_loot_matrix_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-
-        let activities: Vec<_> = self
-            .cdclient()
-            .activity_rewards
-            .iter()
-            .filter(|activity| {
-                activity
-                    .loot_matrix_index
-                    .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
-            })
-            .map(|comp| CdClientActivityRewardsId(comp.object_template))
-            .collect();
-        Ok(activities)
-    }
-
-    pub fn activities_chances(&self) -> MsgResult<Vec<LootMatrixObjectChances>> {
-        let lmis = self
-            .get_containing_loot_matrix_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-
-        let activities: Vec<_> = self
-            .cdclient()
-            .activity_rewards
-            .iter()
-            .filter(|act| {
-                act.loot_matrix_index
-                    .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
-            })
-            .chunk_by(|act| CdClientLootMatrixId(act.loot_matrix_index.expect("Already checked")))
-            .into_iter()
-            .filter_map(|(lmi, comps)| {
-                let sources: Vec<_> = comps
-                    .unique_by(|act| act.object_template)
-                    .filter_map(|act| {
-                        // CdClientActivityRewardsId(comp.id).get_objects_with_component()
-                        CdClientActivityRewardsId(act.object_template).get_objects_from_activity()
-                    })
-                    .flatten()
-                    .collect();
-                let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
-
-                Some(LootMatrixObjectChances {
-                    lmi,
-                    chance,
-                    sources: (sources.len() > 0).then(|| sources)?,
-                })
-            })
-            .sorted_by(|a, b| f32::total_cmp(&(-a.chance as f32), &(-b.chance as f32)))
-            .collect();
-
-        Ok(activities)
-    }
-
-    /// All smashables that drop an object
-    pub fn smashables(&self) -> MsgResult<Vec<CdClientObjectsId>> {
-        let lmis = self
-            .get_containing_loot_matrix_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-
-        let smashables: Vec<_> = self
-            .cdclient()
-            .destructible_component
-            .iter()
-            .filter(|comp| {
-                comp.loot_matrix_index
-                    .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
-            })
-            .map(|comp| CdClientDestructibleComponentId(comp.id))
-            .filter_map(|comp| comp.get_objects_with_component())
-            .flatten()
-            .collect();
-        Ok(smashables)
-    }
-
-    // so i need to return the ids and their chances
-    pub fn smashables_chances(&self) -> MsgResult<Vec<LootMatrixObjectChances>> {
-        let lmis = self
-            .get_containing_loot_matrix_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-
-        let smashables: Vec<_> = self
-            .cdclient()
-            .destructible_component
-            .iter()
-            .filter(|comp| {
-                comp.loot_matrix_index
-                    .is_some_and(|lmi| lmis.contains(&CdClientLootMatrixId(lmi)))
-            })
-            .chunk_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index.expect("Already checked")))
-            .into_iter()
-            .filter_map(|(lmi, comps)| {
-                let sources: Vec<_> = comps
-                    .filter_map(|comp| {
-                        CdClientDestructibleComponentId(comp.id).get_objects_with_component()
-                    })
-                    .flatten()
-                    .collect();
-                let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
-
-                Some(LootMatrixObjectChances {
-                    lmi,
-                    chance,
-                    sources: (sources.len() > 0).then(|| sources)?,
-                })
-            })
-            .sorted_by(|a, b| f32::total_cmp(&(-a.chance as f32), &(-b.chance as f32)))
-            .collect();
-
-        Ok(smashables)
-    }
-
-    /// All packages that unpack an object
-    pub fn packages(&self) -> MsgResult<Vec<CdClientObjectsId>> {
-        let lmis = self
-            .get_containing_loot_matrix_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-
-        let packages: Vec<_> = self
-            .cdclient()
-            .package_component
-            .iter()
-            .filter(|comp| lmis.contains(&CdClientLootMatrixId(comp.loot_matrix_index)))
-            .map(|comp| CdClientPackageComponentId(comp.id))
-            .filter_map(|comp| comp.get_objects_with_component())
-            .flatten()
-            .collect();
-        Ok(packages)
-    }
-
-    pub fn packages_chances(&self) -> MsgResult<Vec<LootMatrixObjectChances>> {
-        let lmis = self
-            .get_containing_loot_matrix_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-
-        let smashables: Vec<_> = self
-            .cdclient()
-            .package_component
-            .iter()
-            .filter(|comp| lmis.contains(&CdClientLootMatrixId(comp.loot_matrix_index)))
-            .chunk_by(|comp| CdClientLootMatrixId(comp.loot_matrix_index))
-            .into_iter()
-            .filter_map(|(lmi, comps)| {
-                let sources: Vec<_> = comps
-                    .filter_map(|comp| {
-                        CdClientPackageComponentId(comp.id).get_objects_with_component()
-                    })
-                    .flatten()
-                    .collect();
-                let chance = self.chance_from_loot_matrix_index(lmi).ok()?;
-
-                Some(LootMatrixObjectChances {
-                    lmi,
-                    chance,
-                    sources: (sources.len() > 0).then(|| sources)?,
-                })
-            })
-            .sorted_by(|a, b| f32::total_cmp(&(-a.chance as f32), &(-b.chance as f32)))
-            .collect();
-
-        Ok(smashables)
-    }
-
-    /// All vendors that sell an object
-    pub fn vendors(&self) -> MsgResult<Vec<CdClientObjectsId>> {
-        let lmis = self
-            .get_containing_loot_matrix_indexes()
-            .ok_or_else(|| self.err("is not in any Loot Matrices"))?;
-
-        let vendors: Vec<_> = self
-            .cdclient()
-            .vendor_component
-            .iter()
-            .filter(|comp| lmis.contains(&CdClientLootMatrixId(comp.loot_matrix_index)))
-            .map(|comp| CdClientVendorComponentId(comp.id))
-            .filter_map(|comp| comp.get_objects_with_component())
-            .flatten()
-            .collect();
-
-        Ok(vendors)
-    }
-}
-
-pub trait LUExplorer: Api {
+/// Something that has a page on LU Explorer
+pub trait LUExplorer {
+    /// e.g. "Object"
     const NAME: &'static str;
     /// **DO NOT PUT FRONT/BACK SLASHES**
     const ENDPOINT: &'static str;
 
     fn id(&self) -> i32;
 
-    fn err(&self, msg: impl Display) -> String {
-        format!("{} {}!", self.hyperlink_name(), msg)
-    }
-
-    fn explorer_url(&self) -> String {
-        self.config()
-            .explorer_uri(format!("/{}/{}", Self::ENDPOINT, self.id()))
-    }
-
-    fn name(&self) -> Option<String> {
+    fn name(&self, _d: &GameData) -> Option<String> {
         None
     }
 
-    fn req_name(&self) -> String {
-        self.name()
-            .unwrap_or(format!("{} {}", Self::NAME, self.id()))
+    fn req_name(&self, d: &GameData) -> String {
+        self.name(d)
+            .unwrap_or_else(|| format!("{} {}", Self::NAME, self.id()))
     }
 
-    fn hyperlink_name(&self) -> String {
-        let name = self.req_name();
-        let explorer_url = self.explorer_url();
-        explorer_hyperlink(name, self.id(), explorer_url)
+    fn name_id(&self, d: &GameData) -> String {
+        fmt_name_id(self.req_name(d), self.id())
+    }
+
+    fn explorer_url(&self) -> String {
+        config().explorer_uri(format!("{}/{}", Self::ENDPOINT, self.id()))
+    }
+
+    fn hyperlink_name(&self, d: &GameData) -> String {
+        explorer_hyperlink(self.req_name(d), self.id(), self.explorer_url())
+    }
+
+    /// `"<Name [id]> {msg}"` as a [`BotError::NotFound`]
+    fn not_found(&self, d: &GameData) -> BotError {
+        BotError::not_found(format!(
+            "{} `{}` does not exist{}.",
+            Self::NAME,
+            self.id(),
+            self.name(d).map(|n| format!(" ({n})")).unwrap_or_default()
+        ))
     }
 }
 
-pub trait ComponentId: Api {
-    const ID: i32;
-    const NAME: &'static str;
+// ------- //
+// Objects //
+// ------- //
 
-    fn id(&self) -> i32;
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CdClientObjectsId(pub i32);
 
-    fn err(&self, msg: impl Display) -> String {
-        format!("{} {}!", self.hyperlink_name(), msg)
+impl LUExplorer for CdClientObjectsId {
+    const NAME: &'static str = "Object";
+    const ENDPOINT: &'static str = "objects";
+
+    fn id(&self) -> i32 {
+        self.0
     }
 
-    fn explorer_url(&self) -> String {
-        self.config()
-            .explorer_uri(format!("/objects/components/{}", Self::ID))
+    /// The in-game (locale) name, then the cdclient display name, then the internal name
+    fn name(&self, d: &GameData) -> Option<String> {
+        if let Some(name) = d.locale.objects.get(&self.0).and_then(|o| o.name.clone()) {
+            return Some(name);
+        }
+        let object = d.cdclient.objects.at_key(&self.0)?;
+        object.display_name.clone().or_else(|| object.name.clone())
+    }
+}
+
+/// An item's equip location in plain words
+pub fn equip_location_name(raw: &str) -> String {
+    match raw.trim() {
+        "clavicle" => String::from("Armor"),
+        "hair" => String::from("Head"),
+        "legs" => String::from("Legs"),
+        "chest" => String::from("Chest"),
+        "special_r" => String::from("Right Hand"),
+        "special_l" => String::from("Left Hand"),
+        other => heck::ToTitleCase::to_title_case(other),
+    }
+}
+
+/// A skill attached to an object (an item's own skills or one of its proxies')
+#[derive(Clone, Copy, Debug)]
+pub struct ObjectSkill {
+    pub object: i32,
+    pub skill: i32,
+    pub cast_on_type: Option<i32>,
+}
+
+impl CdClientObjectsId {
+    pub fn fetch<'a>(&self, d: &'a GameData) -> Option<&'a CdClientObjects> {
+        d.cdclient.objects.at_key(&self.0)
     }
 
-    fn name(&self) -> Option<String> {
-        None
+    /// The object, or a friendly "does not exist" error
+    pub fn try_fetch<'a>(&self, d: &'a GameData) -> BotResult<&'a CdClientObjects> {
+        let object = self.fetch(d).ok_or_else(|| self.not_found(d))?;
+        if !d.is_visible(self.0) {
+            return Err(self.not_found(d));
+        }
+        Ok(object)
     }
 
-    fn req_name(&self) -> String {
-        self.name()
-            .unwrap_or(format!("{} Component {}", Self::NAME, self.id()))
+    pub fn description(&self, d: &GameData) -> Option<String> {
+        d.locale
+            .objects
+            .get(&self.0)
+            .and_then(|o| o.description.clone())
+            .or_else(|| self.fetch(d)?.description.clone())
     }
 
-    fn hyperlink_name(&self) -> String {
-        let name = self.req_name();
-        let explorer_url = self.explorer_url();
-        explorer_hyperlink(name, self.id(), explorer_url)
-    }
-
-    fn get_objects_with_component(&self) -> Option<Vec<CdClientObjectsId>> {
-        let component_id = self.id();
-        self.cdclient()
+    /// All component ids of one type registered to this object
+    pub fn component_ids(&self, d: &GameData, component_type: i32) -> Vec<i32> {
+        d.cdclient
             .components_registry
-            .iter()
-            .filter(|cr| cr.component_type == Self::ID && component_id == cr.component_id)
-            .map(|cr| CdClientObjectsId(cr.id))
-            .collect_some()
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientDestructibleComponentId(pub i32);
-impl Api for CdClientDestructibleComponentId {}
-impl ComponentId for CdClientDestructibleComponentId {
-    const ID: i32 = DESTROYABLE_COMPONENT;
-    const NAME: &'static str = "Destructible";
-    fn id(&self) -> i32 {
-        self.0
-    }
-}
-impl CdClientDestructibleComponentId {
-    pub fn fetch(&self) -> MsgResult<CdClientDestructibleComponent> {
-        self.cdclient()
-            .destructible_component
-            .at_key(&self.0)
-            .cloned()
-            .ok_or_else(|| self.err("does not exist"))
-    }
-
-    pub fn items_dropped(&self) -> Option<Vec<LootTableChances>> {
-        let dc = self.fetch().ok()?;
-        let lmi = CdClientLootMatrixId(dc.loot_matrix_index?);
-        lmi.loot_chances()
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientPackageComponentId(pub i32);
-impl Api for CdClientPackageComponentId {}
-impl ComponentId for CdClientPackageComponentId {
-    const ID: i32 = PACKAGE_COMPONENT;
-    const NAME: &'static str = "Package";
-    fn id(&self) -> i32 {
-        self.0
-    }
-}
-impl CdClientPackageComponentId {
-    pub fn fetch(&self) -> MsgResult<CdClientPackageComponent> {
-        self.cdclient()
-            .package_component
-            .at_key(&self.0)
-            .cloned()
-            .ok_or_else(|| self.err("does not exist"))
-    }
-
-    pub fn items_dropped(&self) -> Option<Vec<LootTableChances>> {
-        let pc = self.fetch().ok()?;
-        let lmi = CdClientLootMatrixId(pc.loot_matrix_index);
-        lmi.loot_chances()
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientItemComponentId(pub i32);
-impl Api for CdClientItemComponentId {}
-impl ComponentId for CdClientItemComponentId {
-    const ID: i32 = ITEM_COMPONENT;
-    const NAME: &'static str = "Item";
-    fn id(&self) -> i32 {
-        self.0
-    }
-}
-impl CdClientItemComponentId {
-    pub fn fetch(&self) -> MsgResult<CdClientItemComponent> {
-        self.cdclient()
-            .item_component
-            .at_key(&self.0)
-            .cloned()
-            .ok_or_else(|| self.err("does not exist"))
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientRenderComponentId(pub i32);
-impl Api for CdClientRenderComponentId {}
-impl ComponentId for CdClientRenderComponentId {
-    const ID: i32 = ITEM_COMPONENT;
-    const NAME: &'static str = "Render";
-    fn id(&self) -> i32 {
-        self.0
-    }
-}
-impl CdClientRenderComponentId {
-    pub fn fetch(&self) -> MsgResult<CdClientRenderComponent> {
-        self.cdclient()
-            .render_component
-            .at_key(&self.0)
-            .cloned()
-            .ok_or_else(|| self.err("does not exist"))
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientVendorComponentId(pub i32);
-impl Api for CdClientVendorComponentId {}
-impl ComponentId for CdClientVendorComponentId {
-    const ID: i32 = VENDOR_COMPONENT;
-    const NAME: &'static str = "Vendor";
-    fn id(&self) -> i32 {
-        self.0
-    }
-}
-impl CdClientVendorComponentId {
-    pub fn fetch(&self) -> MsgResult<CdClientVendorComponent> {
-        self.cdclient()
-            .vendor_component
-            .at_key(&self.0)
-            .cloned()
-            .ok_or_else(|| self.err("does not exist"))
-    }
-
-    pub fn items_sold(&self) -> Option<Vec<CdClientObjectsId>> {
-        let vc = self.fetch().ok()?;
-        let lmi = CdClientLootMatrixId(vc.loot_matrix_index);
-        lmi.contained_items()
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CdClientActivityRewardsId(pub i32);
-impl Api for CdClientActivityRewardsId {}
-impl CdClientActivityRewardsId {}
-impl LUExplorer for CdClientActivityRewardsId {
-    const NAME: &'static str = "Activity";
-    const ENDPOINT: &'static str = "activities";
-
-    fn id(&self) -> i32 {
-        self.0
-    }
-
-    fn name(&self) -> Option<String> {
-        self.locale()
-            .activities
-            .get(&self.0)?
-            .activity_name
-            .clone()
-            .or_else(|| {
-                let rewards = self.cdclient().activity_rewards.at_group_key(&self.0)?;
-                Some(if rewards.len() == 1 {
-                    rewards[0].description.clone()
-                } else {
-                    let desc = &rewards[0].description;
-                    let num_idx = desc.find(char::is_numeric).unwrap_or(desc.len());
-                    desc[0..num_idx].to_string()
-                })
-            })
-    }
-}
-impl CdClientActivityRewardsId {
-    pub fn fetch(&self) -> MsgResult<Vec<CdClientActivityRewards>> {
-        self.cdclient()
-            .activity_rewards
             .at_group_key(&self.0)
-            .clone()
-            .ok_or_else(|| self.err("does not exist"))
+            .unwrap_or_default()
+            .iter()
+            .filter(|cr| cr.component_type == component_type)
+            .map(|cr| cr.component_id)
+            .collect()
     }
 
-    /// ! use a select menu with description to separate which one is being rewarded
-    pub fn items_rewarded(&self) -> Option<Vec<LootTableChances>> {
-        let activity_rewards = self.fetch().ok()?;
-        activity_rewards
-            .into_iter()
-            .filter_map(|ar| {
-                let lmi = CdClientLootMatrixId(ar.loot_matrix_index?);
-                lmi.loot_chances()
-            })
-            .flatten()
-            .collect_some()
-        // let lmi = CdClientLootMatrixId(activity_rewards.loot_matrix_index?);
-        // lmi.loot_chances()
+    pub fn component_id(&self, d: &GameData, component_type: i32) -> Option<i32> {
+        self.component_ids(d, component_type).first().copied()
     }
 
-    pub fn get_objects_from_activity(&self) -> Option<Vec<CdClientObjectsId>> {
-        let activity_rewards = self.fetch().ok()?;
-        activity_rewards
+    pub fn has_component(&self, d: &GameData, component_type: i32) -> bool {
+        self.component_id(d, component_type).is_some()
+    }
+
+    pub fn item_component<'a>(&self, d: &'a GameData) -> Option<&'a CdClientItemComponent> {
+        d.cdclient.item_component.at_key(&self.component_id(d, ITEM_COMPONENT)?)
+    }
+
+    /// The item component, or an error explaining the object is not an item
+    pub fn req_item_component<'a>(&self, d: &'a GameData) -> BotResult<&'a CdClientItemComponent> {
+        self.try_fetch(d)?;
+        self.item_component(d).ok_or_else(|| {
+            BotError::not_applicable(format!("{} is not an item.", self.hyperlink_name(d)))
+        })
+    }
+
+    pub fn render_component<'a>(&self, d: &'a GameData) -> Option<&'a CdClientRenderComponent> {
+        d.cdclient.render_component.at_key(&self.component_id(d, RENDER_COMPONENT)?)
+    }
+
+    pub fn destructible_component<'a>(&self, d: &'a GameData) -> Option<&'a CdClientDestructibleComponent> {
+        d.cdclient
+            .destructible_component
+            .at_key(&self.component_id(d, DESTROYABLE_COMPONENT)?)
+    }
+
+    pub fn thumbnail(&self, d: &GameData) -> Option<String> {
+        let render = self.render_component(d)?;
+        render
+            .icon_asset
+            .as_ref()
+            .map(icon_asset_as_url)
+            .or_else(|| icon_url(d, render.icon_id?))
+    }
+
+    pub fn rarity(&self, d: &GameData) -> Option<i32> {
+        d.index.item_rarity.get(&self.0).copied()
+    }
+
+    /// Items listed in the item component's `subItems` (proxies)
+    pub fn proxies(&self, d: &GameData) -> Vec<CdClientObjectsId> {
+        self.item_component(d)
+            .and_then(|ic| ic.sub_items.clone())
+            .unwrap_or_default()
             .into_iter()
-            .filter_map(|ar| {
-                let lmi = CdClientLootMatrixId(ar.loot_matrix_index?);
-                lmi.contained_items()
-            })
-            .flatten()
-            .collect_some()
-        // let lmi = CdClientLootMatrixId(activity_rewards.loot_matrix_index?);
-        // lmi.loot_chances()
+            .filter(|&id| id > 0)
+            .map(CdClientObjectsId)
+            .collect()
+    }
+
+    /// Equip locations of the item and its proxies, e.g. `["Right Hand", "Left Hand"]`
+    pub fn equip_locations(&self, d: &GameData) -> Vec<String> {
+        let mut locations = vec![];
+        for object in std::iter::once(*self).chain(self.proxies(d)) {
+            if let Some(location) = object.item_component(d).and_then(|ic| ic.equip_location.as_ref()) {
+                for part in location.split(',').filter(|p| !p.trim().is_empty()) {
+                    let name = equip_location_name(part);
+                    if !locations.contains(&name) {
+                        locations.push(name);
+                    }
+                }
+            }
+        }
+        locations
+    }
+
+    pub fn preconditions(&self, d: &GameData) -> Vec<i32> {
+        self.item_component(d)
+            .and_then(|ic| ic.req_precondition.clone())
+            .unwrap_or_default()
+    }
+
+    /// The level required to use the item, read from its precondition text
+    /// (`"You must be Level 35 …"`)
+    pub fn level_requirement(&self, d: &GameData) -> Option<i32> {
+        self.preconditions(d).into_iter().find_map(|id| {
+            let reason = d.locale.preconditions.get(&id)?.failure_reason.as_deref()?;
+            let lower = reason.to_lowercase();
+            let rest = &reason[lower.find("level ")? + "level ".len()..];
+            let digits: String = rest.chars().take_while(char::is_ascii_digit).collect();
+            digits.parse().ok()
+        })
+    }
+
+    /// Skills on this object and its proxies
+    pub fn skills(&self, d: &GameData) -> Vec<ObjectSkill> {
+        let mut skills = vec![];
+        for object in std::iter::once(*self).chain(self.proxies(d)) {
+            for os in d.cdclient.object_skills.at_group_key(&object.0).unwrap_or_default() {
+                if !skills.iter().any(|s: &ObjectSkill| s.object == object.0 && s.skill == os.skill_id) {
+                    skills.push(ObjectSkill {
+                        object: object.0,
+                        skill: os.skill_id,
+                        cast_on_type: os.cast_on_type,
+                    });
+                }
+            }
+        }
+        skills
+    }
+
+    /// (armor, life, imagination) bonuses from equipping the item
+    pub fn stat_bonuses(&self, d: &GameData) -> (i32, i32, i32) {
+        let mut stats = (0, 0, 0);
+        for skill in self.skills(d) {
+            if let Some(sb) = d.cdclient.skill_behavior.at_key(&skill.skill) {
+                stats.0 += sb.armor_bonus_ui.unwrap_or(0);
+                stats.1 += sb.life_bonus_ui.unwrap_or(0);
+                stats.2 += sb.im_bonus_ui.unwrap_or(0);
+            }
+        }
+        stats
+    }
+
+    /// Missions/achievements that reward this item
+    pub fn missions_rewarding(&self, d: &GameData) -> Vec<CdClientMissionsId> {
+        d.index
+            .missions_rewarding_item
+            .get(&self.0)
+            .map(|ids| ids.iter().copied().map(CdClientMissionsId).collect())
+            .unwrap_or_default()
+    }
+
+    /// Objects with a vendor component that sell this item
+    pub fn vendors(&self, d: &GameData) -> Vec<CdClientObjectsId> {
+        let mut vendors = vec![];
+        for lmi in self.loot_matrices(d) {
+            for &comp in d.index.vendors_with_matrix.get(&lmi).map_or(&[][..], Vec::as_slice) {
+                for &object in d.objects_with_component(VENDOR_COMPONENT, comp) {
+                    if d.is_visible(object) && !vendors.contains(&CdClientObjectsId(object)) {
+                        vendors.push(CdClientObjectsId(object));
+                    }
+                }
+            }
+        }
+        vendors.sort();
+        vendors
+    }
+
+    /// Loot tables containing this object
+    pub fn loot_tables<'a>(&self, d: &'a GameData) -> &'a [i32] {
+        d.index.loot_tables_with_item.get(&self.0).map_or(&[], Vec::as_slice)
+    }
+
+    /// Loot matrices that can drop this object
+    pub fn loot_matrices(&self, d: &GameData) -> Vec<i32> {
+        let mut lmis: Vec<i32> = self
+            .loot_tables(d)
+            .iter()
+            .flat_map(|lti| d.index.loot_matrices_with_table.get(lti).into_iter().flatten().copied())
+            .collect();
+        lmis.sort_unstable();
+        lmis.dedup();
+        lmis
+    }
+
+    /// Item sets (kits) that include this item
+    pub fn item_sets<'a>(&self, d: &'a GameData) -> &'a [i32] {
+        d.index.item_sets_with_item.get(&self.0).map_or(&[], Vec::as_slice)
+    }
+
+    pub fn npc_missions<'a>(&self, d: &'a GameData) -> &'a [crate::data::NpcMission] {
+        d.index.npc_missions.get(&self.0).map_or(&[], Vec::as_slice)
+    }
+
+    pub fn is_npc(&self, d: &GameData) -> bool {
+        self.has_component(d, MISSION_OFFER_COMPONENT) || !self.npc_missions(d).is_empty()
+    }
+
+    pub fn is_vendor(&self, d: &GameData) -> bool {
+        self.has_component(d, VENDOR_COMPONENT)
+    }
+
+    pub fn is_package(&self, d: &GameData) -> bool {
+        self.has_component(d, PACKAGE_COMPONENT)
+    }
+
+    /// Loot matrix dropped when smashed
+    pub fn smash_loot_matrix(&self, d: &GameData) -> Option<i32> {
+        self.destructible_component(d)?.loot_matrix_index
+    }
+
+    /// Loot matrix given when opened
+    pub fn package_loot_matrix(&self, d: &GameData) -> Option<i32> {
+        let comp = self.component_id(d, PACKAGE_COMPONENT)?;
+        Some(d.cdclient.package_component.at_key(&comp)?.loot_matrix_index)
+    }
+
+    /// Loot matrix of items sold
+    pub fn vendor_loot_matrix(&self, d: &GameData) -> Option<i32> {
+        let comp = self.component_id(d, VENDOR_COMPONENT)?;
+        Some(d.cdclient.vendor_component.at_key(&comp)?.loot_matrix_index)
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+// -------- //
+// Missions //
+// -------- //
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CdClientMissionsId(pub i32);
+
+impl LUExplorer for CdClientMissionsId {
+    const NAME: &'static str = "Mission";
+    const ENDPOINT: &'static str = "missions";
+
+    fn id(&self) -> i32 {
+        self.0
+    }
+
+    fn name(&self, d: &GameData) -> Option<String> {
+        d.locale.missions.get(&self.0)?.name.clone()
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct MissionReward {
+    pub item: i32,
+    pub count: i32,
+    pub repeat_count: Option<i32>,
+}
+
+impl CdClientMissionsId {
+    pub fn fetch<'a>(&self, d: &'a GameData) -> Option<&'a CdClientMissions> {
+        d.cdclient.missions.at_key(&self.0)
+    }
+
+    pub fn try_fetch<'a>(&self, d: &'a GameData) -> BotResult<&'a CdClientMissions> {
+        self.fetch(d).ok_or_else(|| self.not_found(d))
+    }
+
+    /// `"Type > Subtype"`
+    pub fn category_path(&self, d: &GameData) -> String {
+        let Some(mission) = self.fetch(d) else {
+            return String::new();
+        };
+        match &mission.defined_subtype {
+            Some(subtype) => format!("{} > {}", mission.defined_type, subtype),
+            None => mission.defined_type.clone(),
+        }
+    }
+
+    /// `"Type > Subtype > Name"`
+    pub fn full_path(&self, d: &GameData) -> String {
+        let path = self.category_path(d);
+        if path.is_empty() {
+            self.req_name(d)
+        } else {
+            format!("{path} > {}", self.req_name(d))
+        }
+    }
+
+    pub fn is_mission(&self, d: &GameData) -> bool {
+        self.fetch(d).is_some_and(|m| m.is_mission)
+    }
+
+    /// What the player is told to do
+    pub fn objective(&self, d: &GameData) -> Option<String> {
+        let text = d.locale.mission_text.get(&self.0);
+        text.and_then(|t| t.description.clone())
+            .or_else(|| text.and_then(|t| t.in_progress.clone()))
+            .or_else(|| {
+                // achievements describe themselves through their task
+                d.cdclient
+                    .mission_tasks
+                    .at_group_key(&self.0)
+                    .unwrap_or_default()
+                    .iter()
+                    .find_map(|task| d.locale.mission_tasks.get(&task.uid)?.description.clone())
+            })
+            .or_else(|| text.and_then(|t| t.completion_succeed_tip.clone()))
+    }
+
+    pub fn rewards(&self, d: &GameData) -> Vec<MissionReward> {
+        let Some(m) = self.fetch(d) else {
+            return vec![];
+        };
+        [
+            (m.reward_item1, m.reward_item1_count, m.reward_item1_repeatable, m.reward_item1_repeat_count),
+            (m.reward_item2, m.reward_item2_count, m.reward_item2_repeatable, m.reward_item2_repeat_count),
+            (m.reward_item3, m.reward_item3_count, m.reward_item3_repeatable, m.reward_item3_repeat_count),
+            (m.reward_item4, m.reward_item4_count, m.reward_item4_repeatable, m.reward_item4_repeat_count),
+        ]
+        .into_iter()
+        .filter(|(item, ..)| *item > 0)
+        .map(|(item, count, repeatable, repeat_count)| MissionReward {
+            item,
+            count: count.max(1),
+            repeat_count: (m.repeatable && repeatable > 0).then_some(repeat_count.max(1)),
+        })
+        .collect()
+    }
+
+    pub fn thumbnail(&self, d: &GameData) -> Option<String> {
+        let mission = self.fetch(d)?;
+        mission
+            .mission_icon_id
+            .and_then(|icon| icon_url(d, icon))
+            .or_else(|| {
+                d.cdclient
+                    .mission_tasks
+                    .at_group_key(&self.0)
+                    .unwrap_or_default()
+                    .iter()
+                    .find_map(|task| {
+                        task.icon_id
+                            .and_then(|icon| icon_url(d, icon))
+                            .or_else(|| icon_url(d, task.large_task_icon_id?))
+                    })
+            })
+    }
+}
+
+// ------ //
+// Skills //
+// ------ //
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CdClientSkillBehaviorId(pub i32);
-impl Api for CdClientSkillBehaviorId {}
+
 impl LUExplorer for CdClientSkillBehaviorId {
     const NAME: &'static str = "Skill";
     const ENDPOINT: &'static str = "skills";
@@ -857,69 +501,218 @@ impl LUExplorer for CdClientSkillBehaviorId {
         self.0
     }
 
-    fn name(&self) -> Option<String> {
-        self.locale()
-            .skill_behavior
-            .get(&self.id())
-            .and_then(|skill_behavior| skill_behavior.name.clone())
+    fn name(&self, d: &GameData) -> Option<String> {
+        d.locale.skill_behavior.get(&self.0)?.name.clone()
     }
 }
+
 impl CdClientSkillBehaviorId {
-    pub fn fetch(&self) -> MsgResult<CdClientSkillBehavior> {
-        self.cdclient()
-            .skill_behavior
-            .at_key(&self.0)
-            .cloned()
-            .ok_or_else(|| self.err("does not exist"))
+    pub fn fetch<'a>(&self, d: &'a GameData) -> Option<&'a CdClientSkillBehavior> {
+        d.cdclient.skill_behavior.at_key(&self.0)
     }
 
-    pub fn thumbnail(&self) -> Option<String> {
-        let skill = self.fetch().ok()?;
-        let icon = self.cdclient().icons.at_key(&skill.skill_icon?).cloned()?;
-        let asset = icon.icon_path?;
-        Some(icon_asset_as_url(asset))
+    pub fn try_fetch<'a>(&self, d: &'a GameData) -> BotResult<&'a CdClientSkillBehavior> {
+        self.fetch(d).ok_or_else(|| self.not_found(d))
     }
 
-    pub fn skill_items(&self) -> Option<Vec<CdClientObjectsId>> {
-        self.cdclient()
-            .object_skills
-            .iter()
-            // .filter_map(|ob| (ob.skill_id == self.0).then(|| CdClientObjectsId(ob.object_template)))
-            .filter(|ob| ob.skill_id == self.0)
-            .map(|ob| CdClientObjectsId(ob.object_template))
-            .collect_some()
+    pub fn thumbnail(&self, d: &GameData) -> Option<String> {
+        icon_url(d, self.fetch(d)?.skill_icon?)
+    }
+
+    pub fn description<'a>(&self, d: &'a GameData) -> Option<&'a SkillBehaviorDescriptionUI> {
+        d.locale.skill_behavior.get(&self.0)?.description_ui.as_ref()
+    }
+
+    /// The description as one block of text
+    pub fn description_text(&self, d: &GameData) -> Option<String> {
+        let desc = self.description(d)?;
+        let mut parts = vec![];
+        if let Some(remainder) = &desc.remainder {
+            parts.push(remainder.clone());
+        }
+        for (name, value) in desc.segments.iter().flatten() {
+            parts.push(format!("**{}:** {value}", split_camel_case(name)));
+        }
+        (!parts.is_empty()).then(|| parts.join("\n"))
+    }
+
+    pub fn objects<'a>(&self, d: &'a GameData) -> &'a [i32] {
+        d.index.objects_with_skill.get(&self.0).map_or(&[], Vec::as_slice)
     }
 }
 
-// #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-// pub struct CdClientIconsId(pub i32);
-// impl Api for CdClientIconsId {}
-// impl LUExplorer for CdClientIconsId {
-//     const NAME: &'static str = "Skill";
-//     const ENDPOINT: &'static str = "skills";
-//
-//     fn id(&self) -> i32 {
-//         self.0
-//     }
-//
-//     fn name(&self) -> Option<String> {
-//         self.locale()
-//             .skill_behavior
-//             .get(&self.id())
-//             .and_then(|skill_behavior| skill_behavior.name.clone())
-//     }
-// }
-// impl CdClientIconsId {
-//     pub fn fetch(&self) -> MsgResult<CdClientIcons> {
-//         self.cdclient()
-//             .skill_behavior
-//             .at_key(&self.0)
-//             .cloned()
-//             .ok_or_else(|| self.err("does not exist"))
-//     }
-//     pub fn thumbnail(&self, id: i32) -> Option<String> {
-//         let skill = self.fetch().ok()?;
-//         // self.get_icon_url(skill.skill_icon?)
-//         Some(icon_asset_as_url(skill.skill_icon?))
-//     }
-// }
+/// `"DamageCombo"` -> `"Damage Combo"`
+pub fn split_camel_case(text: &str) -> String {
+    let mut out = String::with_capacity(text.len() + 4);
+    let mut prev: Option<char> = None;
+    for ch in text.chars() {
+        if ch.is_uppercase() && prev.is_some_and(|p| p.is_lowercase() || p.is_ascii_digit()) {
+            out.push(' ');
+        }
+        out.push(ch);
+        prev = Some(ch);
+    }
+    out
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CooldownGroupId(pub i32);
+
+impl LUExplorer for CooldownGroupId {
+    const NAME: &'static str = "Cooldown Group";
+    const ENDPOINT: &'static str = "skills/cooldowngroups";
+
+    fn id(&self) -> i32 {
+        self.0
+    }
+}
+
+impl CooldownGroupId {
+    pub fn skills<'a>(&self, d: &'a GameData) -> &'a [i32] {
+        d.index
+            .skills_in_cooldown_group
+            .get(&self.0)
+            .map_or(&[], Vec::as_slice)
+    }
+}
+
+// ---------- //
+// Activities //
+// ---------- //
+
+/// An activity, identified by `ActivityRewards.objectTemplate` / `Activities.ActivityID`
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CdClientActivityId(pub i32);
+
+impl LUExplorer for CdClientActivityId {
+    const NAME: &'static str = "Activity";
+    const ENDPOINT: &'static str = "activities";
+
+    fn id(&self) -> i32 {
+        self.0
+    }
+
+    /// The locale name, otherwise the common start of its reward descriptions
+    /// (`"Survival 1"`, `"Survival 2"` -> `"Survival"`)
+    fn name(&self, d: &GameData) -> Option<String> {
+        if let Some(name) = d.locale.activities.get(&self.0).and_then(|a| a.activity_name.clone()) {
+            return Some(name);
+        }
+        let rewards = self.rewards(d);
+        let first = rewards.first()?.description.trim();
+        if rewards.len() == 1 {
+            return (!first.is_empty()).then(|| first.to_string());
+        }
+        let common = rewards.iter().skip(1).fold(first.to_string(), |acc, r| {
+            acc.chars()
+                .zip(r.description.chars())
+                .take_while(|(a, b)| a == b)
+                .map(|(a, _)| a)
+                .collect()
+        });
+        let name = common
+            .trim_end_matches(|c: char| c.is_ascii_digit() || c.is_whitespace() || c == '-' || c == '(')
+            .trim();
+        if name.chars().count() >= 3 {
+            Some(name.to_string())
+        } else {
+            (!first.is_empty()).then(|| first.to_string())
+        }
+    }
+}
+
+impl CdClientActivityId {
+    pub fn rewards<'a>(&self, d: &'a GameData) -> &'a [CdClientActivityRewards] {
+        d.cdclient.activity_rewards.at_group_key(&self.0).unwrap_or_default()
+    }
+}
+
+// ----------- //
+// Loot Tables //
+// ----------- //
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CdClientLootTableId(pub i32);
+
+impl LUExplorer for CdClientLootTableId {
+    const NAME: &'static str = "Loot Table";
+    const ENDPOINT: &'static str = "objects/loot/table";
+
+    fn id(&self) -> i32 {
+        self.0
+    }
+
+    fn name(&self, d: &GameData) -> Option<String> {
+        d.loot_table_names.get(&self.0).cloned()
+    }
+}
+
+impl CdClientLootTableId {
+    pub fn exists(&self, d: &GameData) -> bool {
+        d.cdclient.loot_table.at_group_key(&self.0).is_some()
+    }
+
+    /// Items in the table, in the table's sort order
+    pub fn items(&self, d: &GameData) -> Vec<CdClientObjectsId> {
+        let mut rows: Vec<_> = d
+            .cdclient
+            .loot_table
+            .at_group_key(&self.0)
+            .unwrap_or_default()
+            .iter()
+            .collect();
+        rows.sort_by_key(|lt| (lt.sort_priority, lt.id));
+        let mut items: Vec<CdClientObjectsId> = vec![];
+        for lt in rows {
+            let item = CdClientObjectsId(lt.itemid);
+            if !items.contains(&item) && d.is_visible(item.0) {
+                items.push(item);
+            }
+        }
+        items
+    }
+
+    /// Number of items of a rarity (`None` = every item)
+    pub fn count(&self, d: &GameData, rarity: Option<i32>) -> usize {
+        d.index
+            .loot_table_rarity_counts
+            .get(&(self.0, rarity))
+            .copied()
+            .unwrap_or(0)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CdClientLootMatrixId(pub i32);
+
+impl LUExplorer for CdClientLootMatrixId {
+    const NAME: &'static str = "Loot Matrix";
+    const ENDPOINT: &'static str = "objects/loot/matrix";
+
+    fn id(&self) -> i32 {
+        self.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn camel_case() {
+        assert_eq!(split_camel_case("DamageCombo"), "Damage Combo");
+        assert_eq!(split_camel_case("Description"), "Description");
+        assert_eq!(split_camel_case("ChargeUp2Hit"), "Charge Up2 Hit");
+    }
+
+    #[test]
+    fn markdown_escaping() {
+        assert_eq!(escape_markdown("a_b*c [d]"), r"a\_b\*c \[d\]");
+    }
+
+    #[test]
+    fn equip_locations() {
+        assert_eq!(equip_location_name("special_r"), "Right Hand");
+        assert_eq!(equip_location_name("clavicle"), "Armor");
+    }
+}

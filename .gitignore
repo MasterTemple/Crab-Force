@@ -1,2 +1,7 @@
 target
 *.excalidraw
+.env
+# LEGO Universe game data (copyrighted; never commit)
+*.sqlite
+*.fdb
+locale.xml

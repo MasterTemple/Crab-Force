@@ -1,13 +1,28 @@
 [package]
-name = "lu_discord_bot"
-version = "0.1.0"
+name = "crab_force"
+version = "0.2.0"
 edition = "2021"
+rust-version = "1.80"
+description = "A LEGO Universe Discord bot (Rust rewrite of Nexus Force)"
+
+[[bin]]
+name = "crab_force"
+path = "src/main.rs"
 
 [dependencies]
+arc-swap = "1.9"
+dotenvy = "0.15.7"
 heck = "0.5.0"
-itertools = "0.14.0"
-once_cell = "1.20.3"
-regex = "1.11.1"
-rusqlite = "0.33.0"
-serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "collector"] }
-tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+itertools = "0.15.0"
+regex = "1.13"
+rusqlite = { version = "0.40", features = ["bundled"] }
+serenity = { version = "0.12.5", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "collector"] }
+strsim = "0.11.1"
+thiserror = "2.0.21"
+tokio = { version = "1.54", features = ["macros", "rt-multi-thread", "signal"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

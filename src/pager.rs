@@ -1,54 +1,59 @@
-/*
-* - This I believe should cover pages where it is just Discord Embed Fields
-* - This doesn't paginate the Discord Embed Description
-*/
-
-use crate::commands::package::PackageArguments;
+//! Splits a list of entries into pages (pages start at 1)
+//!
+//! The requested page is clamped into range, so stale buttons (e.g. after `/reload` shrinks a
+//! list) show the nearest page instead of panicking.
 
 /// Page starts at 1
 pub const MIN_PAGE: usize = 1;
 /// This is an alias for [`MIN_PAGE`]
 pub const START_PAGE: usize = MIN_PAGE;
 
-/// This is discords field limit
-// pub const PAGE_SIZE: usize = 15;
-
-/// Page starts at 1
 #[derive(Clone, Debug)]
-pub struct Pager<T: Clone> {
+pub struct Pager<T> {
     entries: Vec<T>,
     current: usize,
-    min_page: usize,
     max_page: usize,
     page_size: usize,
 }
 
-impl<T: Clone> Pager<T> {
+impl<T> Pager<T> {
     pub fn new(entries: Vec<T>, page: usize, page_size: usize) -> Self {
-        let mut max_page =
-            (entries.len() / page_size) + (if entries.len() % page_size == 0 { 0 } else { 1 });
-        if max_page < MIN_PAGE {
-            max_page = MIN_PAGE;
-        }
+        let page_size = page_size.max(1);
+        let max_page = entries.len().div_ceil(page_size).max(MIN_PAGE);
         Self {
-            current: page,
-            min_page: MIN_PAGE,
+            current: page.clamp(MIN_PAGE, max_page),
             max_page,
             page_size,
             entries,
         }
     }
 
-    pub fn prev(&self) -> usize {
-        std::cmp::max(self.current - 1, self.min_page)
+    pub fn current(&self) -> usize {
+        self.current
     }
 
-    pub fn is_first_page(&self) -> bool {
-        self.current == self.min_page
+    pub fn max_page(&self) -> usize {
+        self.max_page
+    }
+
+    pub fn total(&self) -> usize {
+        self.entries.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    pub fn prev(&self) -> usize {
+        self.current.saturating_sub(1).max(MIN_PAGE)
     }
 
     pub fn next(&self) -> usize {
-        std::cmp::min(self.current + 1, self.max_page)
+        (self.current + 1).min(self.max_page)
+    }
+
+    pub fn is_first_page(&self) -> bool {
+        self.current == MIN_PAGE
     }
 
     pub fn is_last_page(&self) -> bool {
@@ -56,23 +61,51 @@ impl<T: Clone> Pager<T> {
     }
 
     pub fn has_multiple_pages(&self) -> bool {
-        self.min_page != self.max_page
+        self.max_page > MIN_PAGE
     }
 
-    pub fn is_one_page(&self) -> bool {
-        self.min_page == self.max_page
+    /// `" (Page 2/5)"`, or nothing when there is only one page
+    pub fn title_suffix(&self) -> String {
+        if self.has_multiple_pages() {
+            format!(" (Page {}/{})", self.current, self.max_page)
+        } else {
+            String::new()
+        }
     }
 
-    /// This returns all elements on this page with their 1-based entry number and entry
-    pub fn this_page(&self) -> Vec<(usize, T)> {
-        // page starts at 1
-        let start_idx = (self.current - 1) * self.page_size;
-        let end_idx = std::cmp::min(start_idx + self.page_size, self.entries.len());
-        let paged_entries: Vec<_> = self.entries[start_idx..end_idx]
-            .into_iter()
+    /// All elements on this page with their 1-based entry number
+    pub fn this_page(&self) -> impl Iterator<Item = (usize, &T)> {
+        let start = (self.current - 1) * self.page_size;
+        let end = (start + self.page_size).min(self.entries.len());
+        self.entries[start.min(end)..end]
+            .iter()
             .enumerate()
-            .map(|(idx, entry)| (start_idx + idx + 1, entry.clone()))
-            .collect();
-        paged_entries
+            .map(move |(idx, entry)| (start + idx + 1, entry))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clamps_pages() {
+        let pager = Pager::new((1..=11).collect::<Vec<_>>(), 99, 5);
+        assert_eq!(pager.current(), 3);
+        assert_eq!(pager.this_page().map(|(n, &v)| (n, v)).collect::<Vec<_>>(), vec![(11, 11)]);
+
+        let pager = Pager::new((1..=11).collect::<Vec<_>>(), 0, 5);
+        assert_eq!(pager.current(), 1);
+        assert_eq!(pager.prev(), 1);
+        assert_eq!(pager.next(), 2);
+    }
+
+    #[test]
+    fn empty() {
+        let pager: Pager<i32> = Pager::new(vec![], 3, 5);
+        assert_eq!(pager.current(), 1);
+        assert!(!pager.has_multiple_pages());
+        assert_eq!(pager.this_page().count(), 0);
+        assert_eq!(pager.title_suffix(), "");
     }
 }

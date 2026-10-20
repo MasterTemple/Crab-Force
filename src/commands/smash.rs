@@ -1,94 +1,33 @@
-use crate::ids::CdClientObjectsId;
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{
-    AutocompleteChoice, CommandOptionType, CreateCommandOption, CreateSelectMenuOption,
-    ResolvedOption,
-};
+use crate::data::GameData;
+use crate::error::BotError;
+use crate::ids::{CdClientObjectsId, LUExplorer};
+use crate::interaction_command::{CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::search::SearchCategory;
+
+use super::{add_loot_matrix, enemy_row, object_embed, smash_coins};
 
 pub struct SmashCommand;
 
-pub struct SmashArguments {
-    pub smashable: i32,
-}
-
-impl ToCustomId for SmashArguments {
-    const CMD: &'static str = SmashCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let SmashArguments { smashable } = self;
-        format!("smashable={smashable}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for SmashArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(SmashArguments {
-            smashable: options.parse("smashable")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for SmashArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(SmashArguments {
-            smashable: int_option!(options, "smashable"),
-        })
-    }
-}
-
-impl Into<CreateSelectMenuOption> for SmashArguments {
-    fn into(self) -> CreateSelectMenuOption {
-        let it = CdClientObjectsId(self.smashable);
-        CreateSelectMenuOption::new(it.name_id(), self.to_custom_id(true))
-    }
-}
-
 impl InteractionCommand for SmashCommand {
     const NAME: &'static str = "smashable";
+    const DESCRIPTION: &'static str = "View everything a smashable or enemy drops!";
+    const OPTION_NAME: &'static str = "smashable";
+    const OPTION_DESCRIPTION: &'static str = "A smashable or enemy in LEGO Universe (name or id).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::Smashable);
 
-    const DESCRIPTION: &'static str = "View a smashable in LEGO Universe!";
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let object = CdClientObjectsId(target.id);
+        object.try_fetch(d)?;
+        let dc = object.destructible_component(d);
+        let lmi = dc.and_then(|dc| dc.loot_matrix_index).ok_or_else(|| {
+            BotError::not_applicable(format!("{} does not drop anything when smashed.", object.hyperlink_name(d)))
+        })?;
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "smashable",
-            "A smashable in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
-
-    type Arguments = SmashArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let SmashArguments { smashable: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        // let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
+        let mut embed = object_embed(d, object);
+        if let Some(coins) = dc.and_then(|dc| smash_coins(d, dc)) {
+            embed = embed.description(format!("Also drops {coins}."));
         }
-
-        Ok((embed, None))
+        let (embed, menu) = add_loot_matrix(d, embed, lmi, Self::NAME);
+        Ok(Response::new(embed).row(menu).row(Some(enemy_row(d, object, Self::NAME))))
     }
 }

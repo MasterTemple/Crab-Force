@@ -1,0 +1,662 @@
+# Fan-made names for loot tables (LootTableIndex<TAB>name), from Nexus Force
+3	Life Powerup 1 point
+21	Burky Urchin - Gear Vendor
+23	Life Powerup 1 point
+25	Banana
+29	Kammy Kazei - Gear Vendor
+32	Imagination Powerup 1 point
+37	Leroy Duddsmith - Clothing Vendor
+39	Hammer Piece 1
+40	Hammer Piece 2
+41	Hammer Piece 3
+42	Hammer Piece 4
+46	Yan Parablister - Gear Vendor
+52	Imaginite
+54	UNUSED
+63	m3460
+65	Basic Consumables
+66	Cecil Eyetwitch - Gear Vendor
+71	Fermie Laboosh Items
+72	Avant Gardens Weapon Drops
+73	Avant Gardens Consumable Drops
+79	Test Item with Precondition for Vendor
+81	Cannonball
+82	Dominic Knack - Gear Vendor
+83	UNUSED
+84	Classic Rocket Nose Cones
+85	Classic Rocket Engines
+86	Classic Rocket Cockpits
+87	Pirate Model Accessories
+88	Maelstrom Infected Brick
+89	Sofia Amalgam - Gear Vendor
+90	Bag of Peanuts
+91	Pet Rock Bridge Part 1
+92	Pet Rock Bridge Part 2
+93	Pet Rock Bridge Part 3
+94	Classic Rocket Cockpits
+95	Classic AG Rocket Cockpits
+96	Bag of Peanuts
+97	Armor Powerup 1 point
+102	GF Weapons
+103	GF Consumables
+104	GF Rares
+105	GF Models
+110	Rectangular LEGO Bricks
+111	LEGO Bricks
+112	Connectable LEGO Bricks
+113	LEGO Bricks
+114	Castle and House Models
+115	Mermaid Head
+116	AG Consumables with Gems
+117	GF Honor Accolade
+118	AG Consumables
+119	m4080
+120	m4162
+121	GF Consumables with Boom Kit
+122	Buccaneer Head 1
+123	Buccaneer Chest 1
+124	Buccaneer Legs 1
+125	Sorcerer Legs 1
+126	Sorcerer Chest 1
+127	Sorcerer Head 1
+128	Knight Legs 1
+129	Knight Chest 1
+130	Knight Head 1
+131	Engineer Legs 1
+132	Engineer Chest 1
+133	Engineer Head 1
+134	m3001
+135	m3003
+136	m3004
+137	m3021
+138	Assembly Package
+139	Furniture and Construction Models
+140	AG Consumables
+141	Space Ranger Head 1
+142	Space Ranger Chest 1
+143	Space Ranger Legs 1
+144	Space Ranger Gun 1
+145	Buccaneer Weapon 1
+146	Sorcerer Weapon 1
+147	Knight Weapon 1
+148	Engineer Weapon 1
+149	Samurai Legs 1
+150	Samurai Chest 1
+151	Samurai Head 1
+152	Samurai Weapon 1
+153	Space Marauder Legs 1
+154	Space Marauder Chest 1
+155	Space Marauder Head 1
+156	Space Marauder Gun 1
+157	Shinobi Legs 1
+158	Shinobi Chest 1
+159	Shinobi Head 1
+160	Shinobi Weapon 1
+161	Inventor Legs 1
+162	Inventor Chest 1
+163	Inventor Head 1
+164	Inventor Weapon 1
+165	Adventurer Chest 1
+166	Adventurer Legs 1
+167	Adventurer Head 1
+168	Adventurer Crossbow 1
+169	Daredevil Chest 1
+170	Daredevil Legs 1
+171	Daredevil Head 1
+172	Daredevil Weapon 1
+173	Summoner Legs 1
+174	Summoner Chest 1
+175	Summoner Head 1
+176	Summoner Weapon 1
+177	Meldric Steamvalve - Assembly Vendor
+178	Xeno Blueblade - Sentinel Vendor
+179	Cog Blammo - Paradox Vendor
+180	Magnus Bumperdent - Venture League Vendor
+181	Racing Gear and Car Parts
+182	Blue Imaginite
+184	Picnic and Concert Model Accessories
+185	NS Rares
+186	FV Consumables
+187	Picnic Model Accessories
+188	Racing Rewards
+190	Klaus Zett Items
+191	Basic Shirts
+192	Basic Pants
+193	Coalessa's Flying Disc
+194	Potion of Imagination 1
+196	Numb Chuck's Treasure
+197	Dragon Tooth
+198	Picture of Captain Jack Knife's Mom
+200	CarModule_Wheels_gr
+201	Car1_FrontBumper1_r
+202	Car Module - Car 1 Engine Panel 1 Red
+203	Car1_SidePanels1_r
+204	Car1_RearPanel1_r
+205	Car1_RearBumper1_r
+206	Car1_FrontBumper1_y
+207	Car1_EnginePanel1_y
+208	Car1_SidePanels1_y
+209	Car1_RearPanel1_y
+210	Car1_RearBumper1_y
+211	Car1_FrontBumper1_b
+212	Car1_EnginePanel1_b
+213	Car1_SidePanels1_b
+214	Car1_RearPanel1_b
+215	Car1_RearBumper1_b
+216	Car4_FrontBumper1_y
+217	Car4_EnginePanel1_y
+218	Car4_SidePanels1_y
+219	Car4_RearPanel1_y
+220	Car4_RearBumper1_y
+221	Car2_FrontBumper4_gr
+222	Car2_EnginePanel4_bk
+223	Car2_SidePanels3_bk
+224	Car2_RearPanel2_bk
+225	Car2_RearBumper3_gr
+226	Car3_FrontBumper3_g
+227	Car3_EnginePanel3_g
+228	Car3_SidePanels3_g
+229	Car3_RearPanel3_g
+230	Car3_RearBumper3_g
+231	Car4_FrontBumper3_bk
+232	Car4_EnginePanel3_bk
+233	Car4_SidePanels3_bk
+234	Car4_RearPanel3_bk
+235	Car4_RearBumper3_bk
+236	AG Race Place Vendor
+237	Faction Tokens
+242	Technic/Bionicle Bricks
+243	LEGO Bricks
+244	LEGO Bricks
+245	LEGO Bricks
+247	Model Reward Castle Corner Small
+248	Model Reward Castle Wall T
+249	Model Reward Castle Wall Straight Medium
+250	Model Reward Castle Wall Straight
+251	Model Reward Castle Gate
+252	Model Reward Castle Staircase
+253	Model Reward Castle Corner Outside
+254	Model Reward Castle Ramp
+255	Broken Pirate Nose Cone
+256	Broken Pirate Cockpit
+257	Broken Pirate Engine
+258	Lego Club Vendor
+259	Model Reward Medieval Vendor
+261	Model Reward Medieval Village Stable
+262	Model Reward Medieval Village Forge
+263	Model Reward Medieval Wagon
+264	Model Reward Castle Weapon Rack
+265	Model Reward Tree 1 green
+266	Model Reward Tree 2 green
+267	Model Reward Tree 3 green
+268	Model Reward Tree 3 red
+269	Model Reward Tree 3 yellow
+270	Model Reward Radar Truck
+271	Model Reward Rover 1
+272	Model Reward Rover 2
+273	m2342
+274	Model Reward Hedgehog Barrier
+275	Model Reward Danger Cone
+276	FV Gear Drops
+277	FV Consumable Drops
+278	FV Model Drops
+279	FV Weapon Drops
+280	Maelstrom Infected Anchor
+281	Castle and House Models
+282	Furniture Models
+283	AG and VE Rocket Parts
+284	NS Rocket and Models
+285	Pirate Camp Models
+286	FV Monastary Models
+287	AG Gear Drops
+288	Pirate and Furniture Models
+289	Pirate Accessory Models
+290	Pirate Models
+292	m3062
+293	Nexus Astronaut Helmet
+294	Nexus Astronaut Shirt
+295	Nexus Astronaut Pants
+296	Vehicle Models
+297	Model Reward Cottage Door 1 closed
+298	Model Reward Cottage Door 1 open
+299	Model Reward Cottage Kitchen 1
+300	Model Reward Cottage Kitchen 2
+301	Model Reward Cottage Library 4
+302	Model Reward Cottage Toilet 2
+303	Model Reward Cottage Vanity 3
+304	Model Reward Cottage Wall Arch
+305	Model Reward Cottage Wall Blank 2
+306	Model Reward Cottage Wall Blank 3
+307	Model Reward Cottage Wall Corner 1
+308	Model Reward Cottage Window 1
+309	Model Reward Cottage Window 6
+310	Model Reward Cottage Door 3 open
+311	Model Reward Cottage Door 3 closed
+312	Model Reward Cottage Kitchen 3
+313	Model Reward Cottage Library 2
+314	Model Reward Swamp Tree
+315	Model Reward Pirate Palm Tree
+316	Model Reward Tree 4 red
+317	Model Reward Tree 4 yellow
+318	Model Reward Tree 5 red
+319	Model Reward Tree 5 yellow
+320	MOD Rocket Promo Nose Cone
+321	MOD Rocket Promo Cockpit
+322	MOD Rocket Promo Engine
+323	WBL - Quest - Carrot
+324	WBL - Quest - Snowshoe
+325	Model Reward Pirate Wall 1
+326	Model Reward Pirate Wall 2
+327	Model Reward Pirate Wall 3
+328	Model Reward Pirate Wall End
+330	Model Reward Pirate Wall Bridge
+332	Model Reward Pirate T Wall with Stairs
+333	Model Reward Pirate T Wall
+334	Model Reward Pirate Medium Wall
+335	Model Reward Pirate Wall with Gunport
+336	Model Reward Pirate Small Wall
+337	Model Reward Pirate Wall Corner
+339	Model Reward Space Command Center
+341	Model Reward Fortress Inside Corner
+342	Model Reward Fortress Large Outside Corner
+343	Model Reward Fortress Large Wall
+344	Model Reward Fortress Ramp
+345	Model Reward Fortress Small Outside Corner
+346	Model Reward Fortress Small Wall
+347	Model Reward Fortress Wall Gate
+348	Model Reward Fortress Watch Tower
+349	Model Reward Fortress Zen Garden 1
+350	Model Reward Fortress Zen Garden 2
+351	Model Reward Fortress Zen Garden 3
+352	Model Reward Fortress Zen Garden 4
+353	Model Reward Fortress Zen Garden 5
+359	Super Brick Booster Pack
+360	Dark Red Gem
+361	Quality Weapons
+362	GF Back/Neck Items
+363	Model Reward Shipwreck Hideout 1
+364	Model Reward Shipwreck Hideout 2
+365	Model Reward Shipwreck Hideout 3
+366	Model Reward Shipwreck Hideout 4
+367	WBL - Quest - Snowshoe
+368	WBL - Quest - Carrot
+369	WBL - Quest - Moonbase Fuel Rod
+370	Rank 1 Buccaneer Book
+371	Rank 1 Daredevil Book
+372	Rank 1 Knight Book
+373	Rank 1 Samurai Book
+374	Rank 1 Sorcerer Book
+375	Rank 1 Space Marauder Book
+376	Rank 1 Engineer Book
+377	Rank 1 Summoner Book
+379	LEGO Bricks
+380	Headgear LEGO Bricks
+381	LEGO Bricks
+382	Animal LEGO Bricks
+383	White Top Hat
+384	Nate the Snake
+386	Model Reward Ninja Vendor Hut
+387	Splendid Pants
+388	Model Reward Beehive
+389	Aztec Headdress
+390	LUP Model Reward Well
+391	Breastplate of Armor 1
+392	LUP Model Reward Fireplace
+393	Referee Shirt
+394	Model Reward Pavalion
+395	Soccer Uniform
+396	LUP Model Reward Birdbath and Feeder
+397	Weightlifter Shirt
+398	Model Reward Cottage Wall Fireplace 1
+399	Model Reward Cottage Wall Art 2
+400	Model Reward Cottage Window 4
+401	Model Reward Cottage Wall Corner 3
+402	Model Reward Cottage Laundry 2
+403	Model Reward Cottage Vanity 2
+404	Model Reward Cottage Kitchen 3
+405	Model Reward Cottage Toilet 2
+406	Old Skool Shirt
+407	Model Reward Brig
+408	Old Skool Shirt
+409	Model Reward Farm Barn Back
+410	Model Reward Farm Barn Front
+411	Model Reward Farm Barn Middle
+412	Model Reward Farm Silo 1
+413	m4162
+414	Powerups
+415	Life Powerup 2 points
+416	Life Powerup 3 points
+417	Life Powerup 5 points
+419	Imagination Powerup 2 points
+420	Imagination Powerup 3 points
+421	Imagination Powerup 5 points
+422	Imagination Powerup 10 points
+423	Armor Powerup 2 points
+424	Armor Powerup 3 points
+425	Armor Powerup 5 points
+427	Pod 1 Captain Shirt
+428	Model Reward Pod Model 1
+429	Pod 2 Captain Shirt
+430	Model Reward Pod Model 2
+431	Pod 3 Captain Shirt
+432	Model Reward Pod Model 3
+433	Pod 4 Captain Shirt
+434	Model Reward Pod Model 4
+435	Pod 5 Captain Shirt
+436	Model Reward Pod Model 5
+437	Pod 6 Captain Shirt
+438	Model Reward Pod Model 6
+439	Pod 7 Captain Shirt
+440	Model Reward Pod Model 7
+441	Heimlich Stewblaster Items
+442	Sakura Moonstone Items
+443	Crux Prime Weapon Drops
+444	Crux Prime Gear Drops
+445	Crux Prime Consumables
+446	Crux Prime Skeleton Models
+447	Frostburgh Race Vendor
+448	Frostburgh Gear Drops
+449	Frostburgh Models
+450	Frostburgh Consumables
+452	Pilot's Property Warp
+453	Skeleton Bone
+454	Blue Flower Leaves
+456	Frostburgh Accessory Indoor Models
+457	Water Sprayer Module 1
+458	Candy Cane
+459	Snowball
+460	Model Reward Winter Snowmobile
+461	Model Reward Winter Sleigh
+462	Model Reward Winter Reindeer
+463	Frostburgh Outdoor Models
+464	Frostburgh Ginger Bread Models
+467	RVE Gear Drops
+468	RVE Consumable Drops?
+472	FV Race Place Vendor
+473	CarFV2_FrontBumper_p
+474	CarFV2_FrontPanel_p
+475	CarFV2_SidePanels_p
+476	CarFV2_RearPanel_p
+477	CarFV2_RearBumper_p
+479	NT Hello Griffy Doll
+480	NT- sabertooth cat token
+484	NT Maelstrom Sample
+485	Model Reward Farm Truck
+486	Model Reward Farm Trailer
+487	Model Reward Farm Silo 2
+488	Model Reward Farm Garden1
+489	Model Reward Farm Garden2
+490	Model Reward Farm Tractor 1
+491	Model Reward Farm Disc
+492	Model Reward Farm Chopper
+493	Model Reward Farm Baler
+494	Model Reward Farm Bale
+495	Model Reward Farm Windmill
+496	Model Reward Farm Silo 1
+497	Model Reward Farm Chickencoop
+498	Model Reward Farm Chicken
+499	Model Reward Farm Feedtrough
+500	Model Reward Farm Sheep
+501	Model Reward Farm Fence Tall
+502	Model Reward Farm Fence Short
+521	Model Reward Doom Star Module 1
+522	Model Reward Doom Star Module 2
+523	Model Reward Doom Star Module 3
+524	Model Reward Doom Star Module 4
+525	Model Reward Doom Star Module 5
+526	Model Reward Doom Star Module 6
+527	Model Reward Doom Star Module 7
+528	Model Reward Doom Star Module 8
+529	Model Reward Doom Star Module 9
+530	Model Reward Doom Star Module 10
+531	Model Reward Doom Star Module 11
+532	Model Reward Doom Star Module 12
+533	Model Reward Doom Star Module 13
+534	Model Reward Doom Star Module 14
+535	Model Reward Doom Star Module 15
+536	Model Reward Doom Star Module 16
+537	Model Reward Doom Star Trench 1
+538	Model Reward Doom Star Trench 2
+539	Model Reward Doom Star Trench 3
+540	Model Reward Doom Star Trench 4
+541	Model Reward Doom Star Trench 5
+542	Model Reward Doom Star Trench 6
+543	Model Reward Doom Star Trench 7
+544	Model Reward Doom Star Trench 8
+545	Model Reward Doom Star Trench Inside Corner
+546	Model Reward Doom Star Trench Outside Corner
+547	Model Reward Farm Fence Gate
+548	CP Datacard Mission Item
+551	Model Reward Skeleton Ziggurat
+552	Model Reward Skeleton Wall Watchtower
+553	Model Reward Skeleton Wall Corner
+554	Model Reward Skeleton Wall
+555	Model Reward Skeleton T Wall
+556	Model Reward Skeleton Skull Tower
+557	Model Reward Skeleton Short Wall
+558	Model Reward Skeleton Ribcage Bridge
+559	Model Reward Skeleton Repair Facility
+560	Model Reward Skeleton Wall Pillars
+561	Model Reward Skeleton Mobile Drill
+562	Model Reward Skeleton Hover Drone
+563	Model Reward Skeleton Gate
+564	Model Reward Skeleton Elevator
+567	Skeleton Rocket Nosecones
+568	Skeleton Rocket Cockpits
+569	Skeleton Rockit Engines
+570	Crux Prime Achievement Consumables
+571	Skeleton Map
+572	Cracked Ronin's Helm
+573	Splintered Horseman's Lance
+575	Dragon Battle Mixed Loot Drops?
+576	Fright Speed Car Parts
+581	Nuckal's Maelstrom Bone
+583	CP Loot Surprise Pack
+588	Low Value Gems
+589	Mid Value Gems
+590	High Value Gems
+591	Skeleton Models
+592	Skeleton Models
+593	Skeleton Models
+594	Skeleton Models
+599	Green Imaginite
+600	Red Imaginite
+601	Blue Imaginite
+602	Skeleton Models
+607	Achilles Plutarch Items
+608	Rutger Hemoglobin Clothing
+610	Barry Smoothmoves Models
+612	Ace Warprider Rocket Parts
+613	Olivia Nightshade Items
+618	Space Ranger Rank 3
+626	Adventurer Rank 3
+633	Shinobi Rank 3
+640	Inventor Rank 3
+643	Mr. Ree Items
+645	Model Reward Micro City Block 1
+646	Model Reward Micro City Block Corner 2
+647	Model Reward Micro City Firetruck 3
+648	Model Reward Micro City Defense Force 2
+649	Model Reward Micro City House 1
+650	Model Reward Micro City Fountain
+651	Model Reward Micro City Monster with Car
+652	Model Reward Micro City Block 2
+653	Model Reward Micro City Block Corner 3
+654	Model Reward Micro City Semi Truck and Trailer
+655	Model Reward Micro City Firetruck 5
+656	Model Reward Micro City House 2
+657	Model Reward Micro City Statue
+658	Model Reward Micro City Townhall
+659	Model Reward Micro City Block 3
+660	Model Reward Micro City Block Corner 4
+661	Model Reward Micro City Crawler Crane
+662	Model Reward Micro City Van 3
+663	Model Reward Micro City Gas Station 1
+664	Model Reward Micro City Trees
+665	Model Reward Micro City Block 4
+666	Assembly Device Models
+667	Various Consumables
+668	Autumn Helix Models
+669	Autumn Helix Models
+670	Faction Token Proxy
+672	Bottled Water
+674	Micro City Models
+680	Faction Token Bag - 200 tokens
+681	Green Frog Hat
+682	Faction Token Bag - 100 tokens
+683	Green Dino Backpack
+684	Imagimeter Plinth Chunk
+689	Nikolai Gammapulse Items
+690	Torbert Oscillator Items
+691	Sutoro Hatto Items
+692	Billy Ganges Items
+693	Hatchling Frog's Egg - Green
+694	Hatchling Dog's Bone - Brown
+695	Hatchling Cat's Fish - White
+696	Hatchling Mouse's Cheese - Light Gray
+697	Faction Token Bag - 50 tokens
+698	Blue Imaginite
+699	Test
+733	Maelstrom Dagger First mission
+734	Bone Bucket Building Instructions
+736	Skull-a-Ton Building Instructions
+738	Frakjaw's Maelstrom Battle Mace
+739	Shoulder Socket Wrench
+740	Hammer Toe
+741	Finger Nail
+742	Diamond Gem
+744	Dragon Mask
+745	Lucky Wolf's Paw
+746	Rock Fruit
+747	Shock Fruit
+748	Frost Fruit
+749	Bamboo Bite
+750	Flame Fruit
+751	Onyx Gem
+753	Rib Bone
+754	Tail Bone
+755	Eye Bone
+756	Funny Bone
+757	Jaw Bone
+758	FV Mission Reward Items
+760	Earth Spinjitzu Pants Pants of Quakes
+761	Earth Spinjitzu Gi Gi of Quakes
+762	Earth Spinjitzu Hood Hood of Quakes
+764	CP Honor Accolade
+765	Skeleton Schematic Page
+766	Cracked Ronin's Helm
+768	Spiderling Postcard
+769	Rusty Steel Macguffin - fan
+770	Rusty Steel Macguffin - laser
+771	Broken Robot Part
+772	Med Pack Contents
+773	Armor Repair Kit Contents
+775	AG Rocket Parts
+776	VE Rocket Parts
+777	Rank 1 Space Ranger Book
+778	Rank 1 Shinobi Book
+779	Rank 1 Adventurer Book
+780	Rank 1 Inventor Book
+781	Hatchling Frog's Egg - Yellow
+782	Hatchling Frog's Egg - Red
+783	Hatchling Frog's Egg - Dark Gray
+784	Hatchling Dog's Bone - Red
+785	Hatchling Dog's Bone - Dark Gray
+786	Hatchling Dog's Bone - Reddish Brown
+787	Hatchling Cat's Fish - Tan
+788	Hatchling Cat's Fish - Orange
+789	Hatchling Cat's Fish - Black
+790	Hatchling Mouse's Cheese - Brown
+791	Hatchling Mouse's Cheese - White
+792	Hatchling Mouse's Cheese - Dark Gray
+794	Assembly Capes
+795	Venture Capes
+796	Paradox Capes
+797	Rutger Hemoglobin Capes
+799	Plain Capes
+800	AG Model Vendor
+801	AG Model Vendor
+802	AG Model Vendor
+803	AG Model Vendor
+804	AG Model Vendor
+805	AG Model Vendor
+811	MOD Car Duck Front Bumper
+812	MOD Car Duck Engine Panel
+813	MOD Car Duck Side Panels
+814	MOD Car Duck Rear Panel
+815	MOD Car Duck Rear Bumper
+816	MOD Rocket Shark Nose Cone
+817	MOD Rocket Shark Cockpit
+818	MOD Rocket Shark Engine
+819	MOD Rocket Pencil Nose Cone
+820	MOD Rocket Pencil Cockpit
+821	MOD Rocket Pencil Engine
+822	MOD Rocket Duck Nose Cone
+823	MOD Rocket Duck Cockpit
+824	MOD Rocket Duck Engine
+825	MOD Car Dune Buggy Front Bumper
+826	MOD Car Dune Buggy Engine Panel
+827	MOD Car Dune Buggy Side Panels
+828	MOD Car Dune Buggy Rear Panel
+829	MOD Car Dune Buggy Rear Bumper
+830	Faction Token Bag - 100 tokens
+831	Brown Owl on a Perch
+832	Hatchling Scorpion's Stinger - Red
+833	Furniture Models
+834	Urufu's Treasure 1
+835	Urufu's Treasure 2
+836	Urufu's Treasure 3
+839	Earth Acolyte Package
+840	Ice Acolyte Package
+841	Lightning Acolyte Package
+842	Fire Acolyte Package
+843	Model Reward Micro City Skyscraper with Monkey
+844	NM Gear Drops
+845	NM Weapon Drops
+846	Ninjago Consumables
+847	Ninjago Models
+848	Chopov's Maelstrom Dark Blade
+849	Maelstrom Bone Axe
+850	Maelstrom Blacksmith's Hammer
+851	Maelstrom Bone Dagger
+852	Maelstrom Double-Axe
+853	Lightning Spinjitzu Pants Pants of Storms
+854	Lightning Spinjitzu Gi Gi of Storms
+855	Lightning Spinjitzu Hood Hood of Storms
+856	Fire Spinjitzu Pants Pants of Flames
+857	Fire Spinjitzu Gi Gi of Flames
+858	Fire Spinjitzu Hood Hood of Flames
+859	Ice Spinjitzu Pants Pants of Frost
+860	Ice Spinjitzu Gi Gi of Frost
+861	Ice Spinjitzu Hood Hood of Frost
+862	Micro Castle Model
+863	Tomoko Moonstone
+866	Frakjaw Gear Drops
+867	Krazi's Maelstrom Bone
+868	Ninjago Rares
+870	Sankaku Yari and Imaginite Pack
+871	Ninjago Rares 2
+872	Imaginite herbs
+874	Urufu's Treasure 4
+875	Urufu's Treasure 5
+877	Frakjaw DX Gear Drops
+912	Hatchling Crocodiles Egg
+913	GF Bananas
+2012	BONS Rares
+7777	Elite Blade of Knock Down
+20001	Small Frostivus Gift
+20002	Medium Frostivus Gift
+20003	Large Frostivus Gift
+20004	Huge Frostivus Gift
+20005	Frostivus Gifts
+20006	Vewy Speciaw Pwesent
+20007	Frostburgh Rares - Tier 1
+20008	Frostburgh Rares - Tier 2
+20009	Frostburgh Rares - Tier 3
+20010	Frostburgh Rares - Tier 4
+30003	Face Decals
+37700	Rascus' Helmet
+37701	Rascus' Armor
+37702	Rascus' Shield
+37703	Rascus' Mail
+37704	Rascus' Leggings

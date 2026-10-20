@@ -1,83 +1,42 @@
-use crate::interaction_command::{CommandResult, CustomIdOptions, InteractionCommand, ToCustomId};
-use crate::queries::{AutocompleteQueries, ObjectQueries};
-use crate::{int_option, CD_CLIENT, CONFIG, LOCALE_XML};
-use serenity::all::{AutocompleteChoice, CommandOptionType, CreateCommandOption, ResolvedOption};
+use crate::data::GameData;
+use crate::embed::Embed;
+use crate::ids::{CdClientSkillBehaviorId, CooldownGroupId, LUExplorer};
+use crate::interaction_command::{select_row, CommandResult, InteractionCommand, OptionKind, Response, Target};
+use crate::pager::Pager;
+use crate::search::SearchCategory;
+
+use super::skill::{skill_summary, SkillCommand};
 
 pub struct CooldownGroupCommand;
 
-pub struct CooldownGroupArguments {
-    group: i32,
-}
-
-impl ToCustomId for CooldownGroupArguments {
-    const CMD: &'static str = CooldownGroupCommand::NAME;
-
-    fn parameters(&self) -> String {
-        let CooldownGroupArguments { group } = self;
-        format!("group={group}")
-    }
-}
-
-impl TryFrom<&CustomIdOptions> for CooldownGroupArguments {
-    type Error = String;
-
-    fn try_from(options: &CustomIdOptions) -> Result<Self, Self::Error> {
-        Ok(CooldownGroupArguments {
-            group: options.parse("group")?,
-        })
-    }
-}
-
-impl<'a> TryFrom<&'a [ResolvedOption<'a>]> for CooldownGroupArguments {
-    type Error = String;
-
-    fn try_from(options: &'a [ResolvedOption<'a>]) -> Result<Self, Self::Error> {
-        Ok(CooldownGroupArguments {
-            group: int_option!(options, "group"),
-        })
-    }
-}
-
 impl InteractionCommand for CooldownGroupCommand {
-    const NAME: &'static str = "group";
+    const NAME: &'static str = "cooldowngroup";
+    const DESCRIPTION: &'static str = "View the skills in a cooldown group!";
+    const OPTION_NAME: &'static str = "group";
+    const OPTION_DESCRIPTION: &'static str = "A cooldown group number (or the name of a skill in it).";
+    const OPTION: OptionKind = OptionKind::Search(SearchCategory::CooldownGroup);
 
-    const DESCRIPTION: &'static str = "View the stats of a cooldown group!";
+    fn run(d: &GameData, target: Target) -> CommandResult {
+        let group = CooldownGroupId(target.id);
+        let skills = group.skills(d);
+        if skills.is_empty() {
+            return Err(group.not_found(d));
+        }
+        let pager = Pager::new(skills.to_vec(), target.page, 10);
 
-    fn options() -> Option<Vec<CreateCommandOption>> {
-        Some(vec![CreateCommandOption::new(
-            CommandOptionType::Integer,
-            "group",
-            "A cooldown group in LEGO Universe.",
-        )
-        .required(true)
-        .set_autocomplete(true)])
-    }
-
-    type Arguments = CooldownGroupArguments;
-
-    fn handle_autocomplete(
-        autocomplete_option: serenity::model::prelude::AutocompleteOption<'_>,
-    ) -> Option<Vec<serenity::all::AutocompleteChoice>> {
-        let input = autocomplete_option.value;
-        Some(CD_CLIENT.autocomplete_object(input))
-    }
-
-    fn run(arguments: Self::Arguments) -> CommandResult {
-        let CooldownGroupArguments { group: id } = arguments;
-
-        let explorer_url = CD_CLIENT.object_explorer_url(id);
-        let name = CD_CLIENT.req_object_name(id);
-        let item_component = CD_CLIENT.object_item_component(id)?;
-
-        let mut embed = CONFIG
-            .default_embed()
-            .title(format!("{} [{}]", name, id))
-            .url(explorer_url);
-
-        if let Some(icon_url) = CD_CLIENT.object_icon_url(id) {
-            embed = embed.thumbnail(icon_url);
+        let mut embed = Embed::new()
+            .title(format!("Cooldown Group {}{}", group.0, pager.title_suffix()))
+            .url(group.explorer_url())
+            .description(format!("Using any of these {} skills puts the others on cooldown.", pager.total()));
+        let mut options = vec![];
+        for (_, &skill) in pager.this_page() {
+            let skill = CdClientSkillBehaviorId(skill);
+            embed.push_field(skill.name_id(d), skill_summary(d, skill), true);
+            options.push(SkillCommand::select_option(skill.name_id(d), None, Target::new(skill.0)));
         }
 
-        Ok((embed, None))
+        Ok(Response::new(embed)
+            .row(select_row(Self::NAME, "Open a skill…", options))
+            .row(Self::page_row(&pager, target)))
     }
 }
