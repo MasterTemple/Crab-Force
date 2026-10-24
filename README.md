@@ -13,9 +13,18 @@ skills, activities, and more.
    - `locale.xml`: `PATH_TO_LU_CLIENT/locale/locale.xml`
    - `cdclient.sqlite`: convert the client's `cdclient.fdb` at <https://fdb.lu-dev.net/>
      (unpack only the fdb from a packed client with [lunpack](https://lu-dev.net/LUnpack/))
-3. `cp .env.template .env` and fill it in.
-4. Check that the data loads: `cargo run --release -- check`
-5. Run the bot: `cargo run --release`
+3. Get the bot, either:
+   - **Pre-built:** download the archive for your platform from
+     [Releases](https://github.com/MasterTemple/Crab-Force/releases) and extract it
+     (Linux builds are static and run on any distro; on macOS, run
+     `xattr -d com.apple.quarantine crab_force` if Gatekeeper blocks it), or
+   - **From source:** install [Rust](https://rustup.rs/) and clone this repository.
+4. `cp .env.template .env` (in the directory you run the bot from) and fill it in.
+5. Check that the data loads: `./crab_force check` (from source: `cargo run --release -- check`)
+6. Run the bot: `./crab_force` (from source: `cargo run --release`)
+
+The commands below use `cargo run --release --`; with a pre-built binary, use `./crab_force`
+instead.
 
 `/reload` reloads `cdclient.sqlite` and `locale.xml` without restarting. It is restricted to
 `ADMIN_ROLE_IDS`, or to Administrators when that is blank.
